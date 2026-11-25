@@ -372,6 +372,12 @@ button.bd { cursor: pointer; }
 .ef-breve ul { margin: 4px 0 6px; padding-left: 18px; font-size: 12.5px; }
 .ef-breve p { margin: 0; }
 @media (max-width: 760px) { .m-regola { display: none; } .m-nome { width: auto; } .mis { padding: 10px; } }
+/* pianta generale: sagoma, corda media aerodinamica, centro aerodinamico */
+#tavola .sagoma { fill: var(--accento); fill-opacity: .05; stroke: var(--inchiostro); stroke-width: 1.2; vector-effect: non-scaling-stroke; stroke-linejoin: round; }
+#tavola .mac { fill: none; stroke: var(--bene); stroke-width: 2.4; vector-effect: non-scaling-stroke; }
+#tavola .fuoco { fill: var(--carta); stroke: var(--bene); stroke-width: 1.6; vector-effect: non-scaling-stroke; }
+#tavola .et-mac { fill: var(--bene); font-weight: 600; }
+#tavola text.tenue { fill: var(--tenue); }
 
 </style>
 </head>
@@ -758,9 +764,10 @@ function progettoPredefinito() {
   return {
     app: NOME_APP, v: 1, nome: 'Ala monolongherone NACA 4412',
     naca: '4412', profilo: 'naca', spProf: 12, fProf: 4, pProf: 40, autore: AUTORE, tipo: 'completa', b: 230, cr: 96, tr: 1, AR: 2.4, arLock: false, auto: true, adatta: true, man: {},
+    rifFr: 'c4', centine: 'vento', fr1: 0, fr2: 0, doppia: false, yk: 40, trk: 1, nCentine2: 3,
     nCentine: 4, spCentina: 6, te: 0.96, e: 10, parete: 1.7, rAll: 2.1, gioco: 0.25, alleggerimenti: true, dima: true,
     livello: 'struttura', cNd: 2, cNv: 2, cB: 2.5, cH: 2.1, cX0: 12, cX1: 60, ts: 0.9,
-    longheroni: [{ x: 30, forma: 'I', stampa: true, H: 7.2, B: 6, tf: 1.45, tw: 1.8, s: 1.2 }],
+    longheroni: [{ x: 30, xt: 30, via: 'retto', forma: 'I', stampa: true, H: 7.2, B: 6, tf: 1.45, tw: 1.8, s: 1.2 }],
     piano: { manuale: false, pos: {} }, schizzi: [],
     stampante: Object.assign({}, STAMPANTI.mk3s), stampa: stampaPredefinita()
   };
@@ -778,7 +785,7 @@ function conforma(val, rif) {
   return o;
 }
 const LIVELLI = ['struttura', 'correnti', 'completa'];
-const MAN_CAMPI = ['nCentine', 'spCentina', 'e', 'te', 'parete', 'rAll', 'cNd', 'cNv', 'cB', 'cH', 'ts'], MAN_SEZ = ['H', 'B', 'tf', 'tw', 's'];
+const MAN_CAMPI = ['nCentine', 'nCentine2', 'spCentina', 'e', 'te', 'parete', 'rAll', 'cNd', 'cNv', 'cB', 'cH', 'ts'], MAN_SEZ = ['H', 'B', 'tf', 'tw', 's'];
 const finito = (v, d, a, b) => (v !== null && v !== '' && isFinite(+v) ? limita(+v, a, b) : d);
 const testoSano = (v, d, n) => (typeof v === 'string' ? v.replace(/[\u0000-\u001f\u007f<>]/g, ' ').trim().slice(0, n) : '') || d;
 /* Schizzo 2D letto da file: solo forme note e numeri finiti. */
@@ -809,9 +816,11 @@ function normalizzaProgetto(p) {
   o.stampante = conforma(p && p.stampante, d.stampante);
   if (!STAMPANTI[o.stampante.id]) o.stampante.id = 'generica';
   o.stampa = conforma(p && p.stampa, d.stampa);
-  const base = { x: 30, forma: 'I', stampa: true, H: 6, B: 5, tf: 1.2, tw: 1.5, s: 1.2 };
+  const base = { x: 30, xt: 30, via: 'retto', forma: 'I', stampa: true, H: 6, B: 5, tf: 1.2, tw: 1.5, s: 1.2 };
   o.longheroni = (p && Array.isArray(p.longheroni) ? p.longheroni : d.longheroni).slice(0, 5).map(s => {
     const q = conforma(s, base); if (!FORME[q.forma]) q.forma = 'I';
+    q.x = limita(q.x, 3, 90); q.xt = s && s.xt !== undefined && s.xt !== null && s.xt !== '' && isFinite(+s.xt) ? limita(+s.xt, 3, 90) : q.x; // senza xt: asse a percentuale costante
+    if (q.via !== 'spezzato') q.via = 'retto';
     q.man = {}; MAN_SEZ.forEach(k => { if (s && s.man && s.man[k] === true) q.man[k] = true; });
     return q;
   });
@@ -823,7 +832,13 @@ function normalizzaProgetto(p) {
   });
   o.schizzi = (p && Array.isArray(p.schizzi) ? p.schizzi : []).slice(0, 12).map(sanaSchizzo);
   o.app = NOME_APP; o.v = 1;
-  o.tipo = o.tipo === 'semiala' ? 'semiala' : 'completa';
+  o.tipo = ['semiala', 'intera'].includes(o.tipo) ? o.tipo : 'completa';
+  // pianta: progetti salvati prima della freccia avevano l'asse del 1° longherone normale alla radice
+  if (!p || p.rifFr === undefined) { if (p) { o.rifFr = 'lon'; o.fr1 = 0; o.fr2 = 0; } }
+  if (!['le', 'c4', 'te', 'lon'].includes(o.rifFr)) o.rifFr = 'c4';
+  if (o.centine !== 'normali') o.centine = 'vento';
+  o.fr1 = limita(o.fr1, -45, 60); o.fr2 = limita(o.fr2, -45, 60); o.yk = limita(o.yk, 10, 90); o.trk = limita(o.trk, 0.3, 1.2);
+  o.nCentine2 = limita(Math.round(o.nCentine2), 2, 60); if (o.tipo === 'completa') o.doppia = false;
   o.naca = o.naca.replace(/[^0-9]/g, '').slice(0, 5);
   if (!FAMIGLIE[o.profilo]) o.profilo = 'naca';
   o.spProf = limita(o.spProf, 3, 30); o.fProf = limita(o.fProf, 0, 12); o.pProf = limita(o.pProf, 10, 90);
@@ -837,23 +852,83 @@ function normalizzaProgetto(p) {
   o.cX0 = limita(o.cX0, 3, 60); o.cX1 = limita(o.cX1, o.cX0 + 5, 90); o.ts = limita(o.ts, 0.4, 5);
   return o;
 }
-const corde = P => { const ct = P.cr * (P.tipo === 'semiala' ? P.tr : 1); return { cr: P.cr, ct, cm: (P.cr + ct) / 2, k: P.tipo === 'semiala' ? 2 : 1 }; };
-/* Vincolo dell'allungamento: AR = k b / c_media (k = 2 per la semiala). */
+// ---------------------------------------------------------------- pianta alare
+/* La semiala (o l'ala rettangolare) e' una successione di pannelli trapezi,
+   da y = 0 (radice) a y = bh (estremita'). Il bordo d'attacco discende dalla
+   freccia della linea di riferimento, posta alla frazione f della corda:
+   x_rif(y_b) - x_rif(y_a) = (y_b - y_a) tan(freccia). */
+const RIF_FR = { le: 0, c4: 0.25, te: 1 };
+const RIF_NOMI = { le: 'bordo d’attacco', c4: '25 % della corda', te: 'bordo d’uscita', lon: 'asse del 1° longherone' };
+function pianta(P, ykForzato) {
+  const intera = P.tipo === 'intera', semi = P.tipo === 'semiala' || intera, bh = intera ? P.b / 2 : P.b;
+  const cr = P.cr, ct = semi ? P.cr * P.tr : P.cr, doppia = semi && !!P.doppia;
+  const fRif = P.rifFr === 'lon' ? (P.longheroni.length ? limita(P.longheroni[0].x, 3, 90) / 100 : 0.3) : (RIF_FR[P.rifFr] !== undefined ? RIF_FR[P.rifFr] : 0.25);
+  const yk = doppia ? (ykForzato !== undefined ? ykForzato : limita(P.yk, 10, 90) / 100 * bh) : null, ck = doppia ? P.cr * P.trk : null;
+  const st = doppia ? [[0, cr], [yk, ck], [bh, ct]] : [[0, cr], [bh, ct]];
+  const fr = !semi ? [0] : doppia ? [P.fr1, P.fr2] : [P.fr1];
+  const pannelli = [];
+  let xa = 0, Sh = 0, I2 = 0, Iy = 0, Ix = 0;
+  for (let i = 0; i + 1 < st.length; i++) {
+    const [ya, ca] = st[i], [yb, cb] = st[i + 1], dy = yb - ya;
+    const xb = xa + fRif * ca + dy * Math.tan(limita(fr[i], -60, 70) * Math.PI / 180) - fRif * cb, a = xb - xa, d = cb - ca;
+    const ang = f => Math.atan((a + f * d) / dy) * 180 / Math.PI;
+    const q = { i, ya, yb, ca, cb, xa, xb, S: (ca + cb) / 2 * dy, frLE: ang(0), frC4: ang(0.25), frTE: ang(1), frRif: fr[i] };
+    // integrali per la corda media aerodinamica: S, int c^2, int y c, int x_LE c
+    Sh += q.S; I2 += dy * (ca * ca + ca * cb + cb * cb) / 3;
+    Iy += dy * (ya * (ca + cb) / 2 + dy * (ca + 2 * cb) / 6);
+    Ix += dy * (xa * ca + (xa * d + a * ca) / 2 + a * d / 3);
+    pannelli.push(q); xa = xb;
+  }
+  const pann = y => pannelli.find(q => y <= q.yb + 1e-9) || pannelli[pannelli.length - 1];
+  const lin = (y, A, B) => { const q = pann(y); return q[A] + (q[B] - q[A]) * (y - q.ya) / (q.yb - q.ya); };
+  const k = P.tipo === 'semiala' ? 2 : 1, cm = Sh / bh, mac = I2 / Sh, xMac = Ix / Sh;
+  return { tipo: P.tipo, intera, semi, doppia, bh, cr, ct, ck, yk, fRif, pannelli, pann, c: y => lin(y, 'ca', 'cb'), xLE: y => lin(y, 'xa', 'xb'),
+    Sh, S: (intera ? 2 : 1) * Sh, cm, k, AR: k * P.b / cm, mac, yMac: Iy / Sh, xMac, xCa: xMac + 0.25 * mac, cmin: Math.min(cr, ct, ck || Infinity) };
+}
+const corde = P => { const pi = pianta(P); return { cr: pi.cr, ct: pi.ct, cm: pi.cm, k: pi.k, cmin: pi.cmin, pi }; };
+/* Vincolo dell'allungamento: AR = k b / c_m, con c_m = S_semiala / b_semiala
+   corda media geometrica (k = 2 per la semiala, b = apertura totale per l'ala intera). */
 function applicaAR(P, modificato) {
-  const q = corde(P), f = (1 + (P.tipo === 'semiala' ? P.tr : 1)) / 2;
+  const q = corde(P), f = q.cm / q.cr;
   if (!P.arLock) { P.AR = arr(q.k * P.b / q.cm, 1000); return; }
   if (modificato === 'b') P.cr = arr(q.k * P.b / (P.AR * f), 10);
   else P.b = arr(P.AR * P.cr * f / q.k, 1);
 }
+/* Cambio della linea di riferimento della freccia a geometria invariata. */
+function convertiFreccia(P, nuovo) {
+  const pi = pianta(P), f = nuovo === 'lon' ? (P.longheroni.length ? limita(P.longheroni[0].x, 3, 90) / 100 : 0.3) : RIF_FR[nuovo];
+  if (f === undefined) return;
+  const ang = q => arr(Math.atan(((q.xb - q.xa) + f * (q.cb - q.ca)) / (q.yb - q.ya)) * 180 / Math.PI, 1e4);
+  if (pi.semi) { P.fr1 = ang(pi.pannelli[0]); if (pi.pannelli[1]) P.fr2 = ang(pi.pannelli[1]); }
+  P.rifFr = nuovo;
+}
+/* Stazioni delle centine: equidistanti in ciascun pannello; con la doppia
+   freccia una centina cade esattamente sulla rottura. */
+function stazioni(P, pi) {
+  const t = P.spCentina, bh = pi.bh, e = limita(P.e, t / 2, Math.max(t / 2, bh / 2 - t)), eT = pi.semi ? t / 2 : e, ys = []; // estremita' di una semiala: centina a filo del bordo
+  let ik = -1, yk = null;
+  if (pi.doppia) {
+    yk = limita(pi.yk, e + 1.5 * t, bh - eT - 1.5 * t);
+    const n1 = Math.max(2, Math.round(P.nCentine)), n2 = Math.max(2, Math.round(P.nCentine2));
+    for (let j = 0; j < n1; j++) ys.push(e + (yk - e) * j / (n1 - 1));
+    for (let j = 1; j < n2; j++) ys.push(yk + (bh - eT - yk) * j / (n2 - 1));
+    ik = n1 - 1;
+  } else { const n = Math.max(2, Math.round(P.nCentine)); for (let j = 0; j < n; j++) ys.push(e + (bh - e - eT) * j / (n - 1)); }
+  return { e, eT, ys, n: ys.length, ik, yk, passi: ys.slice(1).map((y, j) => y - ys[j]) };
+}
+/* Pianta e stazioni coerenti: se la rottura e' stata avvicinata alle centine
+   d'estremita', la pianta viene ricalcolata con la rottura effettiva. */
+function piantaEStazioni(P) {
+  let pi = pianta(P); const st = stazioni(P, pi);
+  if (pi.doppia && Math.abs(st.yk - pi.yk) > 1e-6) { const yk0 = pi.yk; pi = pianta(P, st.yk); pi.ykRichiesta = yk0; }
+  return { pi, st };
+}
 const POSIZIONI = { 1: [30], 2: [25, 65], 3: [15, 40, 65] };
 
-/* Dimensionamento automatico della sezione di un longherone sulla
-   centina d'estremita' (la piu' piccola). */
-function autoSezione(sp, P, prof) {
-  const ct = corde(P).ct, x = limita(sp.x, 3, 90) / 100;
-  const th = prof.spessore(x) * ct, man = sp.man || {};
-  let H = Math.max(2.4, 0.95 * (th - 2 * (P.parete + P.gioco + riduzione(P))));
-  const min = 1.0;
+/* Dimensionamento automatico della sezione di un longherone sulla centina in
+   cui lo spessore libero, alla posizione del longherone, e' minimo. */
+function autoSezione(sp, P) {
+  const man = sp.man || {}, min = 1.0;
   const dim = h => {
     const o = { H: arr(h, 10) };
     switch (sp.forma) {
@@ -868,13 +943,19 @@ function autoSezione(sp, P, prof) {
     return o;
   };
   if (man.H) { const Hf = sp.H; Object.assign(sp, dim(Hf)); sp.H = Hf; limitiSezione(sp); return; } // altezza guida: il resto la segue
-  const profC = [toC(prof.pts.map(p => [p[0] * ct, p[1] * ct]))];
-  const interno = offset(profC, -(P.parete + riduzione(P)), JT.jtRound);
-  for (let it = 0; it < 40; it++) {
-    const prova = Object.assign({}, sp, dim(H));
-    const sez = sezioneLongherone(prova);
-    const sede = sposta(offset(sez.esterno, P.gioco, sez.tonda ? JT.jtRound : JT.jtMiter), x * ct, prof.medio(x) * ct);
-    if (area(sottrai(sede, interno)) < 1e-3 || H <= 2.4) break;
+  const def = profiloDef(P), memo = {}, profilo = c => memo[c.toFixed(4)] || (memo[c.toFixed(4)] = nacaProfilo(def, P.te / c));
+  const { pi, st } = piantaEStazioni(P), L = assi(P, pi, st, profilo), l = L[Math.max(0, P.longheroni.indexOf(sp))], t = P.spCentina;
+  // ogni centina, con la sede che il longherone vi occupa; si parte dalla piu' sottile
+  const cen = [];
+  pianiCentine(P, pi, st, L, profilo).piani.forEach(R => { // la sede deve entrare su entrambe le facce della centina
+    const sd = sedeA(P, l, [], R, true), th = R.spessore(limita(sd.u / R.c, 0.001, 0.999)) * R.c;
+    if (sd.dentro) facceCentina(pi, profilo, R, t).forEach(f => { const I = incrocio(R.phi ? l.seg(sd.y) : l.seg(f.Rw.Y0), f.Rw); cen.push({ th, u: I.s - R.sLE, v: I.Z, kx: Math.hypot(1, I.m), interno: offset(f.cont, -(P.parete + riduzione(P)), JT.jtRound) }); });
+  });
+  cen.sort((p, q) => p.th - q.th);
+  let H = Math.max(2.4, 0.95 * (cen[0].th - 2 * (P.parete + P.gioco + riduzione(P))));
+  for (let it = 0; it < 60; it++) {
+    const sez = sezioneLongherone(Object.assign({}, sp, dim(H)));
+    if (H <= 2.4 || cen.every(q => area(sottrai(sposta(sedeLongherone(sez, P.gioco, 0, 0, q.kx), q.u, q.v), q.interno)) < 1e-3)) break;
     H *= 0.96;
   }
   Object.assign(sp, dim(H)); limitiSezione(sp);
@@ -897,12 +978,17 @@ function limitiSezione(sp) {
    profilo ridotto dello spessore del guscio piu' il gioco di montaggio. */
 const riduzione = P => (P.livello === 'completa' ? P.ts + P.gioco : 0);
 function autoProporzioni(P) {
-  const { ct, cm } = corde(P), m = P.man || {};
-  const def = profiloDef(P);
+  const { ct, cm, pi } = corde(P), m = P.man || {};
   if (!m.spCentina) P.spCentina = arr(limita(0.0625 * cm, 3, 10), 2);
   if (!m.te) P.te = arr(Math.max(0.8, 0.01 * ct), 100);
-  if (!m.e) P.e = Math.round(Math.max(P.spCentina / 2 + 4, 0.105 * cm));
-  if (!m.nCentine) P.nCentine = Math.max(2, Math.round((P.b - 2 * P.e) / (0.73 * cm)) + 1);
+  if (!m.e) P.e = pi.semi ? arr(P.spCentina / 2, 100) : Math.round(Math.max(P.spCentina / 2 + 4, 0.105 * cm)); // semiala: centina di radice a filo della radice
+  const eT = pi.semi ? P.spCentina / 2 : P.e;
+  const passoIdeale = c => 0.73 * c;
+  if (pi.doppia) { // centine per pannello, la centina della rottura e' comune
+    const p1 = pi.pannelli[0], p2 = pi.pannelli[1];
+    if (!m.nCentine) P.nCentine = Math.max(2, Math.round((p1.yb - P.e) / passoIdeale((p1.ca + p1.cb) / 2)) + 1);
+    if (!m.nCentine2) P.nCentine2 = Math.max(2, Math.round((pi.bh - eT - p2.ya) / passoIdeale((p2.ca + p2.cb) / 2)) + 1);
+  } else if (!m.nCentine) P.nCentine = Math.max(2, Math.round((pi.bh - P.e - eT) / passoIdeale(cm)) + 1);
   if (!m.parete) P.parete = arr(Math.max(1.5, 0.018 * ct), 10);
   if (!m.rAll) P.rAll = arr(Math.max(1.5, 0.022 * ct), 10);
   // correnti e rivestimento: regole della tabella delle misure
@@ -911,14 +997,19 @@ function autoProporzioni(P) {
   if (!m.cB) P.cB = arr(Math.max(2, 0.026 * ct), 10);
   if (!m.cNd) P.cNd = limita(Math.round(cm / 45), 1, 6);
   if (!m.cNv) P.cNv = limita(Math.round(cm / 60), 1, 5);
-  const prof = nacaProfilo(def, P.te / ct);
-  P.longheroni.forEach(sp => autoSezione(sp, P, prof));
+  P.longheroni.forEach(sp => autoSezione(sp, P));
+  // ala intera: il giunto di radice deve stare fra le due centine di radice
+  if (pi.intera && !m.e && P.longheroni.some(sp => sp.stampa)) {
+    const Hm = Math.max(...P.longheroni.filter(sp => sp.stampa).map(sp => sp.H)), serve = Math.ceil(limita(2 * Hm, 8, 50) + P.spCentina / 2 + 2);
+    if (serve > P.e) { P.e = serve; P.longheroni.forEach(sp => autoSezione(sp, P)); }
+  }
   return P;
 }
 
 // ---------------------------------------------------------------- struttura dell'ala
-function sedeLongherone(sez, gioco, du, dv) {
-  let h = offset(sez.esterno, gioco, sez.tonda ? JT.jtRound : JT.jtMiter);
+function sedeLongherone(sez, gioco, du, dv, kx) {
+  const est = kx > 1.0005 ? sez.esterno.map(p => p.map(q => ({ X: Math.round(q.X * kx), Y: q.Y }))) : sez.esterno; // taglio obliquo: larghezza B / cos δ
+  let h = offset(est, gioco, sez.tonda ? JT.jtRound : JT.jtMiter);
   if (du > 0.01 || dv > 0.01) { // asse inclinato rispetto alla centina: sede allungata
     const a = Math.max(du / 2, 0.001) * SC, c = Math.max(dv / 2, 0.001) * SC;
     const sagoma = [{ X: -a, Y: -c }, { X: a, Y: -c }, { X: a, Y: c }, { X: -a, Y: c }];
@@ -958,32 +1049,172 @@ function finestreAlleggerimento(P, prof, c, profC, zone, rid = 0) {
   return poligoniConFori(w).filter(e => Math.abs(CL.Clipper.Area(e.outer)) / (SC * SC) >= Math.max(8, 2.5 * r * r)).map(e => e.outer);
 }
 
-/* Assi dei longheroni: rettilinei per i centri delle sedi di radice ed estremita'. */
-function assi(P, profilo) {
-  const { cr, ct } = corde(P), t = P.spCentina, b = P.b;
-  const e = limita(P.e, t / 2, Math.max(t / 2, b / 2 - t)), dy = Math.max(1e-6, b - 2 * e);
-  const x1 = (P.longheroni.length ? limita(P.longheroni[0].x, 3, 90) : 30) / 100;
+/* Assi dei longheroni. Ogni longherone e' definito dalla posizione (in % della
+   corda) sulla centina di radice e su quella d'estremita'; l'asse e' la retta
+   per i due punti della linea media. Con la doppia freccia l'asse puo' essere
+   «spezzato» alla rottura, cioe' fatto di due tratti rettilinei. */
+function assi(P, pi, st, profilo) {
+  const t = P.spCentina, ys = st.ys, yr = ys[0], yt = ys[st.n - 1];
   return P.longheroni.map((sp, i) => {
-    const xi = limita(sp.x, 3, 90) / 100, sez = sezioneLongherone(sp);
-    const pr = profilo(cr), pt = profilo(ct);
-    const A = { x: xi * cr, z: pr.medio(xi) * cr }, Bp = { x: x1 * (cr - ct) + xi * ct, z: pt.medio(xi) * ct };
-    const tx = (Bp.x - A.x) / dy, tz = (Bp.z - A.z) / dy;
-    return { i, sp, xi, sez, tx, tz, A, du: t * Math.abs(tx), dv: t * Math.abs(tz) };
+    const xr = limita(sp.x, 3, 90) / 100, xt = limita(sp.xt === undefined || sp.xt === null ? sp.x : sp.xt, 3, 90) / 100, sez = sezioneLongherone(sp);
+    const punto = (y, f) => { const c = pi.c(y); return { y, f, X: pi.xLE(y) + f * c, Z: profilo(c).medio(f) * c }; };
+    const nodi = [punto(yr, xr)];
+    if (pi.doppia && sp.via === 'spezzato' && st.ik > 0) { const yk = ys[st.ik]; nodi.push(punto(yk, xr + (xt - xr) * (yk - yr) / (yt - yr))); }
+    nodi.push(punto(yt, xt));
+    const segmenti = [];
+    for (let s = 0; s + 1 < nodi.length; s++) {
+      const a = nodi[s], b = nodi[s + 1], tx = (b.X - a.X) / (b.y - a.y), tz = (b.Z - a.Z) / (b.y - a.y);
+      segmenti.push({ s, ya: s === 0 ? 0 : a.y, yb: s === nodi.length - 2 ? pi.bh : b.y, ox: a.X - tx * a.y, oz: a.Z - tz * a.y, tx, tz, k: Math.sqrt(1 + tx * tx + tz * tz) });
+    }
+    const seg = y => segmenti.find(g => y <= g.yb + 1e-9) || segmenti[segmenti.length - 1];
+    const vicini = y => segmenti.filter(g => y >= g.ya - t && y <= g.yb + t);
+    const l = { i, sp, sez, xi: xr, xt, nodi, segmenti, seg,
+      asse: y => { const g = seg(y); return { X: g.ox + g.tx * y, Z: g.oz + g.tz * y }; },
+      duA: y => t * Math.max(...vicini(y).map(g => Math.abs(g.tx))), dvA: y => t * Math.max(...vicini(y).map(g => Math.abs(g.tz))) };
+    l.tx = segmenti[0].tx; l.tz = segmenti[0].tz;
+    l.du = t * Math.max(...segmenti.map(g => Math.abs(g.tx))); l.dv = t * Math.max(...segmenti.map(g => Math.abs(g.tz)));
+    return l;
   });
 }
-/* Verifica rapida: ogni sede rientra nel profilo (radice ed estremita') e i
-   longheroni non si toccano. E' la stessa prova di costruisci(), senza le centine. */
+/* Giunti fra due tratti rettilinei di longherone: alla radice dell'ala intera
+   (le due semiali) e alla rottura (asse spezzato). Con assi allineati basta un
+   manicotto diritto; altrimenti un giunto angolato a U, in due meta' uguali
+   (sopra e sotto) che abbracciano le estremita'. Le estremita' dei longheroni
+   si accorciano di d = (B/2 + g) tan(a/2) + (H/2 + g) tan(b/2) + 0,3, dove a e b
+   sono le deviazioni in pianta e in elevazione: cosi' gli spigoli interni non
+   si toccano e i tronchi restano a testa dritta. */
+const norm2 = v => { const q = Math.hypot(v[0], v[1]); return [v[0] / q, v[1] / q]; };
+function giuntiAngolati(P, pi, L) {
+  const out = [], g = P.gioco;
+  L.forEach(l => {
+    if (!l.sp.stampa) return;
+    const B = l.sez.B, H = l.sez.H, s0 = l.segmenti[0], casi = [];
+    if (pi.intera) casi.push({ dove: 'radice', y: 0, f1: [-s0.tx, -s0.tz], f2: [s0.tx, s0.tz], X: s0.ox, Z: s0.oz });
+    if (l.segmenti.length > 1) { const s1 = l.segmenti[1], y = s1.ya; casi.push({ dove: 'rottura', y, f1: [s0.tx, s0.tz], f2: [s1.tx, s1.tz], X: s1.ox + s1.tx * y, Z: s1.oz + s1.tz * y }); }
+    casi.forEach(q => {
+      const ap = Math.abs(Math.atan(q.f2[0]) - Math.atan(q.f1[0])), av = Math.abs(Math.atan(q.f2[1]) - Math.atan(q.f1[1]));
+      const dritto = ap < 0.3 * Math.PI / 180 && av < 0.3 * Math.PI / 180, a1 = norm2([-q.f1[0], -1]), a2 = norm2([q.f2[0], 1]);
+      const r = Object.assign({ l, i: l.i, dritto, ap, av, a1, a2 }, q);
+      if (dritto) { // manicotto diritto centrato sul punto di giunzione
+        const pm = Math.max(1.6, arr(0.25 * H, 10));
+        Object.assign(r, { d: 0, Ls: arr(limita(3 * H, 10, 60), 2), pm, wEst: B / 2 + g + pm, hEst: H / 2 + g + pm });
+        r.ext = r.Ls / 2;
+      } else {
+        const Lg = arr(limita(2 * H, 8, 50), 2), sj = Math.max(1.6, arr(0.25 * H, 10)), wo = B / 2 + g + sj, wi = B / 2 + g;
+        const d = (B / 2 + g) * Math.tan(ap / 2) + (H / 2 + g) * Math.tan(av / 2) + 0.3, hw = (H + 2 * g) / 2 + Lg * Math.tan(av / 2);
+        const striscia = (a, s0x, s1x, w) => { const n = [-a[1], a[0]]; return toC([[a[0] * s0x + n[0] * w, a[1] * s0x + n[1] * w], [a[0] * s1x + n[0] * w, a[1] * s1x + n[1] * w], [a[0] * s1x - n[0] * w, a[1] * s1x - n[1] * w], [a[0] * s0x - n[0] * w, a[1] * s0x - n[1] * w]]); };
+        const est = unisci([striscia(a1, 0, Lg, wo), striscia(a2, 0, Lg, wo), cerchio(2 * wo)]);
+        const int = unisci([striscia(a1, 0, Lg + 2, wi), striscia(a2, 0, Lg + 2, wi), cerchio(2 * wi)]);
+        Object.assign(r, { d, Lg, sj, wo, wi, hw, est, pareti: sottrai(est, int), wEst: wo, hEst: sj + hw });
+        r.ext = Lg * Math.max(Math.abs(a1[1]), Math.abs(a2[1])) + wo * Math.max(Math.abs(a1[0]), Math.abs(a2[0]));
+      }
+      out.push(r);
+    });
+  });
+  return out;
+}
+/* Sezione dell'ala con un piano verticale. Il piano passa per (X0, Y0); la sua
+   traccia in pianta ha direzione e = (cos φ, −sin φ) e normale n = (sin φ, cos φ):
+   φ = 0 e' il piano «secondo il vento» (parallelo al piano di simmetria), φ = freccia
+   del longherone e' il piano normale al longherone. In un pannello corda e bordo
+   d'attacco sono lineari in y, quindi il punto di ascissa s lungo la traccia sta a
+       ξ(s) = [U0 + s (cos φ + x' sin φ)] / (C0 − s c' sin φ)
+   della corda locale, e viceversa s(ξ) = (ξ C0 − U0) / [cos φ + (x' + ξ c') sin φ].
+   Il risultato si usa come un profilo: ascisse riferite alla lunghezza c della sezione. */
+function tagliaAla(profilo, q, X0, Y0, phi) {
+  const cf = Math.cos(phi), sf = Math.sin(phi), dc = (q.cb - q.ca) / (q.yb - q.ya), dx = (q.xb - q.xa) / (q.yb - q.ya);
+  const C0 = q.ca + dc * (Y0 - q.ya), U0 = X0 - (q.xa + dx * (Y0 - q.ya)), pr = profilo(C0);
+  const sDi = xi => (xi * C0 - U0) / (cf + sf * (dx + xi * dc)), cDi = s => C0 - s * sf * dc, xiDi = s => (U0 + s * (cf + sf * dx)) / cDi(s);
+  const sLE = sDi(0), sTE = sDi(1), c = sTE - sLE;
+  const lato = F => f => { const s = sLE + f * c; return F(limita(xiDi(s), 0, 1)) * cDi(s) / c; };
+  const yU = lato(pr.yU), yL = lato(pr.yL), punti = () => pr.pts.map(p => { const s = sDi(p[0]); return [s, p[1] * cDi(s)]; });
+  return { X0, Y0, phi, cf, sf, q, sLE, sTE, c, sDi, yU, yL, medio: lato(pr.medio), spessore: f => yU(f) - yL(f), xi: u => xiDi(sLE + u), punti,
+    pts: punti().map(p => [(p[0] - sLE) / c, p[1] / c]), poli: s0 => toC(punti().map(p => [p[0] - s0, p[1]])) };
+}
+/* Incontro di un asse rettilineo (x = ox + tx y, z = oz + tz y) con il piano di una centina:
+   m = tan dell'angolo fra l'asse e la normale alla centina. */
+function incrocio(g, R) {
+  const den = R.cf + g.tx * R.sf, s = (g.ox + g.tx * R.Y0 - R.X0) / den, y = R.Y0 - s * R.sf;
+  return { s, y, Z: g.oz + g.tz * y, m: (g.tx * R.cf - R.sf) / den, den };
+}
+/* Contorno di una centina spessa t: deve stare dentro l'ala su tutto lo spessore, quindi e'
+   l'intersezione delle sezioni dell'ala con le sue due facce. */
+function pianoParallelo(pi, profilo, R, w) { const X = R.X0 + w * R.sf, Y = R.Y0 + w * R.cf; return tagliaAla(profilo, R.phi ? R.q : pi.pann(Y), X, Y, R.phi); }
+/* Le due facce di una centina spessa t: piano e sezione dell'ala su ciascuna (nel riferimento della centina). */
+function facceCentina(pi, profilo, R, t) {
+  return [-1, 1].map(sg => { const Rw = pianoParallelo(pi, profilo, R, sg * t / 2); let cont = unisci([Rw.poli(R.sLE)]); if (R.tronca) cont = interseca(cont, [rettangolo(R.s0 - R.sLE, -1e4, R.s1 - R.sLE, 1e4)]); return { Rw, cont }; });
+}
+function contornoCentina(pi, profilo, R, t) { const f = facceCentina(pi, profilo, R, t); return interseca(f[0].cont, f[1].cont); }
+/* Sede esatta del longherone su un piano Rw parallelo alla centina R: la sezione tagliata obliqua (B / cos δ),
+   senza allungamento. Strato per strato la sede si sposta con l'asse: nello spessore e' un foro obliquo a misura. */
+function sedeFaccia(P, l, J, R, Rw) {
+  const sd = sedeA(P, l, J, R, true), q = R.phi ? l.seg(sd.y) : (l.segmenti.find(s => Rw.Y0 <= s.yb + 1e-9) || l.segmenti[l.segmenti.length - 1]), I = incrocio(q, Rw), g = P.gioco, kx = Math.hypot(1, I.m);
+  const h = sd.giunto ? [rettangolo(-(sd.giunto.wEst + g) * kx, -(sd.giunto.hEst + g), (sd.giunto.wEst + g) * kx, sd.giunto.hEst + g)] : sedeLongherone(l.sez, g, 0, 0, kx);
+  return sposta(h, I.s - R.sLE, I.Z);
+}
+/* Piani delle centine. Le centine di chiusura (radice, rottura, estremita') sono «secondo il
+   vento». In un pannello a freccia le centine intermedie sono normali al longherone 1, che le
+   attraversa ad angolo retto in sedi a misura; devono stare per intero fra le due chiusure,
+   a passo uniforme lungo il suo asse. Nelle zone triangolari accanto alle chiusure la centina
+   normale non puo' arrivare al bordo opposto: e' tronca e termina di testa contro la chiusura. */
+function pianiCentine(P, pi, st, L, profilo) {
+  const t = P.spCentina, ys = st.ys, l1 = L[0], out = [], note = [];
+  const dritta = (y, chiusa) => { const R = tagliaAla(profilo, pi.pann(y), pi.xLE(y), y, 0); return Object.assign(R, { y, chiusa, s0: R.sLE, s1: R.sTE, tronca: false }); };
+  const tratti = st.ik > 0 ? [[0, st.ik], [st.ik, st.n - 1]] : [[0, st.n - 1]];
+  tratti.forEach(([ja, jb], k) => {
+    if (k === 0) out.push(dritta(ys[ja], true));
+    const ya = ys[ja], yb = ys[jb], m = jb - ja - 1, q = pi.pannelli[Math.min(k, pi.pannelli.length - 1)];
+    const g = l1 && l1.seg((ya + yb) / 2), phi = g ? Math.atan(g.tx) : 0;
+    if (!g || P.centine === 'vento' || !pi.semi || Math.abs(phi) < 0.5 * Math.PI / 180 || m < 1) for (let j = ja + 1; j < jb; j++) out.push(dritta(ys[j], false));
+    else { // passo uniforme lungo il longherone; la centina che incontrerebbe una chiusura e' tronca e vi termina contro
+      const hc = t / 2 * Math.cos(phi), sfp = Math.sin(phi), lim = [ya + t / 2 + P.gioco + hc, yb - t / 2 - P.gioco - hc];
+      for (let i = 1; i <= m; i++) {
+        const y = ya + (yb - ya) * i / (m + 1), R = Object.assign(tagliaAla(profilo, q, g.ox + g.tx * y, y, phi), { y, chiusa: false });
+        const a = (y - lim[0]) / sfp, b = (y - lim[1]) / sfp; // la centina sta fra le facce delle chiusure: lim0 <= y − s sin φ <= lim1
+        let s0 = Math.max(R.sLE, Math.min(a, b)), s1 = Math.min(R.sTE, Math.max(a, b));
+        const fasce = L.map(l => { const I = incrocio(l.seg(y), R), hw = (l.sez.B || 0) / 2 * Math.hypot(1, I.m) + P.gioco + t * Math.abs(I.m) / 2 + P.parete; return [I.s - hw, I.s + hw]; });
+        fasce.forEach((f, li) => { if (li && f[0] < s0 && f[1] > s0) s0 = f[1]; if (li && f[1] > s1 && f[0] < s1) s1 = f[0]; }); // un longherone a cavallo del taglio resta fuori
+        if (fasce[0][0] < s0 || fasce[0][1] > s1 || s1 - s0 < 12) { note.push('La centina normale a y = ' + arr(y, 1) + ' mm cadrebbe a ridosso di una centina di chiusura e non potrebbe abbracciare il longherone 1: omessa.'); continue; }
+        out.push(Object.assign(R, { s0, s1, tronca: s0 > R.sLE + 0.5 || s1 < R.sTE - 0.5 }));
+      }
+    }
+    out.push(dritta(yb, true));
+  });
+  out.forEach((R, j) => { R.j = j; });
+  return { piani: out, note, ik: st.ik > 0 ? out.findIndex(R => R.chiusa && Math.abs(R.y - ys[st.ik]) < 1e-9) : -1 };
+}
+/* Sede del longherone l nella centina R, riferita al bordo d'attacco della centina. Un
+   longherone largo B che attraversa la centina (spessa t) con scarto δ dalla normale occupa
+   B / cos δ + t tan δ: la sezione si allarga di 1/cos δ e scorre di t tan δ nello spessore.
+   Dove passa un giunto la sede ne segue l'ingombro. */
+function sedeA(P, l, J, R, soloGeometria) {
+  const t = P.spCentina, g = P.gioco, y0 = incrocio(l.seg(R.Y0), R).y;
+  const segs = R.phi ? [l.seg(y0)] : l.segmenti.filter(q => R.Y0 >= q.ya - t && R.Y0 <= q.yb + t), q0 = segs[0] || l.seg(R.Y0), I = incrocio(q0, R);
+  const F = (segs.length ? segs : [q0]).map(q => { const Iq = incrocio(q, R); return { m: Math.abs(Iq.m), dv: t * Math.abs(q.tz) / Iq.den }; });
+  const m = Math.max(...F.map(x => x.m)), du = t * m, dv = Math.max(...F.map(x => x.dv)), kx = Math.hypot(1, m), u = I.s - R.sLE, v = I.Z;
+  const gz = J.find(q => q.l === l && Math.abs(I.y - q.y) <= q.ext + t / 2);
+  const h = soloGeometria ? [] : gz ? [rettangolo(-(gz.wEst + g) * kx - du / 2, -(gz.hEst + g + dv / 2), (gz.wEst + g) * kx + du / 2, gz.hEst + g + dv / 2)] : sedeLongherone(l.sez, g, du, dv, kx);
+  const hw = l.sez.B / 2 * kx + g + du / 2 + P.parete, dentro = !R.tronca || (I.s - hw >= R.s0 - 1e-6 && I.s + hw <= R.s1 + 1e-6); // in una centina tronca il longherone puo' passare fuori
+  return { h: sposta(h, u, v), u, v, y: I.y, m, du, dv, kx, ht: t / 2 * q0.k / I.den, f: R.xi(u), giunto: gz || null, dentro };
+}
+/* Verifica rapida su tutte le centine: ogni sede rientra nel profilo con la
+   parete minima e due sedi vicine lasciano almeno la parete fra loro. */
 function sediEntrano(P) {
-  const def = profiloDef(P), { cr, ct } = corde(P), memo = {};
-  const profilo = c => memo[c] || (memo[c] = nacaProfilo(def, P.te / c));
-  const L = assi(P, profilo); let fuori = -1, vicini = false;
-  for (const c of ct === cr ? [ct] : [ct, cr]) {
-    const pr = profilo(c), profC = unisci([toC(pr.pts.map(p => [p[0] * c, p[1] * c]))]);
-    const limite = offset(profC, -(Math.min(P.parete, 1.2) + riduzione(P)), JT.jtRound);
-    L.forEach(l => { if (fuori < 0 && area(sottrai(sposta(sedeLongherone(l.sez, P.gioco, l.du, l.dv), l.xi * c, pr.medio(l.xi) * c), limite)) > 1e-3) fuori = l.i; });
+  const def = profiloDef(P), memo = {}, profilo = c => memo[c.toFixed(4)] || (memo[c.toFixed(4)] = nacaProfilo(def, P.te / c));
+  const { pi, st } = piantaEStazioni(P), L = assi(P, pi, st, profilo), J = giuntiAngolati(P, pi, L), rid = riduzione(P), t = P.spCentina;
+  let fuori = -1, vicini = false;
+  for (const R of pianiCentine(P, pi, st, L, profilo).piani) {
+    if (fuori >= 0) break;
+    const facce = facceCentina(pi, profilo, R, t).map(f => ({ Rw: f.Rw, lim: offset(f.cont, -(Math.min(P.parete, 1.2) + rid), JT.jtRound) })), zs = [];
+    for (const l of L) {
+      const sd = sedeA(P, l, J, R), s = sd.h;
+      if (!sd.dentro) continue;
+      if (facce.some(f => area(sottrai(sedeFaccia(P, l, J, R, f.Rw), f.lim)) > 1e-3)) { fuori = l.i; break; }
+      const bb = ingombro(s); zs.push({ a: bb.x0, b: bb.x1 });
+    }
+    zs.sort((p, q) => p.a - q.a);
+    for (let i = 1; i < zs.length; i++) if (zs[i].a - zs[i - 1].b < P.parete) vicini = true;
   }
-  const zs = L.map(l => ({ a: l.xi * ct - l.sez.B / 2 - P.gioco, b: l.xi * ct + l.sez.B / 2 + P.gioco })).sort((p, q) => p.a - q.a);
-  for (let i = 1; i < zs.length; i++) if (zs[i].a - zs[i - 1].b < P.parete) vicini = true;
   return { ok: fuori < 0 && !vicini, fuori, vicini };
 }
 /* Adattamento: se un particolare fissato a mano non entra piu' nel profilo,
@@ -1003,12 +1234,12 @@ function adatta(P) {
   prova(hi);
   const Lu = P.stampante.lx - 2 * (4 + Math.max(0, P.stampa.brim) + (P.stampa.skirt > 0 ? P.stampa.skirtDist : 0));
   note.push('Corda portata da ' + arr(c0, 10) + ' a ' + arr(P.cr, 10) + ' mm per ' + motivo + (P.arLock && P.b !== b0 ? '; apertura adeguata a ' + arr(P.b, 10) + ' mm (AR vincolato)' : '') + '.' +
-    (Math.max(P.cr, corde(P).ct) > Lu ? ' Attenzione: la nuova corda supera i ' + arr(Lu, 1) + ' mm utili del piano di stampa.' : ''));
+    (Math.max(P.cr, corde(P).ct, corde(P).pi.ck || 0) > Lu ? ' Attenzione: la nuova corda supera i ' + arr(Lu, 1) + ' mm utili del piano di stampa.' : ''));
   return note;
 }
 /* Ricalcolo completo dopo una modifica: vincolo di AR, quote automatiche, adattamento. */
 function ricalcola(P, chiave) {
-  if (!P.arLock || ['b', 'cr', 'AR', 'tr', 'tipo', 'arLock'].includes(chiave)) applicaAR(P, chiave === 'b' ? 'b' : 'cr');
+  if (!P.arLock || ['b', 'cr', 'AR', 'tr', 'trk', 'yk', 'doppia', 'tipo', 'arLock'].includes(chiave)) applicaAR(P, chiave === 'b' ? 'b' : 'cr');
   P.longheroni.forEach(limitiSezione);
   if (P.auto) autoProporzioni(P);
   return adatta(P);
@@ -1159,12 +1390,13 @@ function posizioniCorrenti(P, L, ct, prT, rid) {
   for (const [lato, nn, sig] of [['d', P.cNd, 'D'], ['v', P.cNv, 'V']]) for (let i = 0; i < nn; i++) {
     const x0 = (nn === 1 ? (P.cX0 + P.cX1) / 2 : P.cX0 + i * (P.cX1 - P.cX0) / (nn - 1)) / 100;
     let x = limita(x0, xa, xb), motivo = x !== x0 ? 'perché in quel punto la centina d’estremità è troppo sottile per due intagli contrapposti' : '';
-    for (let giro = 0; giro < 3; giro++) for (const l of L) {
-      const d = (l.sez.B / 2 + P.gioco + l.du / 2 + P.cB / 2 + P.gioco + P.parete) / ct;
-      if (Math.abs(x - l.xi) < d - 1e-9) {
-        const a = l.xi - d, b = l.xi + d;
+    for (let giro = 0; giro < 3; giro++) for (const l of L) { // il longherone occupa, lungo la corda, la fascia fa..fb (in frazione)
+      const fa = l.fmin !== undefined ? l.fmin : l.xi, fb = l.fmax !== undefined ? l.fmax : l.xi, hw = l.hw !== undefined ? l.hw : l.sez.B / 2 + P.gioco + l.du / 2;
+      const d = (hw + P.cB / 2 + P.gioco + P.parete) / ct;
+      if (x > fa - d + 1e-9 && x < fb + d - 1e-9) {
+        const a = fa - d, b = fb + d;
         x = (Math.abs(a - x) <= Math.abs(b - x) && a > 0.04) || b > 0.9 ? a : b;
-        motivo = 'per non interferire con il longherone ' + (l.i + 1);
+        motivo = (motivo && !/longherone/.test(motivo) ? motivo + ' e ' : '') + 'per non interferire con il longherone ' + (l.i + 1);
       }
     }
     x = limita(x, 0.03, 0.92);
@@ -1185,157 +1417,288 @@ const rettLocale = (S, tau, nrm, a0, a1, d0, d1) => toC([[a0, d0], [a1, d0], [a1
 function costruisci(P) {
   const avvisi = [], avv = (liv, testo) => avvisi.push({ liv, testo });
   const def = profiloDef(P);
-  const { cr, ct, cm, k } = corde(P);
-  const n = Math.max(2, Math.round(P.nCentine)), t = P.spCentina, b = P.b, S = P.stampa, st = P.stampante;
-  const e = limita(P.e, t / 2, Math.max(t / 2, b / 2 - t));
-  const passo = (b - 2 * e) / (n - 1);
+  const { pi, st: sta } = piantaEStazioni(P);
+  if (pi.ykRichiesta !== undefined) avv('attenzione', 'La rottura richiesta a ' + arr(pi.ykRichiesta, 10) + ' mm cadrebbe troppo vicino a una centina d’estremità: è stata portata a ' + arr(pi.yk, 10) + ' mm.');
+  const { cr, ct, cm, k, bh } = pi, intera = pi.intera;
+  const ysE = sta.ys, e = sta.e, t = P.spCentina, b = P.b, S = P.stampa, st = P.stampante;
   const margine = 4 + Math.max(0, S.brim) + (S.skirt > 0 ? S.skirtDist : 0);
   const Lmax = st.lx - 2 * margine;
   const cache = {};
-  const profilo = c => cache[c.toFixed(4)] || (cache[c.toFixed(4)] = nacaProfilo(def, P.te / c));
-  const x1 = (P.longheroni.length ? limita(P.longheroni[0].x, 3, 90) : 30) / 100;
+  const profilo = c => cache[c.toFixed(4)] || (cache[c.toFixed(4)] = nacaProfilo(def, P.te / c)), profiloQ = c => profilo(arr(c, 2));
+  const lato = intera ? 'D' : null; // con l'ala intera la struttura calcolata e' la destra; la sinistra e' speculare
+  const gradi = x => arr(Math.atan(x) * 180 / Math.PI, 10);
 
-  // --- longheroni: asse rettilineo per i centri delle sedi di radice ed estremita'
-  const longheroni = assi(P, profilo).map(l => Object.assign(l, {
-    stampa: sezioneDiStampa(l.sez), L: b * Math.sqrt(1 + l.tx * l.tx + l.tz * l.tz), origine: { x: l.A.x - l.tx * e, z: l.A.z - l.tz * e },
-    inclinazione: Math.atan(Math.sqrt(l.tx * l.tx + l.tz * l.tz)) * 180 / Math.PI, tronchi: [], giunti: []
-  }));
+  // --- longheroni: assi e giunti; piani delle centine
+  const longheroni = assi(P, pi, sta, profilo), giunti = giuntiAngolati(P, pi, longheroni), l1 = longheroni[0];
+  const PC = pianiCentine(P, pi, sta, longheroni, profilo), piani = PC.piani, n = piani.length, ik = PC.ik, obl = piani.some(R => R.phi);
+  PC.note.forEach(x => avv('attenzione', x));
+  const sedi = piani.map(R => longheroni.map(l => sedeA(P, l, giunti, R)));
+  longheroni.forEach(l => { // fascia occupata lungo la corda su tutte le centine (serve ai correnti)
+    let fa = Infinity, fb = -Infinity, hw = 0;
+    sedi.forEach(r => { const sd = r[l.i]; if (!sd.dentro) return; const bb = ingombro(sd.h); fa = Math.min(fa, sd.f); fb = Math.max(fb, sd.f); hw = Math.max(hw, (bb.x1 - bb.x0) / 2); });
+    Object.assign(l, { stampa: sezioneDiStampa(l.sez), origine: { x: l.segmenti[0].ox, z: l.segmenti[0].oz }, angolati: giunti.filter(q => q.l === l), fmin: fa, fmax: fb, hw,
+      inclinazione: Math.max(...l.segmenti.map(g => Math.atan(Math.sqrt(g.tx * g.tx + g.tz * g.tz)) * 180 / Math.PI)), tronchi: [], giunti: [], pos: [], inc: [], mN: 0, mC: 0, dvM: 0 });
+  });
 
   // --- livello di completezza: struttura, struttura con correnti, ala completa con rivestimento
   const conRiv = P.livello === 'completa', rid = riduzione(P), conCorr = P.livello !== 'struttura' && P.cNd + P.cNv > 0;
-  const yA = e - t / 2, yB = e + (n - 1) * passo + t / 2; // facce esterne delle centine di estremita'
-  const cAt = y => cr + (ct - cr) * (y - e) / Math.max(1e-9, (n - 1) * passo), xLEAt = y => x1 * (cr - cAt(y));
-  const correnti = conCorr ? posizioniCorrenti(P, longheroni, ct, profilo(ct), rid) : [];
-  correnti.forEach(s => { // asse rettilineo del corrente: per i punti delle centine di radice ed estremita'
-    const a = puntoCorrente(profilo(cr), cr, s.x, s.lato, rid), z = puntoCorrente(profilo(ct), ct, s.x, s.lato, rid), dy = Math.max(1e-9, (n - 1) * passo);
-    s.tx = (z.S[0] + x1 * (cr - ct) - a.S[0]) / dy; s.tz = (z.S[1] - a.S[1]) / dy;
-    s.du = t * Math.abs(s.tx); s.dv = t * Math.abs(s.tz);
-    s.posa = { S: [a.S[0] + (yA - e) * s.tx, a.S[1] + (yA - e) * s.tz], tau: a.tau, n: a.n, yA };
+  const yA = ysE[0] - t / 2, yB = ysE[sta.n - 1] + t / 2; // facce esterne delle centine di estremita'
+  const rotte = pi.doppia ? [[0, sta.ik], [sta.ik, sta.n - 1]] : [[0, sta.n - 1]]; // centine di chiusura dei pannelli
+  const correnti = conCorr ? posizioniCorrenti(P, longheroni, pi.cmin, profilo(pi.cmin), rid) : [];
+  correnti.forEach(s => { // un tratto rettilineo per pannello, lungo una linea a percentuale costante della corda
+    s.segmenti = rotte.map(([ja, jb], q) => {
+      const pa = puntoCorrente(profilo(pi.c(ysE[ja])), pi.c(ysE[ja]), s.x, s.lato, rid), pb = puntoCorrente(profilo(pi.c(ysE[jb])), pi.c(ysE[jb]), s.x, s.lato, rid);
+      const Xa = pi.xLE(ysE[ja]) + pa.S[0], Xb = pi.xLE(ysE[jb]) + pb.S[0], tx = (Xb - Xa) / (ysE[jb] - ysE[ja]), tz = (pb.S[1] - pa.S[1]) / (ysE[jb] - ysE[ja]);
+      return { q, ya: q === 0 ? yA : ysE[ja], yb: q === rotte.length - 1 ? yB : ysE[jb], ox: Xa - tx * ysE[ja], oz: pa.S[1] - tz * ysE[ja], tx, tz, tau: pa.tau, n: pa.n, k: Math.sqrt(1 + tx * tx + tz * tz) };
+    });
+    Object.assign(s, { tx: s.segmenti[0].tx, tz: s.segmenti[0].tz, inc: [], mN: 0, mC: 0 });
   });
 
   // --- centine
   const centine = [], parti = [];
   let nonEntra = false, spezzata = false;
-  for (let j = 0; j < n; j++) {
-    const c = cr + (ct - cr) * j / (n - 1), y = e + j * passo, xLE = x1 * (cr - c);
-    const pr = profilo(c);
-    const profC = unisci([toC(pr.pts.map(p => [p[0] * c, p[1] * c]))]);
+  piani.forEach((R, j) => {
+    const c = R.c, profC = contornoCentina(pi, profilo, R, t);
     const contorno = rid > 0 ? offset(profC, -rid, JT.jtRound) : profC;
     const limite = offset(profC, -(Math.min(P.parete, 1.2) + rid), JT.jtRound);
-    const intagli = correnti.map(s => { // intaglio: larghezza b + 2g (+ t tan), profondita' h + g
-      const q = puntoCorrente(pr, c, s.x, s.lato, rid), w = P.cB / 2 + P.gioco + s.du / 2;
-      return rettLocale(q.S, q.tau, q.n, -w, w, -(rid + 3), P.cH + P.gioco + s.dv / 2);
-    });
+    const smusso = pi.semi && pi.pannelli.some(q => Math.abs(q.xb - q.xa) > 1e-9 || Math.abs(q.cb - q.ca) > 1e-9); // ala a freccia o rastremata: bordi e sedi obliqui nello spessore
+    const facce = smusso ? facceCentina(pi, profilo, R, t).map(f => ({ Rw: f.Rw, lim: offset(f.cont, -(Math.min(P.parete, 1.2) + rid), JT.jtRound) })) : null, fori = [], tacche = [];
+    const corr = [], intagli = correnti.map(s => { // intaglio: larghezza b / cos δ + 2g + t tan δ, profondita' h + g
+      const gs = R.phi ? [s.segmenti.find(g => R.y <= g.yb + 1e-6) || s.segmenti[s.segmenti.length - 1]] : s.segmenti.filter(g => R.y >= g.ya - t && R.y <= g.yb + t);
+      const I = incrocio(gs[0], R), mm = Math.max(...gs.map(g => Math.abs(incrocio(g, R).m)));
+      if (R.tronca && (I.s < R.s0 + P.cB || I.s > R.s1 - P.cB)) return null; // il corrente passa oltre la testa della centina tronca
+      const q = puntoCorrente(R, c, limita((R.sDi(s.x) - R.sLE) / c, 0.01, 0.99), s.lato, rid), w = P.cB / 2 * Math.hypot(1, mm) + P.gioco + t * mm / 2;
+      q.S = [I.s - R.sLE, I.Z]; // l'intaglio sta dove la retta del corrente buca il piano della centina
+      s.inc[j] = I.y; if (R.phi) s.mN = Math.max(s.mN, mm); else s.mC = Math.max(s.mC, mm);
+      corr.push({ id: s.id, lato: s.lato, S: q.S, tau: q.tau, n: q.n });
+      const wn = P.cB / 2 * Math.hypot(1, mm) + P.gioco; tacche.push(Rw => { const Iw = incrocio(gs[0], Rw); return rettLocale([Iw.s - R.sLE, Iw.Z], q.tau, q.n, -wn, wn, -(rid + 3), P.cH + P.gioco); });
+      return rettLocale(q.S, q.tau, q.n, -w, w, -(rid + 3), P.cH + P.gioco + t * Math.abs(gs[0].tz) / I.den / 2);
+    }).filter(Boolean);
     const intagliU = intagli.length ? unisci(intagli) : [];
-    let sedi = [];
-    const zone = [];
+    let sediR = [];
+    const zone = [], posLon = [], zs = [];
     longheroni.forEach(l => {
-      const u = l.xi * c, v = pr.medio(l.xi) * c;
-      const h = sposta(sedeLongherone(l.sez, P.gioco, l.du, l.dv), u, v);
-      if (area(sottrai(h, limite)) > 1e-3) { nonEntra = true; l.nonEntra = true; }
-      const bb = ingombro(h);
-      zone.push({ a: bb.x0 - P.parete, b: bb.x1 + P.parete });
-      sedi = sedi.concat(h);
+      const sd = sedi[j][l.i];
+      if (!sd.dentro) { posLon.push(null); l.pos[j] = l.inc[j] = null; return; }
+      fori.push(Rw => sedeFaccia(P, l, giunti, R, Rw));
+      if (smusso ? facce.some(f => area(sottrai(sedeFaccia(P, l, giunti, R, f.Rw), f.lim)) > 1e-3) : area(sottrai(sd.h, limite)) > 1e-3) { nonEntra = true; l.nonEntra = true; (l.centineKO = l.centineKO || []).push(j + 1); }
+      const bb = ingombro(sd.h);
+      zone.push({ a: bb.x0 - P.parete, b: bb.x1 + P.parete }); zs.push({ a: bb.x0, b: bb.x1, i: l.i });
+      posLon.push({ u: sd.u, v: sd.v, giunto: !!sd.giunto });
+      l.pos[j] = { u: sd.u, v: sd.v, f: sd.f }; l.inc[j] = { y: sd.y, ht: sd.ht };
+      if (R.phi) l.mN = Math.max(l.mN, sd.m); else l.mC = Math.max(l.mC, sd.m);
+      l.dvM = Math.max(l.dvM, sd.dv);
+      sediR = sediR.concat(sd.h);
     });
-    sedi = unisci(sedi);
-    const finestre = P.alleggerimenti ? finestreAlleggerimento(P, pr, c, intagliU.length ? sottrai(contorno, intagliU) : contorno, zone, rid) : [];
-    const regione = sottrai(contorno, unisci(sedi.concat(finestre, intagliU)));
-    if (poligoniConFori(regione).length > 1) spezzata = true;
-    const bb = ingombro(regione);
-    centine.push({ j, c, y, xLE, regione, profC, contorno, intagli: intagliU, sedi, finestre, ox: bb.x0, oy: bb.y0, area: area(regione), areaProfilo: area(profC), pts: pr.pts });
-    parti.push({ id: 'C' + (j + 1), tipo: 'centina', nome: 'Centina ' + (j + 1) + (n > 1 && ct !== cr ? ' (c = ' + arr(c, 10) + ')' : ''),
-      chiave: 'cen|' + c.toFixed(3), lx: bb.x1 - bb.x0, ly: bb.y1 - bb.y0, lz: t, rif: { centina: j },
-      prisma: { regione: sposta(regione, -bb.x0, -bb.y0), h: t } });
+    sediR = unisci(sediR);
+    const finestre = P.alleggerimenti ? finestreAlleggerimento(P, R, c, intagliU.length ? sottrai(contorno, intagliU) : contorno, zone, rid) : [];
+    let regione = sottrai(contorno, unisci(sediR.concat(finestre, intagliU)));
+    const maggiore = reg => { const is = poligoniConFori(reg); if (is.length < 2) return reg; const gr = is.slice().sort((p, q) => Math.abs(CL.Clipper.Area(q.outer)) - Math.abs(CL.Clipper.Area(p.outer)))[0]; return [gr.outer].concat(gr.holes); };
+    // strato alla quota w (dal piano medio, lungo la normale): sezione dell'ala in quel piano, meno sedi e intagli
+    // dove li' passano longheroni e correnti. Bordi, sedi e intagli risultano obliqui nello spessore, a misura.
+    const strato = w => {
+      const Rw = pianoParallelo(pi, profilo, R, w); let cont = unisci([Rw.poli(R.sLE)]);
+      if (rid > 0) cont = offset(cont, -rid, JT.jtRound);
+      if (R.tronca) cont = interseca(cont, [rettangolo(R.s0 - R.sLE, -1e4, R.s1 - R.sLE, 1e4)]);
+      const via = [].concat(...fori.map(f => f(Rw)), tacche.map(f => f(Rw)), finestre), reg = via.length ? sottrai(cont, unisci(via)) : cont;
+      return R.tronca ? maggiore(reg) : reg; // scheggia staccata da un intaglio sulla testa di una centina tronca
+    };
+    let bb, forma, imp, profV = profC, contV = contorno;
+    if (smusso) {
+      const fA = strato(-t / 2), fB = strato(t / 2), bA = ingombro(fA), bB = ingombro(fB);
+      if (!R.tronca && [fA, fB].some(f => poligoniConFori(f).length > 1)) spezzata = true;
+      regione = strato(0); bb = ingombro(fA.concat(fB)); imp = [[bA.x0, bA.x1], [bB.x0, bB.x1]];
+      profV = unisci([R.poli(R.sLE)]); contV = rid > 0 ? offset(profV, -rid, JT.jtRound) : profV;
+      const x0 = bb.x0, y0 = bb.y0;
+      forma = { loft: { ya: 0, yb: t, pieno: true, dx: 0, dz: 0, ts: 0, sez: h => ({ anello: sposta(strato(h - t / 2), -x0, -y0) }) } };
+    } else {
+      const isole = poligoniConFori(regione);
+      if (isole.length > 1 && R.tronca) regione = maggiore(regione); else if (isole.length > 1) spezzata = true;
+      bb = ingombro(regione); imp = [[bb.x0, bb.x1], [bb.x0, bb.x1]];
+      forma = { prisma: { regione: sposta(regione, -bb.x0, -bb.y0), h: t } };
+    }
+    const tipoC = R.phi ? (R.tronca ? ' tronca,' : '') + ' normale al longherone' : obl && R.chiusa ? (j === ik ? ' di chiusura alla rottura' : ' di chiusura') : j === ik ? ' - rottura' : '';
+    const firma = c.toFixed(3) + '|' + R.phi.toFixed(5) + '|' + R.y.toFixed(3) + '|' + area(regione).toFixed(2) + '|' + posLon.map(q => (q ? q.u.toFixed(2) + ',' + q.v.toFixed(2) + (q.giunto ? 'g' : '') : '-')).join(';') + '|' + corr.map(q => q.S[0].toFixed(2)).join(',');
+    const parte = Object.assign({ id: 'C' + (j + 1), tipo: 'centina', nome: 'Centina ' + (j + 1) + tipoC + (ct !== cr || pi.doppia || obl ? ' (' + arr(c, 10) + ' mm)' : ''),
+      chiave: 'cen|' + firma, lx: bb.x1 - bb.x0, ly: bb.y1 - bb.y0, lz: t, rif: { centina: j }, lato }, forma);
+    centine.push({ j, c, y: R.y, xLE: R.X0 + R.sLE * R.cf, yLE: R.Y0 - R.sLE * R.sf, phi: R.phi, chiusa: R.chiusa, tronca: R.tronca, u0: R.s0 - R.sLE, u1: R.s1 - R.sLE, imp, smusso, prof: R, regione, profC: profV, contorno: contV, intagli: intagliU, sedi: sediR, finestre, posLon, corr, zs, parte,
+      ox: bb.x0, oy: bb.y0, area: area(regione), areaProfilo: area(profV), pts: R.pts, rottura: j === ik });
+    parti.push(parte);
+  });
+  // interassi: distanza fra i piani di due centine parallele; nelle campate a cuneo, distanza lungo il longherone 1
+  const passi = piani.slice(1).map((R, j) => (l1 && (piani[j].phi || R.phi) ? (l1.inc[j + 1].y - l1.inc[j].y) * Math.hypot(1, l1.seg((l1.inc[j].y + l1.inc[j + 1].y) / 2).tx) : R.y - piani[j].y)), passo = passi[0];
+  longheroni.forEach(l => { l.incV = l.inc.filter(Boolean); }); // le centine che il longherone attraversa davvero
+  const campata = (l, y) => { const V = l.incV; for (let j = 0; j + 1 < V.length; j++) if (y >= V[j].y - 1e-9 && y <= V[j + 1].y + 1e-9) return j; return 0; };
+  const luce = (l, j) => { const V = l.incV; return (V[j + 1].y - V[j].y) * l.seg((V[j].y + V[j + 1].y) / 2).k - V[j].ht - V[j + 1].ht; }; // tratto libero del longherone fra due centine
+
+  // --- tronchi dei longheroni, manicotti di giunzione e giunti angolati
+  longheroni.forEach(l => {
+    if (!l.sp.stampa) { l.L = l.segmenti.reduce((s, g) => s + (g.yb - g.ya) * g.k, 0); return; }
+    const pm = Math.max(1.6, arr(0.25 * l.sez.H, 10));
+    const foro = offset(l.sez.esterno, P.gioco, l.sez.tonda ? JT.jtRound : JT.jtMiter);
+    const fuori = l.sez.tonda ? offset(l.sez.esterno, P.gioco + pm, JT.jtRound) : offset([rettangolo(-l.sez.B / 2, -l.sez.H / 2, l.sez.B / 2, l.sez.H / 2)], P.gioco + pm, JT.jtRound);
+    const regMan = sottrai(fuori, foro), bbM = ingombro(regMan);
+    const manicotto = (g, y, Ls, nome, id) => {
+      l.giunti.push({ y, Ls, regione: regMan, ox: g.ox, oz: g.oz, tx: g.tx, tz: g.tz, k: g.k });
+      parti.push({ id, tipo: 'manicotto', nome, chiave: 'man|' + l.i + '|' + Ls, lx: bbM.x1 - bbM.x0, ly: bbM.y1 - bbM.y0, lz: Ls, rif: { longherone: l.i }, lato,
+        prisma: { regione: sposta(regMan, -bbM.x0, -bbM.y0), h: Ls } });
+    };
+    let L = 0, nm = 0, nt = 0;
+    const nomiSeg = l.segmenti.length > 1 ? [' pannello interno', ' pannello esterno'] : [''];
+    l.segmenti.forEach((g, s) => {
+      const gA = l.angolati.find(q => Math.abs(q.y - g.ya) < 1e-6 && (q.dove === 'radice' ? s === 0 : s > 0));
+      const gB = l.angolati.find(q => q.dove === 'rottura' && Math.abs(q.y - g.yb) < 1e-6 && s === 0);
+      const rientro = l.sez.B / 2 * Math.abs(g.tx) / Math.hypot(1, g.tx); // teste a squadra: gli spigoli restano dentro la pianta
+      const y0 = g.ya + (gA ? gA.d / g.k : s === 0 ? rientro : 0), y1 = g.yb - (gB ? gB.d / g.k : s === l.segmenti.length - 1 ? rientro : 0), Lseg = (y1 - y0) * g.k;
+      L += Lseg;
+      const ntS = Math.max(1, Math.ceil(Lseg / Lmax - 1e-9)), tagli = [y0];
+      for (let q = 1; q < ntS; q++) { // taglio a meta' campata, il piu' vicino alla divisione ideale
+        const ideale = y0 + q * (y1 - y0) / ntS; let best = ideale, dm = Infinity;
+        for (let j = 0; j + 1 < l.incV.length; j++) { const mm = (l.incV[j].y + l.incV[j + 1].y) / 2; if (mm > y0 + 5 && mm < y1 - 5 && Math.abs(mm - ideale) < dm) { dm = Math.abs(mm - ideale); best = mm; } }
+        tagli.push(best);
+      }
+      tagli.push(y1);
+      if (!tagli.every((v, q) => !q || ((v - tagli[q - 1]) * g.k <= Lmax + 1e-6 && v - tagli[q - 1] > 5))) for (let q = 1; q < ntS; q++) tagli[q] = y0 + q * (y1 - y0) / ntS;
+      for (let q = 0; q < ntS; q++) {
+        const len = (tagli[q + 1] - tagli[q]) * g.k;
+        l.tronchi.push({ s, y0: tagli[q], y1: tagli[q + 1], L: len, ox: g.ox, oz: g.oz, tx: g.tx, tz: g.tz, k: g.k });
+        parti.push({ id: 'L' + (l.i + 1) + (l.segmenti.length > 1 ? (s ? 'e' : 'i') : '') + (ntS > 1 ? String.fromCharCode(97 + q) : ''), tipo: 'longherone',
+          nome: 'Longherone ' + (l.i + 1) + nomiSeg[s] + (ntS > 1 ? ' - tronco ' + (q + 1) + '/' + ntS : ''),
+          chiave: 'lon|' + l.i + '|' + JSON.stringify([l.sp.forma, l.sez.B, l.sez.H, l.sp.tf, l.sp.tw, l.sp.s]) + '|' + len.toFixed(3),
+          lx: len, ly: l.stampa.ly, lz: l.stampa.lz, rif: { longherone: l.i, tronco: nt++ }, lato, barra: { regione: l.stampa.regione, L: len } });
+      }
+      for (let q = 1; q < ntS; q++) {
+        const lib = luce(l, campata(l, tagli[q])), Ls = arr(limita(3 * l.sez.H, 10, Math.max(10, lib - 2)), 2);
+        manicotto(g, tagli[q], Ls, 'Manicotto longherone ' + (l.i + 1), 'M' + (l.i + 1) + (++nm));
+        if (lib - 2 < 10) avv('attenzione', 'Longherone ' + (l.i + 1) + ': la luce fra le centine (' + arr(lib, 10) + ' mm) lascia poco spazio al manicotto.');
+      }
+      if (ntS > 1) avv('info', 'Longherone ' + (l.i + 1) + nomiSeg[s] + ': lungo ' + arr(Lseg, 10) + ' mm, supera i ' + arr(Lmax, 1) + ' mm utili del piano. Diviso in ' + ntS +
+        ' tronchi uniti da manicotti posti a metà campata.');
+    });
+    l.L = L;
+    l.angolati.forEach(q => { // giunti alla radice (ala intera) e alla rottura (asse spezzato)
+      const nomeG = 'Giunto ' + (q.dove === 'radice' ? 'di radice' : 'alla rottura') + ' longherone ' + (l.i + 1);
+      const sg = q.dove === 'radice' ? l.segmenti[0] : l.segmenti[1], ltG = q.dove === 'radice' ? null : lato;
+      if (q.dritto) { manicotto(sg, q.y, q.Ls, nomeG + ' (manicotto)', 'M' + (l.i + 1) + (q.dove === 'radice' ? 'R' : 'K')); if (q.dove === 'radice') parti[parti.length - 1].lato = null; return; }
+      const bb = ingombro(q.est), gr = [{ z0: 0, z1: q.sj, regione: sposta(q.est, -bb.x0, -bb.y0) }, { z0: q.sj, z1: q.sj + q.hw, regione: sposta(q.pareti, -bb.x0, -bb.y0) }];
+      q.bb = bb;
+      for (let h = 1; h <= 2; h++) parti.push({ id: 'J' + (l.i + 1) + (q.dove === 'radice' ? 'R' : 'K') + h, tipo: 'giunto', nome: nomeG + ' - metà ' + h + '/2',
+        chiave: 'giu|' + l.i + '|' + q.dove + '|' + q.Lg + '|' + arr(q.ap, 1e4), lx: bb.x1 - bb.x0, ly: bb.y1 - bb.y0, lz: q.sj + q.hw, rif: { longherone: l.i, giunto: q.dove }, lato: ltG, gradini: gr });
+      const gd = x => arr(x * 180 / Math.PI, 10);
+      avv('info', nomeG + ': deviazione di ' + gd(q.ap) + '° in pianta' + (q.av > 1e-4 ? ' e ' + gd(q.av) + '° in elevazione' : '') + '. Due metà a U lunghe ' + q.Lg +
+        ' mm per braccio; le teste dei tronchi sono accorciate di ' + arr(q.d, 100) + ' mm.');
+    });
+  });
+  // --- dime: fra due centine parallele una barretta lunga quanto la luce; nelle campate a cuneo una
+  // dima a trapezio, appoggiata al fianco del longherone 1, che fissa insieme distanza e angolo di freccia
+  const dime = [];
+  if (P.dima) {
+    const viste = new Set();
+    for (let j = 0; j + 1 < n; j++) {
+      const A0 = piani[j], B0 = piani[j + 1], W = 10;
+      let pts, nome, tipoD = 'luce';
+      if (!!A0.phi === !!B0.phi) { const v = arr(passi[j] - t, 100); if (v <= 4) continue; pts = [[0, 0], [v, 0], [v, W], [0, W]]; nome = 'Dima distanziale ' + v + ' mm'; }
+      else {
+        if (!l1) continue;
+        const Ro = A0.phi ? A0 : B0, Rc = A0.phi ? B0 : A0, sg = A0.phi ? 1 : -1; // sg: verso della chiusura lungo il longherone
+        const fl = sg * Math.sign(Ro.sf), a = fl * (l1.sez.B / 2 + P.gioco + 0.5), a2 = a + fl * W; // sul fianco in cui la campata si allarga: li' la centina normale non e' tronca
+        const wc = s => (Rc.y - sg * t / 2 - Ro.Y0 + s * Ro.sf) / Ro.cf, wo = sg * t / 2, La = Math.abs(wc(a) - wo), Lb = Math.abs(wc(a2) - wo);
+        if (Math.min(La, Lb) <= 4 || (wc(a) - wo) * sg <= 0 || (wc(a2) - wo) * sg <= 0) continue;
+        pts = [[wo, 0], [wc(a), 0], [wc(a2), W], [wo, W]]; tipoD = 'cuneo';
+        nome = 'Dima di freccia ' + arr(La, 10) + ' / ' + arr(Lb, 10) + ' mm (campata ' + (j + 1) + ')';
+      }
+      const reg = unisci([toC(pts)]), bb = ingombro(reg), chiave = 'dima|' + pts.map(p => p[0].toFixed(2)).join('|');
+      if (viste.has(chiave)) continue; viste.add(chiave);
+      dime.push({ j, tipo: tipoD, pts });
+      parti.push({ id: 'D' + (dime.length > 1 ? dime.length : ''), tipo: 'dima', nome, chiave, lx: bb.x1 - bb.x0, ly: bb.y1 - bb.y0, lz: 3, rif: { campata: j }, prisma: { regione: sposta(reg, -bb.x0, -bb.y0), h: 3 } });
+    }
   }
 
-  // --- tronchi dei longheroni e manicotti di giunzione
-  longheroni.forEach(l => {
-    if (!l.sp.stampa) return;
-    const nt = Math.max(1, Math.ceil(l.L / Lmax - 1e-9));
-    const tagli = [0];
-    for (let q = 1; q < nt; q++) {
-      const ideale = q * b / nt;
-      let best = ideale, dm = Infinity;
-      for (let j = 0; j < n - 1; j++) { const m = e + (j + 0.5) * passo; if (Math.abs(m - ideale) < dm) { dm = Math.abs(m - ideale); best = m; } }
-      tagli.push(best);
-    }
-    tagli.push(b);
-    let ok = true;
-    for (let q = 0; q < nt; q++) if ((tagli[q + 1] - tagli[q]) * l.L / b > Lmax + 1e-6 || tagli[q + 1] - tagli[q] < 5) ok = false;
-    if (!ok) for (let q = 1; q < nt; q++) tagli[q] = q * b / nt;
-    for (let q = 0; q < nt; q++) {
-      const len = (tagli[q + 1] - tagli[q]) * l.L / b;
-      l.tronchi.push({ y0: tagli[q], y1: tagli[q + 1], L: len });
-      parti.push({ id: 'L' + (l.i + 1) + (nt > 1 ? String.fromCharCode(97 + q) : ''), tipo: 'longherone',
-        nome: 'Longherone ' + (l.i + 1) + (nt > 1 ? ' - tronco ' + (q + 1) + '/' + nt : ''),
-        chiave: 'lon|' + l.i + '|' + JSON.stringify([l.sp.forma, l.sez.B, l.sez.H, l.sp.tf, l.sp.tw, l.sp.s]) + '|' + len.toFixed(3),
-        lx: len, ly: l.stampa.ly, lz: l.stampa.lz, rif: { longherone: l.i, tronco: q }, barra: { regione: l.stampa.regione, L: len } });
-    }
-    if (nt > 1) {
-      const luce = passo - t, Ls = arr(limita(3 * l.sez.H, 10, Math.max(10, luce - 2)), 2);
-      const parete = Math.max(1.6, arr(0.25 * l.sez.H, 10));
-      const foro = offset(l.sez.esterno, P.gioco, l.sez.tonda ? JT.jtRound : JT.jtMiter);
-      const fuori = l.sez.tonda ? offset(l.sez.esterno, P.gioco + parete, JT.jtRound)
-        : offset([rettangolo(-l.sez.B / 2, -l.sez.H / 2, l.sez.B / 2, l.sez.H / 2)], P.gioco + parete, JT.jtRound);
-      const reg = sottrai(fuori, foro), bb = ingombro(reg);
-      for (let q = 1; q < nt; q++) {
-        l.giunti.push({ y: tagli[q], Ls, regione: reg });
-        parti.push({ id: 'M' + (l.i + 1) + q, tipo: 'manicotto', nome: 'Manicotto longherone ' + (l.i + 1), chiave: 'man|' + l.i + '|' + Ls,
-          lx: bb.x1 - bb.x0, ly: bb.y1 - bb.y0, lz: Ls, rif: { longherone: l.i, giunto: q - 1 }, prisma: { regione: sposta(reg, -bb.x0, -bb.y0), h: Ls } });
-      }
-      avv('info', 'Longherone ' + (l.i + 1) + ': lungo ' + arr(l.L, 10) + ' mm, supera i ' + arr(Lmax, 1) + ' mm utili del piano. Viene diviso in ' + nt +
-        ' tronchi uniti da manicotti lunghi ' + Ls + ' mm, posti a meta\' campata.');
-      if (luce - 2 < 10) avv('attenzione', 'La luce tra le centine (' + arr(luce, 10) + ' mm) lascia poco spazio ai manicotti: ridurre il numero di centine o lo spessore.');
-    }
-  });
-  if (P.dima && passo - t > 4) {
-    parti.push({ id: 'D', tipo: 'dima', nome: 'Dima distanziale ' + arr(passo - t, 100) + ' mm', chiave: 'dima|' + (passo - t).toFixed(3),
-      lx: passo - t, ly: 10, lz: 3, rif: {}, prisma: { regione: [rettangolo(0, 0, passo - t, 10)], h: 3 } });
-  }
-  // --- correnti: barre b x h stampate coricate, divise al centro di una centina se piu' lunghe del piano
-  const Ly = yB - yA;
+  // --- correnti: barre b x h stampate coricate, divise al centro di una centina (anche alla rottura)
   correnti.forEach(s => {
-    const k3 = Math.sqrt(1 + s.tx * s.tx + s.tz * s.tz), nt = Math.max(1, Math.ceil(Ly * k3 / Lmax - 1e-9)), tagli = [yA];
-    for (let q = 1; q < nt; q++) {
-      const ideale = yA + q * Ly / nt; let best = ideale, dm = Infinity;
-      for (let j = 1; j < n - 1; j++) { const yj = e + j * passo; if (Math.abs(yj - ideale) < dm) { dm = Math.abs(yj - ideale); best = yj; } }
-      tagli.push(best);
-    }
-    tagli.push(yB);
-    if (!tagli.every((v, q) => !q || ((v - tagli[q - 1]) * k3 <= Lmax + 1e-6 && v - tagli[q - 1] > 5))) for (let q = 1; q < nt; q++) tagli[q] = yA + q * Ly / nt;
-    s.L = Ly * k3; s.tronchi = [];
-    for (let q = 0; q < nt; q++) {
-      const len = (tagli[q + 1] - tagli[q]) * k3;
-      s.tronchi.push({ y0: tagli[q], y1: tagli[q + 1], L: len });
-      parti.push({ id: s.id + (nt > 1 ? String.fromCharCode(97 + q) : ''), tipo: 'corrente', nome: 'Corrente ' + (s.lato === 'd' ? 'dorsale ' : 'ventrale ') + s.id.slice(2) + (nt > 1 ? ' - tronco ' + (q + 1) + '/' + nt : ''),
-        chiave: 'cor|' + P.cB + '|' + P.cH + '|' + len.toFixed(3), lx: len, ly: P.cB, lz: P.cH, rif: { corrente: s.id, tronco: q }, brim: true,
-        barra: { regione: [rettangolo(0, 0, P.cB, P.cH)], L: len } });
-    }
+    s.L = 0; s.tronchi = [];
+    let nt = 0;
+    s.segmenti.forEach((g, q0) => {
+      const Ly = g.yb - g.ya, ntS = Math.max(1, Math.ceil(Ly * g.k / Lmax - 1e-9)), tagli = [g.ya];
+      for (let q = 1; q < ntS; q++) {
+        const ideale = g.ya + q * Ly / ntS; let best = ideale, dm = Infinity;
+        for (let j = 1; j < n - 1; j++) { const yj = s.inc[j]; if (yj > g.ya + 5 && yj < g.yb - 5 && Math.abs(yj - ideale) < dm) { dm = Math.abs(yj - ideale); best = yj; } }
+        tagli.push(best);
+      }
+      tagli.push(g.yb);
+      if (!tagli.every((v, q) => !q || ((v - tagli[q - 1]) * g.k <= Lmax + 1e-6 && v - tagli[q - 1] > 5))) for (let q = 1; q < ntS; q++) tagli[q] = g.ya + q * Ly / ntS;
+      s.L += Ly * g.k;
+      for (let q = 0; q < ntS; q++) s.tronchi.push({ s: q0, y0: tagli[q], y1: tagli[q + 1], L: (tagli[q + 1] - tagli[q]) * g.k });
+    });
+    const tot = s.tronchi.length;
+    s.tronchi.forEach((tr, q) => parti.push({ id: s.id + (tot > 1 ? String.fromCharCode(97 + q) : ''), tipo: 'corrente', nome: 'Corrente ' + (s.lato === 'd' ? 'dorsale ' : 'ventrale ') + s.id.slice(2) + (tot > 1 ? ' - tronco ' + (q + 1) + '/' + tot : ''),
+      chiave: 'cor|' + P.cB + '|' + P.cH + '|' + tr.L.toFixed(3), lx: tr.L, ly: P.cB, lz: P.cH, rif: { corrente: s.id, tronco: nt++ }, brim: true, lato,
+      barra: { regione: [rettangolo(0, 0, P.cB, P.cH)], L: tr.L } }));
   });
-  if (correnti.some(s => s.tronchi.length > 1)) avv('info', 'I correnti sono più lunghi dei ' + arr(Lmax, 1) + ' mm utili del piano: sono divisi in tronchi che si uniscono al centro di una centina, dentro l’intaglio.');
+  if (correnti.some(s => s.tronchi.length > 1)) avv('info', 'I correnti sono divisi in tronchi (per la lunghezza del piano' + (pi.doppia ? ' e alla rottura' : '') + ') che si uniscono al centro di una centina, dentro l’intaglio.');
   correnti.filter(s => s.spostato).forEach(s => avv('info', 'Corrente ' + s.id + ': spostato da ' + arr(100 * s.x0, 10) + ' a ' + arr(100 * s.x, 10) + ' % della corda ' + s.motivo + '.'));
   if (spezzata) avv('errore', 'Gli intagli dei correnti tagliano in due almeno una centina: ridurre l’altezza dei correnti, spostarli o aumentare la corda.');
 
-  // --- rivestimento: un guscio per campata, stampato in piedi (asse dell'apertura verticale)
+  // --- rivestimento: un guscio per campata, stampato in piedi con l'asse normale al piano di base.
+  // Fra due centine normali al longherone l'asse di stampa e' il longherone: ogni strato e' una sezione
+  // dell'ala normale al longherone e lo sbalzo si riduce alla differenza fra la freccia dei bordi e quella
+  // del longherone. Accanto a una chiusura il guscio e' un cuneo: poggia sul piano della centina normale
+  // e termina in alto con il taglio «secondo il vento». Un guscio rastremato o a freccia non ha piani di
+  // simmetria: il destro e il sinistro sono speculari e si ottengono ribaltando la sezione (sg = ±1).
   const gusci = [];
   if (conRiv) {
-    const sez = y => { const c = cAt(y), pr = nacaProfilo(def, P.te / c), xl = xLEAt(y), est = unisci([toC(pr.pts.map(p => [xl + p[0] * c, p[1] * c]))]); return { est, anello: sottrai(est, offset(est, -P.ts, JT.jtRound)) }; };
-    const Hmax = st.lz - 1;
-    for (let kk = 0; kk < n - 1; kk++) {
-      const y0 = kk === 0 ? yA : e + kk * passo, y1 = kk === n - 2 ? yB : e + (kk + 1) * passo, m = Math.max(1, Math.ceil((y1 - y0) / Hmax - 1e-9)), pezzi = [];
-      for (let q = 0; q < m; q++) {
-        const ya = y0 + (y1 - y0) * q / m, yb = y0 + (y1 - y0) * (q + 1) / m, sa = sez(ya), sb = sez(yb), bb = ingombro(sa.est.concat(sb.est)), L = yb - ya;
-        const id = 'G' + (kk + 1) + (m > 1 ? String.fromCharCode(97 + q) : '');
-        const p = { id, tipo: 'guscio', nome: 'Guscio campata ' + (kk + 1) + (m > 1 ? ' - parte ' + (q + 1) + '/' + m : ''), lx: bb.x1 - bb.x0, ly: bb.y1 - bb.y0, lz: L,
-          rif: { campata: kk, pezzo: q }, posa: { x0: bb.x0, z0: bb.y0, ya } };
-        if (ct === cr) Object.assign(p, { chiave: 'gus|' + L.toFixed(3) + '|' + P.ts, prisma: { regione: sposta(sa.anello, -bb.x0, -bb.y0), h: L } });
-        else Object.assign(p, { chiave: 'gus|' + ya.toFixed(3) + '|' + yb.toFixed(3) + '|' + P.ts, loft: { ya, yb, sez, dx: -bb.x0, dz: -bb.y0, ts: P.ts } });
-        parti.push(p); pezzi.push(id);
-      }
-      gusci.push({ k: kk, y0, y1, L: y1 - y0, pezzi });
+    const Hmax = st.lz - 1, lati = intera ? ['D', 'S'] : [null], piatto = y => ({ X0: 0, Y0: y, phi: 0, cf: 1, sf: 0 });
+    const mapC = (paths, f) => paths.map(p => p.map(q => { const r = f(q.X / SC, q.Y / SC); return { X: Math.round(r[0] * SC), Y: Math.round(r[1] * SC) }; }));
+    const pieni = piani.filter(R => !R.tronca), nP = pieni.length; // i gusci vanno da una centina intera all'altra: le tronche li sostengono dall'interno
+    for (let kk = 0; kk < nP - 1; kk++) {
+      const A0 = kk === 0 ? piatto(intera ? 0 : yA) : pieni[kk], B0 = kk === nP - 2 ? piatto(yB) : pieni[kk + 1], pezzi = [];
+      const q = A0.phi ? A0.q : B0.phi ? B0.q : pi.pann((A0.Y0 + B0.Y0) / 2);
+      const dritto = !A0.phi && !B0.phi && Math.abs(pi.c(A0.Y0) - pi.c(B0.Y0)) < 1e-6 && Math.abs(pi.xLE(A0.Y0) - pi.xLE(B0.Y0)) < 1e-6;
+      const base = A0.phi || !B0.phi ? A0 : B0, cima = base === A0 ? B0 : A0, sw = base === A0 ? 1 : -1, cuneo = !!base.phi && !cima.phi, cf = base.cf, sf = base.sf;
+      const taglio = (h, sg, dx, dz) => unisci([toC(tagliaAla(profiloQ, q, base.X0 + sw * h * sf, base.Y0 + sw * h * cf, base.phi).punti().map(p => [sg * p[0] + dx, p[1] + dz]))]);
+      const anello = est => sottrai(est, offset(est, -P.ts, JT.jtRound));
+      let Lg = 0;
+      lati.forEach(lt => {
+        const sg = dritto ? 1 : (lt === 'S' ? sw : -sw), nomeL = lt === 'D' ? ' (destra)' : lt === 'S' ? ' (sinistra)' : '';
+        const nuovo = (suff, nomeP, lz, bb, posa, forma, chiave) => {
+          const id = 'G' + (kk + 1) + suff + (lt || '');
+          parti.push(Object.assign({ id, tipo: 'guscio', nome: 'Guscio campata ' + (kk + 1) + (cuneo ? ' a cuneo' : '') + nomeP + nomeL, chiave, lx: bb.x1 - bb.x0, ly: bb.y1 - bb.y0, lz, rif: { campata: kk }, latoG: lt, posa }, forma));
+          pezzi.push(id);
+        };
+        if (cuneo) { // cima = piano «secondo il vento» y = Yt, che nelle coordinate di stampa e' il piano inclinato z = zTop(x)
+          const Yt = cima.Y0, estT = unisci([toC(tagliaAla(profiloQ, q, 0, Yt, 0).punti())]), intT = offset(estT, -P.ts, JT.jtRound), e0 = taglio(0, sg, 0, 0);
+          const sDi = X => (X - base.X0 - (Yt - base.Y0) * sf / cf) * cf, bb = ingombro(e0.concat(mapC(estT, (X, z) => [sg * sDi(X), z]))), dx = -bb.x0, dz = -bb.y0;
+          const zTop = x => sw * (Yt - base.Y0 + sg * (x - dx) * sf) / cf, pend = sw * sg * sf / cf, inStampa = (X, z) => [sg * sDi(X) + dx, z + dz];
+          const top = { est: mapC(estT, inStampa), int: mapC(intT, inStampa) }, H = Math.max(...top.est[0].map(p => zTop(p.X / SC)));
+          const sez = h => { const est = taglio(h, sg, dx, dz), xs = dx + sg * (sw * h * cf - (Yt - base.Y0)) / sf; return { est, anello: interseca(anello(est), [pend > 0 ? rettangolo(xs, -1e4, 1e5, 1e4) : rettangolo(-1e5, -1e4, xs, 1e4)]) }; };
+          if (H > Hmax) avv('errore', 'Guscio a cuneo della campata ' + (kk + 1) + ': alto ' + arr(H, 1) + ' mm, più dell’altezza utile della stampante (' + st.lz + ' mm). Ridurre la freccia o la corda.');
+          nuovo('', '', H, { x0: 0, y0: 0, x1: bb.x1 - bb.x0, y1: bb.y1 - bb.y0 }, { X0: base.X0, Y0: base.Y0, phi: base.phi, sg, sw, dx, dz },
+            { loft: { ya: 0, yb: H, sez, dx: 0, dz: 0, ts: P.ts, cima: top, zTop } }, 'gus|' + kk + '|c|' + sg + '|' + H.toFixed(3) + '|' + P.ts);
+          Lg = H; return;
+        }
+        const Htot = sw * ((cima.Y0 - base.Y0) * cf + (cima.X0 - base.X0) * sf), m = dritto ? Math.max(1, Math.ceil(Htot / Hmax - 1e-9)) : Math.max(1, Math.ceil(Htot / Hmax - 1e-9));
+        Lg = Htot;
+        for (let qq = 0; qq < m; qq++) {
+          const h0 = Htot * qq / m, h1 = Htot * (qq + 1) / m, lz = h1 - h0, e0 = taglio(h0, sg, 0, 0), bb = ingombro(e0.concat(taglio(h1, sg, 0, 0))), dx = -bb.x0, dz = -bb.y0;
+          const posa = { X0: base.X0 + sw * h0 * sf, Y0: base.Y0 + sw * h0 * cf, phi: base.phi, sg, sw, dx, dz }, suff = m > 1 ? String.fromCharCode(97 + qq) : '', nomeP = m > 1 ? ' - parte ' + (qq + 1) + '/' + m : '';
+          if (dritto) nuovo(suff, nomeP, lz, bb, posa, { prisma: { regione: sposta(anello(e0), dx, dz), h: lz } }, 'gus|' + lz.toFixed(3) + '|' + P.ts + '|' + pi.c(base.Y0).toFixed(3));
+          else nuovo(suff, nomeP, lz, bb, posa, { loft: { ya: 0, yb: lz, sez: h => { const est = taglio(h0 + h, sg, dx, dz); return { est, anello: anello(est) }; }, dx: 0, dz: 0, ts: P.ts } },
+            'gus|' + kk + '|' + qq + '|' + sg + '|' + lz.toFixed(3) + '|' + P.ts);
+        }
+      });
+      gusci.push({ k: kk, L: Lg, pezzi, dritto, cuneo, phi: base.phi, da: pieni[kk].j, a: pieni[kk + 1].j });
     }
     if (P.ts < 2 * S.w - 0.01) avv('attenzione', 'Rivestimento spesso ' + P.ts + ' mm: meno di due cordoni (' + arr(2 * S.w, 100) + ' mm). Il guscio stampato risulterebbe poroso o incompleto.');
-    if (gusci.some(g => g.pezzi.length > 1)) avv('info', 'Le campate sono più lunghe dell’altezza utile della stampante (' + st.lz + ' mm): i gusci sono divisi in più parti da incollare di testa.');
+    if (gusci.some(g => g.pezzi.length > (intera ? 2 : 1))) avv('info', 'Le campate sono più lunghe dell’altezza utile della stampante (' + st.lz + ' mm): i gusci sono divisi in più parti da incollare di testa.');
+    if (gusci.some(g => g.phi)) avv('info', 'Gusci delle campate fra centine normali al longherone: si stampano in piedi con il longherone verticale, così ogni strato è una sezione normale al longherone. Accanto alle centine di chiusura i gusci sono a cuneo: poggiano sul lato della centina normale e finiscono in alto con il taglio parallelo al piano di simmetria.');
+    if (gusci.some(g => !g.dritto)) avv('info', 'Gusci rastremati o a freccia: ' + (intera ? 'i destri e i sinistri sono pezzi speculari, stampati entrambi in piedi.' : 'sono quelli della semiala destra; per la sinistra servono i gusci speculari (scegliere «Ala intera»).'));
+  }
+
+  // --- ala intera: la semiala sinistra replica i pezzi destri (centine, longheroni, correnti sono uguali)
+  if (intera) {
+    const dx = parti.filter(p => p.lato === 'D');
+    dx.forEach(p => { p.id += 'D'; p.nome += ' (destra)'; });
+    dx.forEach(p => parti.push(Object.assign({}, p, { id: p.id.slice(0, -1) + 'S', nome: p.nome.replace(' (destra)', ' (sinistra)'), lato: 'S' })));
   }
 
   // --- pezzi liberi: schizzi 2D estrusi
@@ -1355,29 +1718,42 @@ function costruisci(P) {
     if (sott) avv('attenzione', nome + ': alcune lettere hanno tratti piu\' sottili del cordone (' + S.w + ' mm). Aumentare l\'altezza delle lettere, l\'ingrossamento o scegliere un carattere piu\' pieno.');
   });
 
+
   // --- avvisi
-  const cordaMax = Math.max(cr, ct);
+  const cordaMax = Math.max(cr, ct, pi.ck || 0);
   if (cordaMax > Lmax) avv('errore', 'La corda di ' + arr(cordaMax, 10) + ' mm non entra nel piano di stampa: il massimo e\' ' + arr(Lmax, 1) + ' mm con i margini attuali.');
   if (nonEntra) longheroni.filter(l => l.nonEntra).forEach(l => avv('errore', 'Longherone ' + (l.i + 1) + ': la sede esce dal profilo o lascia una parete inferiore a ' +
-    Math.min(P.parete, 1.2) + ' mm. Ridurre la sezione, spostare il longherone o attivare l\'adattamento automatico.'));
-  const zs = longheroni.map(l => ({ a: l.xi * ct - l.sez.B / 2 - P.gioco, b: l.xi * ct + l.sez.B / 2 + P.gioco, i: l.i })).sort((p, q) => p.a - q.a);
-  for (let i = 1; i < zs.length; i++) if (zs[i].a - zs[i - 1].b < P.parete) avv('errore', 'I longheroni ' + (zs[i - 1].i + 1) + ' e ' + (zs[i].i + 1) + ' sono troppo vicini sulla centina d\'estremita\'.');
-  if (passo < 1.5 * t) avv('attenzione', 'Il passo delle centine (' + arr(passo, 10) + ' mm) e\' inferiore a una volta e mezza il loro spessore.');
+    Math.min(P.parete, 1.2) + ' mm sulla centina ' + l.centineKO.slice(0, 4).join(', ') + (l.centineKO.length > 4 ? '…' : '') + '. Ridurre la sezione, spostare il longherone o attivare l\'adattamento automatico.'));
+  const coppie = {};
+  centine.forEach(cn => { const zs = cn.zs.slice().sort((p, q) => p.a - q.a); for (let i = 1; i < zs.length; i++) if (zs[i].a - zs[i - 1].b < P.parete) { const c = (zs[i - 1].i + 1) + ' e ' + (zs[i].i + 1); (coppie[c] = coppie[c] || []).push(cn.j + 1); } });
+  Object.keys(coppie).forEach(c => avv('errore', 'I longheroni ' + c + ' sono troppo vicini sulla centina ' + coppie[c].join(', ') + '.'));
+  const pMin = Math.min(...passi);
+  if (pMin < 1.5 * t) avv('attenzione', 'L’interasse minimo delle centine (' + arr(pMin, 10) + ' mm) e\' inferiore a una volta e mezza il loro spessore.');
+  if (pi.semi && pi.pannelli.some(q => Math.abs(q.frLE) > 0.05)) {
+    const gr = x => arr(x, 10).toLocaleString('it-IT');
+    avv('info', 'Freccia del bordo d’attacco: ' + pi.pannelli.map(q => gr(q.frLE) + '°').join(' e poi ') + '; al 25 % della corda: ' + pi.pannelli.map(q => gr(q.frC4) + '°').join(' e poi ') + '. ' +
+      (centine.some(c => c.smusso) ? 'Le centine si stampano piane con gli strati sfalsati: bordi, sedi e intagli seguono nello spessore la superficie alare, i longheroni e i correnti. ' : '') + (obl ? 'Centine di chiusura (' + centine.filter(c => c.chiusa).map(c => c.j + 1).join(', ') + ') parallele al piano di simmetria; centine intermedie (' + centine.filter(c => c.phi).map(c => c.j + 1).join(', ') + ') normali al longherone 1, a passo uniforme lungo il suo asse, ruotate di ' +
+        [...new Set(centine.filter(c => c.phi).map(c => gr(c.phi * 180 / Math.PI) + '°'))].join(' e ') + '.' + (centine.some(c => c.tronca) ? ' Nelle zone triangolari le centine ' + centine.filter(c => c.tronca).map(c => c.j + 1).join(', ') + ' sono tronche: terminano di testa contro la centina di chiusura, a cui vanno incollate.' : '') : 'Tutte le centine sono parallele al piano di simmetria (secondo il vento), la prima a filo della radice e l’ultima a filo dell’estremità.'));
+  }
   longheroni.forEach(l => {
     const sp = l.sp, sott = [];
     if (['I', 'C', 'T'].includes(sp.forma)) { if (sp.tf < 2 * S.w - 0.01) sott.push('solette'); if (sp.tw < 2 * S.w - 0.01) sott.push('anima'); }
     if (['scat', 'tubo'].includes(sp.forma) && sp.s < 2 * S.w - 0.01) sott.push('parete');
     if (sott.length && sp.stampa) avv('attenzione', 'Longherone ' + (l.i + 1) + ': ' + sott.join(' e ') + ' sotto i ' + arr(2 * S.w, 100) + ' mm (due cordoni affiancati). La stampa puo\' risultare fragile.');
-    if (l.inclinazione > 0.05) avv('info', 'Longherone ' + (l.i + 1) + ': asse inclinato di ' + arr(l.inclinazione, 100) + ' gradi rispetto alla normale alle centine. Le sedi sono allungate di ' +
-      arr(Math.max(l.du, l.dv), 100) + ' mm per consentire il passaggio.');
+    const largh = m => arr(l.sez.B * Math.hypot(1, m) + 2 * P.gioco, 100);
+    if (obl) avv('info', 'Longherone ' + (l.i + 1) + ': ' + (l.mN < 2e-3 ? 'attraversa le centine normali ad angolo retto, in sedi a misura (' + largh(0) + ' mm) che lo tengono in squadra' : 'attraversa le centine normali con uno scarto di ' + gradi(l.mN) + '° (sede larga ' + largh(l.mN) + ' mm)') +
+      '; nelle centine di chiusura passa obliquo di ' + gradi(l.mC) + '°: sede larga B / cos δ + 2g = ' + largh(l.mC) + ' mm, obliqua nello spessore.');
+    else if (l.mC > 2e-3 || l.dvM > 0.01) avv('info', 'Longherone ' + (l.i + 1) + ': attraversa le centine con uno scarto di ' + gradi(l.mC) + '° dalla normale; la sede è larga B / cos δ + 2g = ' + largh(l.mC) + ' mm e attraversa lo spessore obliqua, a misura: il longherone tiene la centina in posizione e in angolo.');
+    if (Math.max(l.mN, l.mC) > 1) avv('attenzione', 'Longherone ' + (l.i + 1) + ': attraversa le centine con più di 45° di scarto: la sede obliqua non si stampa più senza supporti. Scegliere le centine normali al longherone o una freccia minore.');
     if (l.sez.tonda && sp.stampa) avv('info', 'Longherone ' + (l.i + 1) + ': sezione tonda stampata coricata con una spianatura di appoggio larga ' + arr(0.4 * l.sez.H, 10) + ' mm.');
-    if (!sp.stampa) avv('info', 'Longherone ' + (l.i + 1) + ': non stampato. Procurarsi un elemento commerciale ' + FORME[sp.forma].desc + ' lungo ' + arr(l.L, 1) + ' mm.');
+    if (!sp.stampa) avv('info', 'Longherone ' + (l.i + 1) + ': non stampato. Procurarsi ' + (intera ? 'due elementi' : 'un elemento') + ' commerciali ' + FORME[sp.forma].desc + ' lunghi ' + arr(l.L, 1) + ' mm' +
+      (l.segmenti.length > 1 || intera ? ', piegati o giuntati come indicato in pianta' : '') + '.');
   });
   if (!P.longheroni.length) avv('attenzione', 'Nessun longherone: le centine non hanno sedi di collegamento.');
 
   return {
-    def, n, t, b, e, passo, cr, ct, cm, S: b * cm, AR: k * b / cm, k, Lmax, margine,
-    cma: (2 / 3) * cr * (1 + (ct / cr) + (ct / cr) * (ct / cr)) / (1 + ct / cr),
+    def, n, t, b, e, passo, passi, cr, ct, ck: pi.ck, cm, S: pi.S, Sh: pi.Sh, AR: pi.AR, k, bh, Lmax, margine, pianta: pi, stazioni: sta,
+    cma: pi.mac, yMac: pi.yMac, xMac: pi.xMac, xCa: pi.xCa, intera, doppia: pi.doppia, ik, giunti, obl, dime, luci: l1 ? passi.map((v, j) => luce(l1, j)) : passi.map(v => v - t),
     yA, yB, rid, livello: P.livello, correnti, gusci,
     centine, longheroni, schizzi, parti, avvisi, errori: avvisi.filter(a => a.liv === 'errore').length
   };
@@ -1444,9 +1820,9 @@ function loftGuscio(parte) {
     const sp = q => [q[0] + Lf.dx, q[1] + Lf.dz];
     return { o: anelloRicampionato(est, MO).map(sp), i: int ? anelloRicampionato(int, MO).map(sp) : null };
   };
-  const A0 = anelli(Lf.ya), A1 = anelli(Lf.yb), cavo = !!(A0.i && A1.i), v = [], t = [];
+  const A0 = anelli(Lf.ya), A1 = Lf.cima ? { o: anelloRicampionato(maggiore(Lf.cima.est), MO), i: Lf.cima.int.length ? anelloRicampionato(maggiore(Lf.cima.int), MO) : null } : anelli(Lf.yb), cavo = !!(A0.i && A1.i), v = [], t = [];
   const giro = [A0.o, cavo ? A0.i : null, A1.o, cavo ? A1.i : null], base = [];
-  giro.forEach((r, k) => { base.push(v.length / 3); if (r) r.forEach(q => v.push(q[0], q[1], k < 2 ? 0 : H)); });
+  giro.forEach((r, k) => { base.push(v.length / 3); if (r) r.forEach(q => v.push(q[0], q[1], k < 2 ? 0 : (Lf.zTop ? Lf.zTop(q[0]) : H))); }); // cima obliqua nei gusci a cuneo
   const o0 = base[0], i0 = base[1], o1 = base[2], i1 = base[3];
   for (let j = 0; j < MO; j++) {
     const a = j, b = (j + 1) % MO;
@@ -1464,6 +1840,27 @@ function loftGuscio(parte) {
     t.push(id(x, true), id(y, true), id(z, true), id(z, false), id(y, false), id(x, false));
   }
   return { v: new Float32Array(v), t: new Uint32Array(t) };
+}
+/* Pezzo pieno con gli strati sfalsati (centina a bordi e sedi obliqui): pila di prismi alti circa 1 mm. */
+function meshStrati(parte) {
+  const Lf = parte.loft, K = limita(Math.round(parte.lz), 3, 10), dz = parte.lz / K, vs = [], ts = []; let nv = 0;
+  for (let k = 0; k < K; k++) {
+    const reg = CL.Clipper.CleanPolygons(Lf.sez((k + 0.5) * dz).anello, 0.02 * SC).filter(q => q.length > 2); if (!reg.length) continue;
+    const m = estrudi(reg, dz);
+    for (let i = 0; i < m.v.length; i += 3) vs.push(m.v[i], m.v[i + 1], m.v[i + 2] + k * dz);
+    for (let i = 0; i < m.t.length; i++) ts.push(m.t[i] + nv);
+    nv += m.v.length / 3;
+  }
+  return { v: new Float32Array(vs), t: new Uint32Array(ts) };
+}
+/* Guscio dalla posizione di stampa a quella di montaggio: x di stampa = sg·s + dx (s lungo la traccia
+   della centina di base), y = z + dz, quota = sw·w (w lungo la normale al piano di base). */
+function guscioInOpera(p) {
+  const m = meshParte(p), q = p.posa, cf = Math.cos(q.phi), sf = Math.sin(q.phi), sin = p.latoG === 'S' ? -1 : 1, v = new Float32Array(m.v.length);
+  for (let i = 0; i < v.length; i += 3) { const s = q.sg * (m.v[i] - q.dx), w = q.sw * m.v[i + 2]; v[i] = q.X0 + s * cf + w * sf; v[i + 1] = sin * (q.Y0 - s * sf + w * cf); v[i + 2] = m.v[i + 1] - q.dz; }
+  const riflesso = q.sg * q.sw * sin > 0; let t = m.t;
+  if (riflesso) { t = new Uint32Array(m.t); for (let i = 0; i < t.length; i += 3) { const a = t[i + 1]; t[i + 1] = t[i + 2]; t[i + 2] = a; } }
+  return { v, t, riflesso };
 }
 function meshParte(parte) {
   if (parte.mesh) return parte.mesh;
@@ -1483,7 +1880,7 @@ function meshParte(parte) {
     }
     m = { v: new Float32Array(vv), t: new Uint32Array(tt) };
   } else if (parte.prisma) m = estrudi(parte.prisma.regione, parte.prisma.h);
-  else if (parte.loft) m = loftGuscio(parte);
+  else if (parte.loft) m = parte.loft.pieno ? meshStrati(parte) : loftGuscio(parte);
   else { // barra: sezione (y,z) estrusa lungo x  ->  permutazione ciclica degli assi
     m = estrudi(parte.barra.regione, parte.barra.L);
     for (let i = 0; i < m.v.length; i += 3) { const a = m.v[i], b = m.v[i + 1], c = m.v[i + 2]; m.v[i] = c; m.v[i + 1] = a; m.v[i + 2] = b; }
@@ -1765,7 +2162,7 @@ function percorsiParte(parte, S) {
   for (let i = 0; i < N; i++) {
     const R = reg[i]; let modo = 'R', comune = null;
     if (S.riemp >= 99 || i < S.solidiSotto || i >= N - S.solidiSopra) modo = 'S';
-    else if (parte.loft) modo = 'R'; // guscio rastremato: parete sottile, gli strati vicini differiscono di poco
+    else if (parte.loft && !parte.loft.pieno) modo = 'R'; // guscio rastremato: parete sottile, gli strati vicini differiscono di poco
     else {
       let uguali = true;
       for (let k = i - S.solidiSotto; k <= i + S.solidiSopra; k++) if (reg[k] !== R) { uguali = false; break; }
@@ -2109,22 +2506,59 @@ function tabellaMisure(P, M) {
   const ruolo = k => (P.auto ? (P.man && P.man[k] ? 'fissa' : 'auto') : 'guida');
   const ruoloS = (sp, k) => (P.auto ? (sp.man && sp.man[k] ? 'fissa' : 'auto') : 'guida');
   const riga = (G, o) => { G.righe.push(Object.assign({ um: 'mm', tipo: 'calc', regola: '', calcolo: '', passo: 0.1 }, o)); };
-  const { cr, ct, cm, k } = corde(P), semi = P.tipo === 'semiala', S = P.stampa, st = P.stampante, g2 = 2 * P.gioco;
-  const ctLab = semi ? 'c<sub>t</sub>' : 'c', crLab = semi ? 'c<sub>r</sub>' : 'c';
+  const { cr, ct, cm, k, pi } = corde(P), semi = P.tipo !== 'completa', intera = P.tipo === 'intera', S = P.stampa, st = P.stampante, g2 = 2 * P.gioco;
+  const ctLab = semi ? 'c<sub>t</sub>' : 'c', crLab = semi ? 'c<sub>r</sub>' : 'c', bh = pi.bh, bs = intera ? 'b<sub>s</sub>' : 'b', doppia = pi.doppia;
+  const gr = v => nf(v, 2) + '°', tg = v => Math.tan(v * Math.PI / 180);
 
   // 1. pianta
-  let G = g('pianta', '1 · Pianta dell\'ala', 'Le misure di partenza: tutto il resto ne discende.');
-  riga(G, { id: 'b', sim: 'b', nome: semi ? 'Apertura della semiala' : 'Apertura alare', v: P.b, k: 'b', tipo: 'guida', min: 40, max: 3000, passo: 1,
+  let G = g('pianta', '1 · Pianta dell\'ala', 'Le misure di partenza: tutto il resto ne discende. Le centine restano parallele al piano di simmetria.');
+  riga(G, { id: 'b', sim: 'b', nome: P.tipo === 'semiala' ? 'Apertura della semiala' : 'Apertura alare', v: P.b, k: 'b', tipo: 'guida', min: 40, max: 3000, passo: 1,
     regola: P.arLock ? 'legata alla corda dal vincolo AR = ' + nf(P.AR, 2) : 'scelta dall\'operatore' });
+  if (intera) riga(G, { id: 'bs', sim: 'b<sub>s</sub>', nome: 'Apertura di ciascuna semiala', v: bh, regola: 'b<sub>s</sub> = b / 2', calcolo: nf(P.b, 1) + ' / 2 = ' + nf(bh, 1) });
   riga(G, { id: 'cr', sim: crLab, nome: semi ? 'Corda alla radice' : 'Corda', v: P.cr, k: 'cr', tipo: 'guida', min: 30, max: 600, passo: 1, regola: P.arLock ? 'legata all\'apertura dal vincolo AR' : 'scelta dall\'operatore' });
   if (semi) {
+    if (doppia) {
+      riga(G, { id: 'pia.ykp', sim: 'y<sub>k</sub>/' + bs, nome: 'Posizione della rottura', v: P.yk, um: '%', k: 'yk', tipo: 'guida', min: 10, max: 90, passo: 1 });
+      riga(G, { id: 'pia.yk', sim: 'y<sub>k</sub>', nome: 'Distanza della rottura dalla radice', v: pi.yk, regola: 'y<sub>k</sub> = (y<sub>k</sub>/' + bs + ') · ' + bs + (pi.ykRichiesta !== undefined ? ', avvicinata per non sovrapporsi alle centine d’estremità' : ''),
+        calcolo: nf(P.yk / 100, 2) + ' · ' + nf(bh, 1) + ' = ' + nf(limita(P.yk, 10, 90) / 100 * bh, 1) + (pi.ykRichiesta !== undefined ? ' → ' + nf(pi.yk, 1) : '') });
+      riga(G, { id: 'trk', sim: 'c<sub>k</sub>/c<sub>r</sub>', nome: 'Corda alla rottura (rapporto)', v: P.trk, um: '', k: 'trk', tipo: 'guida', min: 0.3, max: 1.2, passo: 0.05 });
+      riga(G, { id: 'ck', sim: 'c<sub>k</sub>', nome: 'Corda alla rottura', v: pi.ck, regola: 'c<sub>k</sub> = c<sub>r</sub> · (c<sub>k</sub>/c<sub>r</sub>)', calcolo: nf(cr, 1) + ' · ' + nf(P.trk, 2) + ' = ' + nf(pi.ck, 1) });
+    }
     riga(G, { id: 'tr', sim: 'c<sub>t</sub>/c<sub>r</sub>', nome: 'Rastremazione', v: P.tr, um: '', k: 'tr', tipo: 'guida', min: 0.3, max: 1, passo: 0.05 });
     riga(G, { id: 'ct', sim: 'c<sub>t</sub>', nome: 'Corda all\'estremità', v: ct, q: 'ct', regola: 'c<sub>t</sub> = c<sub>r</sub> · (c<sub>t</sub>/c<sub>r</sub>)', calcolo: nf(cr, 1) + ' · ' + nf(P.tr, 2) + ' = ' + nf(ct, 1) });
+    const fR = pi.fRif, nomeR = P.rifFr === 'lon' ? 'linea al ' + nf(100 * fR, 1) + ' % della corda (1° longherone)' : RIF_NOMI[P.rifFr];
+    riga(G, { id: 'pia.rif', sim: 'h', nome: 'Linea di riferimento della freccia', v: nomeR, um: '', regola: 'h = ' + nf(fR, 3) + ' (frazione della corda); cambiandola, la pianta non cambia' });
+    pi.pannelli.forEach((q, i) => {
+      const s = doppia ? (i ? ' del pannello esterno' : ' del pannello interno') : '', n = doppia ? String(i + 1) : '', dy = q.yb - q.ya, dc = (q.ca - q.cb) / dy;
+      riga(G, { id: 'fr' + (i + 1), sim: 'Λ<sub>' + (n || 'h') + '</sub>', nome: 'Freccia' + s + ' sulla linea di riferimento', v: q.frRif, um: '°', k: 'fr' + (i + 1), tipo: 'guida', min: -45, max: 60, passo: 0.5 });
+      const fLE = 'tan Λ<sub>LE' + n + '</sub> = tan Λ<sub>' + (n || 'h') + '</sub> + h · (c<sub>a</sub> − c<sub>b</sub>) / Δy';
+      riga(G, { id: 'pia.frLE' + (i + 1), sim: 'Λ<sub>LE' + n + '</sub>', nome: 'Freccia del bordo d’attacco' + s, v: q.frLE, um: '°', regola: fLE,
+        calcolo: 'arctan[' + nf(tg(q.frRif), 4) + ' + ' + nf(fR, 3) + ' · (' + nf(q.ca, 1) + ' − ' + nf(q.cb, 1) + ') / ' + nf(dy, 1) + '] = ' + gr(q.frLE) });
+      riga(G, { id: 'pia.frC4' + (i + 1), sim: 'Λ<sub>c/4' + n + '</sub>', nome: 'Freccia al 25 % della corda' + s, v: q.frC4, um: '°', regola: 'tan Λ<sub>c/4</sub> = tan Λ<sub>LE</sub> − 0,25 · (c<sub>a</sub> − c<sub>b</sub>) / Δy',
+        calcolo: 'arctan[' + nf(tg(q.frLE), 4) + ' − 0,25 · ' + nf(dc, 4) + '] = ' + gr(q.frC4) });
+      riga(G, { id: 'pia.frTE' + (i + 1), sim: 'Λ<sub>TE' + n + '</sub>', nome: 'Freccia del bordo d’uscita' + s, v: q.frTE, um: '°', regola: 'tan Λ<sub>TE</sub> = tan Λ<sub>LE</sub> − (c<sub>a</sub> − c<sub>b</sub>) / Δy',
+        calcolo: 'arctan[' + nf(tg(q.frLE), 4) + ' − ' + nf(dc, 4) + '] = ' + gr(q.frTE) });
+    });
+    riga(G, { id: 'pia.xt', sim: 'x<sub>LE,t</sub>', nome: 'Arretramento del bordo d’attacco all’estremità', v: pi.xLE(bh), regola: 'x<sub>LE,t</sub> = Σ Δy · tan Λ<sub>LE</sub>',
+      calcolo: pi.pannelli.map(q => nf(q.yb - q.ya, 1) + ' · ' + nf(tg(q.frLE), 4)).join(' + ') + ' = ' + nf(pi.xLE(bh), 2) });
   }
-  riga(G, { id: 'cm', sim: 'c̄', nome: 'Corda media', v: cm, regola: 'c̄ = (c<sub>r</sub> + c<sub>t</sub>) / 2', calcolo: '(' + nf(cr, 1) + ' + ' + nf(ct, 1) + ') / 2 = ' + nf(cm, 1) });
-  riga(G, { id: 'AR', sim: 'AR', nome: 'Allungamento', v: arr(k * P.b / cm, 1000), um: '', k: P.arLock ? 'AR' : null, tipo: P.arLock ? 'guida' : 'calc', min: 0.5, max: 40,
-    regola: 'AR = ' + (semi ? '2' : '') + 'b / c̄' + (semi ? ' (ala completa)' : ''), calcolo: (semi ? '2 · ' : '') + nf(P.b, 1) + ' / ' + nf(cm, 1) + ' = ' + nf(k * P.b / cm, 2) });
-  riga(G, { id: 'S', sim: 'S', nome: semi ? 'Superficie della semiala' : 'Superficie alare', v: arr(P.b * cm / 100, 10), um: 'cm²', regola: 'S = b · c̄', calcolo: nf(P.b, 1) + ' · ' + nf(cm, 1) + ' = ' + nf(P.b * cm / 100, 1) + ' cm²' });
+  const Ss = pi.Sh;
+  riga(G, { id: 'S', sim: 'S', nome: P.tipo === 'semiala' ? 'Superficie della semiala' : 'Superficie alare', v: arr(pi.S / 100, 10), um: 'cm²',
+    regola: (intera ? 'S = 2 · ' : 'S = ') + 'Σ Δy · (c<sub>a</sub> + c<sub>b</sub>) / 2', calcolo: (intera ? '2 · (' : '') + pi.pannelli.map(q => nf(q.yb - q.ya, 1) + ' · ' + nf((q.ca + q.cb) / 2, 1)).join(' + ') + (intera ? ')' : '') + ' = ' + nf(pi.S / 100, 1) + ' cm²' });
+  riga(G, { id: 'cm', sim: 'c̄', nome: 'Corda media geometrica', v: cm, regola: 'c̄ = S<sub>s</sub> / ' + bs + ', con S<sub>s</sub> superficie di una semiala', calcolo: nf(Ss, 0) + ' / ' + nf(bh, 1) + ' = ' + nf(cm, 2) });
+  riga(G, { id: 'AR', sim: 'AR', nome: 'Allungamento', v: arr(pi.AR, 1000), um: '', k: P.arLock ? 'AR' : null, tipo: P.arLock ? 'guida' : 'calc', min: 0.5, max: 40,
+    regola: 'AR = b<sub>tot</sub>² / S<sub>tot</sub> = ' + (k === 2 ? '2b' : 'b') + ' / c̄' + (P.tipo === 'semiala' ? ' (ala completa)' : ''), calcolo: (k === 2 ? '2 · ' : '') + nf(P.b, 1) + ' / ' + nf(cm, 2) + ' = ' + nf(pi.AR, 3) });
+  if (semi) {
+    const unico = pi.pannelli.length === 1, tau = ct / cr;
+    riga(G, { id: 'pia.mac', sim: 'c̄<sub>A</sub>', nome: 'Corda media aerodinamica (MAC)', v: pi.mac, regola: unico ? 'c̄<sub>A</sub> = (2/3) · c<sub>r</sub> · (1 + τ + τ²) / (1 + τ), τ = c<sub>t</sub>/c<sub>r</sub>' : 'c̄<sub>A</sub> = (1/S<sub>s</sub>) · ∫ c² dy, somma sui due pannelli',
+      calcolo: unico ? '(2/3) · ' + nf(cr, 1) + ' · (1 + ' + nf(tau, 3) + ' + ' + nf(tau * tau, 3) + ') / ' + nf(1 + tau, 3) + ' = ' + nf(pi.mac, 2) : nf(pi.mac * Ss, 0) + ' / ' + nf(Ss, 0) + ' = ' + nf(pi.mac, 2) });
+    riga(G, { id: 'pia.yMac', sim: 'y<sub>A</sub>', nome: 'Posizione della MAC lungo l’apertura', v: pi.yMac, regola: unico ? 'y<sub>A</sub> = (' + bs + '/3) · (1 + 2τ) / (1 + τ)' : 'y<sub>A</sub> = (1/S<sub>s</sub>) · ∫ y · c dy',
+      calcolo: unico ? '(' + nf(bh, 1) + ' / 3) · ' + nf(1 + 2 * tau, 3) + ' / ' + nf(1 + tau, 3) + ' = ' + nf(pi.yMac, 2) : nf(pi.yMac, 2) });
+    riga(G, { id: 'pia.xMac', sim: 'x<sub>A</sub>', nome: 'Bordo d’attacco della MAC', v: pi.xMac, regola: 'x<sub>A</sub> = (1/S<sub>s</sub>) · ∫ x<sub>LE</sub> · c dy' + (unico ? ' = y<sub>A</sub> · tan Λ<sub>LE</sub>' : ''),
+      calcolo: unico ? nf(pi.yMac, 2) + ' · ' + nf(tg(pi.pannelli[0].frLE), 4) + ' = ' + nf(pi.xMac, 2) : nf(pi.xMac, 2) });
+    riga(G, { id: 'pia.xCa', sim: 'x<sub>ca</sub>', nome: 'Centro aerodinamico dell’ala (dal bordo d’attacco alla radice)', v: pi.xCa, regola: 'x<sub>ca</sub> = x<sub>A</sub> + c̄<sub>A</sub> / 4',
+      calcolo: nf(pi.xMac, 2) + ' + ' + nf(pi.mac, 2) + ' / 4 = ' + nf(pi.xCa, 2) });
+  }
 
   // 2. profilo
   G = g('profilo', '2 · Profilo', 'Forma della centina: decide gli spessori disponibili per longheroni e correnti.');
@@ -2136,16 +2570,39 @@ function tabellaMisure(P, M) {
   riga(G, { id: 'te', sim: 't<sub>e</sub>', nome: 'Bordo d\'uscita', v: P.te, k: 'te', tipo: ruolo('te'), min: 0.4, max: 5, passo: 0.05, regola: 't<sub>e</sub> = max(0,8 ; 0,01 · ' + ctLab + ')', calcolo: 'max(0,8 ; ' + nf(0.01 * ct, 3) + ') ' + esito(Math.max(0.8, 0.01 * ct), arr(Math.max(0.8, 0.01 * ct), 100)) });
 
   // 3. centine
-  G = g('centine', '3 · Centine', 'Numero, spessore e passo seguono la corda media.');
-  const n = M ? M.n : P.nCentine, passo = M ? M.passo : (P.b - 2 * P.e) / (n - 1);
-  riga(G, { id: 'n', sim: 'n', nome: 'Numero di centine', v: n, um: 'pz', k: 'nCentine', tipo: ruolo('nCentine'), min: 2, max: 60, passo: 1,
-    regola: 'n = arrotonda[(b − 2e) / (0,73 · c̄)] + 1', calcolo: 'arrotonda[(' + nf(P.b, 1) + ' − 2·' + nf(P.e, 1) + ') / (0,73 · ' + nf(cm, 1) + ')] + 1 = ' + (Math.max(2, Math.round((P.b - 2 * P.e) / (0.73 * cm)) + 1)) });
+  G = g('centine', '3 · Centine', 'Numero, spessore e passo seguono la corda media' + (doppia ? ' di ciascun pannello; una centina cade sulla rottura.' : '.'));
+  const n = M ? M.n : P.nCentine, e = P.e, p1 = doppia ? pi.pannelli[0] : null, p2 = doppia ? pi.pannelli[1] : null;
+  const passi = M ? M.passi : null, eT = semi ? P.spCentina / 2 : e, dueE = semi ? ' − e − t/2' : ' − 2e', dueN = semi ? ' − ' + nf(e, 2) + ' − ' + nf(eT, 2) : ' − 2·' + nf(e, 1), passo = M ? M.passo : (doppia ? (pi.yk - e) / (P.nCentine - 1) : (bh - e - eT) / (n - 1));
+  if (doppia) {
+    const c1 = (p1.ca + p1.cb) / 2, c2 = (p2.ca + p2.cb) / 2, yk = M ? M.stazioni.yk : pi.yk, pE = M ? passi[passi.length - 1] : (bh - eT - yk) / (P.nCentine2 - 1);
+    riga(G, { id: 'n', sim: 'n<sub>1</sub>', nome: 'Centine del pannello interno (rottura compresa)', v: P.nCentine, um: 'pz', k: 'nCentine', tipo: ruolo('nCentine'), min: 2, max: 60, passo: 1,
+      regola: 'n<sub>1</sub> = arrotonda[(y<sub>k</sub> − e) / (0,73 · c̄<sub>1</sub>)] + 1', calcolo: 'arrotonda[(' + nf(yk, 1) + ' − ' + nf(e, 1) + ') / (0,73 · ' + nf(c1, 1) + ')] + 1 = ' + Math.max(2, Math.round((yk - e) / (0.73 * c1)) + 1) });
+    riga(G, { id: 'n2', sim: 'n<sub>2</sub>', nome: 'Centine del pannello esterno (rottura compresa)', v: P.nCentine2, um: 'pz', k: 'nCentine2', tipo: ruolo('nCentine2'), min: 2, max: 60, passo: 1,
+      regola: 'n<sub>2</sub> = arrotonda[(' + bs + ' − t/2 − y<sub>k</sub>) / (0,73 · c̄<sub>2</sub>)] + 1', calcolo: 'arrotonda[(' + nf(bh, 1) + ' − ' + nf(eT, 2) + ' − ' + nf(yk, 1) + ') / (0,73 · ' + nf(c2, 1) + ')] + 1 = ' + Math.max(2, Math.round((bh - eT - yk) / (0.73 * c2)) + 1) });
+    riga(G, { id: 'ntot', sim: 'n', nome: 'Centine in tutto' + (intera ? ' (per semiala)' : ''), v: P.nCentine + P.nCentine2 - 1, um: 'pz', regola: 'n = n<sub>1</sub> + n<sub>2</sub> − 1', calcolo: P.nCentine + ' + ' + P.nCentine2 + ' − 1 = ' + (P.nCentine + P.nCentine2 - 1) });
+    riga(G, { id: 'passo', sim: 'p<sub>1</sub>', nome: 'Passo nel pannello interno', v: passo, q: 'passo', regola: 'p<sub>1</sub> = (y<sub>k</sub> − e) / (n<sub>1</sub> − 1)', calcolo: '(' + nf(yk, 1) + ' − ' + nf(e, 1) + ') / ' + (P.nCentine - 1) + ' = ' + nf(passo, 2) });
+    riga(G, { id: 'passo2', sim: 'p<sub>2</sub>', nome: 'Passo nel pannello esterno', v: pE, q: 'passo2', regola: 'p<sub>2</sub> = (' + bs + ' − t/2 − y<sub>k</sub>) / (n<sub>2</sub> − 1)', calcolo: '(' + nf(bh, 1) + ' − ' + nf(eT, 2) + ' − ' + nf(yk, 1) + ') / ' + (P.nCentine2 - 1) + ' = ' + nf(pE, 2) });
+  } else {
+    riga(G, { id: 'n', sim: 'n', nome: 'Numero di centine' + (intera ? ' (per semiala)' : ''), v: n, um: 'pz', k: 'nCentine', tipo: ruolo('nCentine'), min: 2, max: 60, passo: 1,
+      regola: 'n = arrotonda[(' + bs + dueE + ') / (0,73 · c̄)] + 1', calcolo: 'arrotonda[(' + nf(bh, 1) + dueN + ') / (0,73 · ' + nf(cm, 1) + ')] + 1 = ' + (Math.max(2, Math.round((bh - e - eT) / (0.73 * cm)) + 1)) });
+    riga(G, { id: 'passo', sim: 'p', nome: 'Passo delle centine', v: passo, q: 'passo', regola: 'p = (' + bs + dueE + ') / (n − 1); scrivendo un passo si ricava n', calcolo: '(' + nf(bh, 1) + dueN + ') / ' + (n - 1) + ' = ' + nf(passo, 2) });
+  }
   riga(G, { id: 't', sim: 't', nome: 'Spessore della centina', v: P.spCentina, k: 'spCentina', tipo: ruolo('spCentina'), min: 1.5, max: 20, passo: 0.5,
     regola: 't = 0,0625 · c̄ (fra 3 e 10 mm)', calcolo: '0,0625 · ' + nf(cm, 1) + ' ' + esito(limita(0.0625 * cm, 3, 10), arr(limita(0.0625 * cm, 3, 10), 2)) });
-  riga(G, { id: 'e', sim: 'e', nome: 'Prima centina dall\'estremità', v: P.e, k: 'e', tipo: ruolo('e'), min: 1, max: 300, passo: 1,
-    regola: 'e = max(t/2 + 4 ; 0,105 · c̄)', calcolo: 'max(' + nf(P.spCentina / 2 + 4, 1) + ' ; ' + nf(0.105 * cm, 1) + ') = ' + Math.round(Math.max(P.spCentina / 2 + 4, 0.105 * cm)) });
-  riga(G, { id: 'passo', sim: 'p', nome: 'Passo delle centine', v: passo, q: 'passo', regola: 'p = (b − 2e) / (n − 1); scrivendo un passo si ricava n', calcolo: '(' + nf(P.b, 1) + ' − 2·' + nf(P.e, 1) + ') / ' + (n - 1) + ' = ' + nf(passo, 2) });
-  riga(G, { id: 'luce', sim: 'l', nome: 'Luce netta fra due centine', v: passo - P.spCentina, regola: 'l = p − t', calcolo: nf(passo, 2) + ' − ' + nf(P.spCentina, 2) + ' = ' + nf(passo - P.spCentina, 2) });
+  const eAuto = Math.round(Math.max(P.spCentina / 2 + 4, 0.105 * cm)), Hst = P.longheroni.filter(sp => sp.stampa).map(sp => sp.H), eG = intera && Hst.length ? Math.ceil(limita(2 * Math.max(...Hst), 8, 50) + P.spCentina / 2 + 2) : 0;
+  riga(G, { id: 'e', sim: 'e', nome: intera ? 'Prima centina dal piano di simmetria' : 'Prima centina dall\'estremità', v: P.e, k: 'e', tipo: ruolo('e'), min: 1, max: 300, passo: 1,
+    regola: semi ? (eG ? 'e = L<sub>g</sub> + t/2 + 2: fra le due centine di radice sta il giunto dei longheroni' : 'e = t/2: la centina di radice è a filo della radice, quella d’estremità a filo dell’estremità') : 'e = max(t/2 + 4 ; 0,105 · c̄)',
+    calcolo: semi ? (eG ? String(eG) : nf(P.spCentina, 2) + ' / 2 = ' + nf(P.spCentina / 2, 2)) : 'max(' + nf(P.spCentina / 2 + 4, 1) + ' ; ' + nf(0.105 * cm, 1) + ') = ' + eAuto });
+  if (doppia) riga(G, { id: 'luce', sim: 'l<sub>1</sub> / l<sub>2</sub>', nome: 'Luci nette fra le centine (interno / esterno)', v: nf(passo - P.spCentina, 2) + ' / ' + nf((M ? passi[passi.length - 1] : passo) - P.spCentina, 2), regola: 'l = p − t' });
+  else riga(G, { id: 'luce', sim: 'l', nome: 'Luce netta fra due centine', v: passo - P.spCentina, regola: 'l = p − t', calcolo: nf(passo, 2) + ' − ' + nf(P.spCentina, 2) + ' = ' + nf(passo - P.spCentina, 2) });
+  if (M && M.obl) { // centine normali al longherone: i passi si misurano lungo il longherone 1
+    G.righe = G.righe.filter(r => !['passo', 'passo2', 'luce'].includes(r.id));
+    riga(G, { id: 'cen.disp', sim: '', nome: 'Disposizione delle centine', v: 'chiusure secondo il vento, intermedie normali al longherone 1', um: '', regola: 'chiusure: centine ' + M.centine.filter(c => c.chiusa).map(c => c.j + 1).join(', ') + ' (radice' + (doppia ? ', rottura' : '') + ', estremità); normali: ' + M.centine.filter(c => c.phi).map(c => c.j + 1).join(', ') });
+    if (M.centine.some(c => c.tronca)) riga(G, { id: 'cen.tronche', sim: '', nome: 'Centine tronche nelle zone triangolari', v: M.centine.filter(c => c.tronca).map(c => (c.j + 1) + ': ' + nf(c.u1 - c.u0, 1) + ' mm').join(' · '), um: '', regola: 'la centina normale che incontrerebbe una chiusura si ferma di testa contro la sua faccia (gioco g) e vi si incolla; conserva la sede del longherone 1' });
+    riga(G, { id: 'cen.phi', sim: 'φ', nome: 'Rotazione delle centine normali rispetto al piano di simmetria', v: [...new Set(M.centine.filter(c => c.phi).map(c => nf(c.phi * 180 / Math.PI, 2)))].join(' / '), um: '°', regola: 'φ = Λ<sub>L</sub>, freccia dell’asse del longherone 1: la centina gli è normale' });
+    riga(G, { id: 'cen.passi', sim: 'p', nome: 'Interassi lungo il longherone 1, dalla radice', v: M.passi.map(v => nf(v, 1)).join(' / '), regola: 'fra due centine normali è la distanza fra i loro piani; nelle campate a cuneo, accanto alle chiusure, la distanza lungo l’asse del longherone' });
+    riga(G, { id: 'cen.luci', sim: 'l', nome: 'Tratti liberi del longherone 1 fra le centine', v: M.luci.map(v => nf(v, 1)).join(' / '), regola: 'l = p − t fra centine normali; p − t/2 − t / (2 cos φ) nelle campate a cuneo' });
+  }
   riga(G, { id: 'parete', sim: 's<sub>min</sub>', nome: 'Parete minima della centina', v: P.parete, k: 'parete', tipo: ruolo('parete'), min: 0.8, max: 10, passo: 0.1,
     regola: 's<sub>min</sub> = max(1,5 ; 0,018 · ' + ctLab + ')', calcolo: 'max(1,5 ; ' + nf(0.018 * ct, 3) + ') ' + esito(Math.max(1.5, 0.018 * ct), arr(Math.max(1.5, 0.018 * ct), 10)) });
   if (P.alleggerimenti) riga(G, { id: 'rAll', sim: 'r', nome: 'Raggio di raccordo delle finestre', v: P.rAll, k: 'rAll', tipo: ruolo('rAll'), min: 0.5, max: 10, passo: 0.1,
@@ -2156,9 +2613,15 @@ function tabellaMisure(P, M) {
   const nomiDim = { H: 'Altezza', B: 'Larghezza', tf: 'Spessore delle solette', tw: 'Spessore dell\'anima', s: 'Spessore di parete' };
   P.longheroni.forEach((sp, i) => {
     const l = M && M.longheroni[i], tonda = sp.forma === 'tondo' || sp.forma === 'tubo';
-    G = g('lon' + i, '4.' + (i + 1) + ' · Longherone ' + (i + 1) + ' — ' + FORME[sp.forma].nome, 'La sezione si dimensiona sulla centina d\'estremità, la più sottile.');
-    riga(G, { id: 'lon' + i + '.x', sim: 'x/c', nome: 'Posizione lungo la corda', v: sp.x, um: '%', k: 'longheroni.' + i + '.x', tipo: 'guida', min: 3, max: 90, passo: 1 });
-    riga(G, { id: 'lon' + i + '.xr', sim: 'x', nome: 'Distanza dal bordo d\'attacco alla radice', v: sp.x * cr / 100, regola: 'x = (x/c) · ' + crLab, calcolo: nf(sp.x / 100, 3) + ' · ' + nf(cr, 1) + ' = ' + nf(sp.x * cr / 100, 1) });
+    G = g('lon' + i, '4.' + (i + 1) + ' · Longherone ' + (i + 1) + ' — ' + FORME[sp.forma].nome, 'La sezione si dimensiona sulla centina più sottile nel punto in cui il longherone la attraversa.');
+    const xt = sp.xt === undefined || sp.xt === null ? sp.x : sp.xt;
+    riga(G, { id: 'lon' + i + '.x', sim: 'x<sub>r</sub>/c', nome: semi ? 'Posizione lungo la corda alla radice' : 'Posizione lungo la corda', v: sp.x, um: '%', k: 'longheroni.' + i + '.x', tipo: 'guida', min: 3, max: 90, passo: 1 });
+    riga(G, { id: 'lon' + i + '.xr', sim: 'x<sub>r</sub>', nome: 'Distanza dal bordo d\'attacco alla radice', v: sp.x * cr / 100, regola: 'x<sub>r</sub> = (x<sub>r</sub>/c) · ' + crLab, calcolo: nf(sp.x / 100, 3) + ' · ' + nf(cr, 1) + ' = ' + nf(sp.x * cr / 100, 1) });
+    if (semi) {
+      riga(G, { id: 'lon' + i + '.xt', sim: 'x<sub>t</sub>/c', nome: 'Posizione lungo la corda all’estremità', v: xt, um: '%', k: 'longheroni.' + i + '.xt', tipo: 'guida', min: 3, max: 90, passo: 1, regola: xt === sp.x ? 'uguale alla radice: asse a percentuale costante' + (pi.pannelli.length > 1 ? ' solo se è spezzato' : '') : 'diversa dalla radice: il longherone attraversa le centine in percentuali diverse' });
+      riga(G, { id: 'lon' + i + '.xte', sim: 'x<sub>t</sub>', nome: 'Distanza dal bordo d\'attacco all’estremità', v: xt * ct / 100, regola: 'x<sub>t</sub> = (x<sub>t</sub>/c) · c<sub>t</sub>', calcolo: nf(xt / 100, 3) + ' · ' + nf(ct, 1) + ' = ' + nf(xt * ct / 100, 1) });
+      if (doppia) riga(G, { id: 'lon' + i + '.via', sim: '', nome: 'Andamento dell’asse', v: sp.via === 'spezzato' ? 'spezzato alla rottura' : 'rettilineo', um: '', regola: sp.via === 'spezzato' ? 'due tratti rettilinei uniti da un giunto angolato sulla centina della rottura' : 'una sola retta dalla radice all’estremità' });
+    }
     FORME[sp.forma].campi.forEach(d => {
       const r = regoleSez[sp.forma][d];
       riga(G, { id: 'lon' + i + '.' + d, sim: d === 'H' && tonda ? 'd' : ET_SIM[d], nome: d === 'H' && tonda ? 'Diametro' : nomiDim[d], v: sp[d], k: 'longheroni.' + i + '.' + d, tipo: ruoloS(sp, d), min: 0.4, max: 120, passo: 0.1,
@@ -2167,9 +2630,12 @@ function tabellaMisure(P, M) {
         calcolo: d !== 'H' && r ? (d === 'B' ? nf(r, 2) + ' · ' + nf(sp.H, 2) + ' ' + esito(r * sp.H, arr(r * sp.H, 10)) : 'max(1 ; ' + nf(r * sp.H, 3) + ') ' + esito(Math.max(1, r * sp.H), Math.max(1, arr(r * sp.H, 20)))) : '' });
     });
     if (l) {
-      const incl = l.tx || l.tz;
-      riga(G, { id: 'lon' + i + '.L', sim: 'L', nome: 'Lunghezza', v: l.L, regola: incl ? 'L = b · √(1 + t<sub>x</sub>² + t<sub>z</sub>²) (asse inclinato)' : 'L = b', calcolo: incl ? nf(P.b, 1) + ' · ' + nf(l.L / P.b, 5) + ' = ' + nf(l.L, 1) : nf(l.L, 1) });
-      if (sp.stampa) riga(G, { id: 'lon' + i + '.nt', sim: 'n<sub>t</sub>', nome: 'Tronchi di stampa', v: l.tronchi.length, um: 'pz', regola: 'n<sub>t</sub> = ⌈L / L<sub>max</sub>⌉', calcolo: '⌈' + nf(l.L, 1) + ' / ' + nf(M.Lmax, 1) + '⌉ = ' + l.tronchi.length });
+      const incl = l.segmenti.some(q => q.tx || q.tz), dG = l.angolati.length ? l.angolati.map(q => q.d) : [];
+      if (semi) l.segmenti.forEach((q, s) => riga(G, { id: 'lon' + i + '.fr' + (s + 1), sim: 'Λ<sub>L' + (l.segmenti.length > 1 ? s + 1 : '') + '</sub>', nome: 'Freccia dell’asse' + (l.segmenti.length > 1 ? (s ? ' (tratto esterno)' : ' (tratto interno)') : ''), v: Math.atan(q.tx) * 180 / Math.PI, um: '°',
+        regola: 'tan Λ<sub>L</sub> = Δx / Δy fra i centri delle sedi', calcolo: 'arctan ' + nf(q.tx, 4) + ' = ' + nf(Math.atan(q.tx) * 180 / Math.PI, 2) + '°' }));
+      riga(G, { id: 'lon' + i + '.L', sim: 'L', nome: 'Lunghezza' + (intera ? ' (per semiala)' : ''), v: l.L, regola: (incl ? 'L = Σ Δy · √(1 + t<sub>x</sub>² + t<sub>z</sub>²)' : 'L = ' + bs) + (dG.length ? ', meno gli accorciamenti ai giunti' : ''),
+        calcolo: l.segmenti.map(q => nf(q.yb - q.ya, 1) + (incl ? ' · ' + nf(q.k, 5) : '')).join(' + ') + (dG.length ? ' − ' + dG.map(d => nf(d, 2)).join(' − ') : '') + ' = ' + nf(l.L, 1) });
+      if (sp.stampa) riga(G, { id: 'lon' + i + '.nt', sim: 'n<sub>t</sub>', nome: 'Tronchi di stampa' + (intera ? ' (per semiala)' : ''), v: l.tronchi.length, um: 'pz', regola: 'n<sub>t</sub> = Σ ⌈L<sub>i</sub> / L<sub>max</sub>⌉ per ogni tratto rettilineo', calcolo: l.segmenti.length > 1 ? l.tronchi.length + ' tronchi su ' + l.segmenti.length + ' tratti' : '⌈' + nf(l.L, 1) + ' / ' + nf(M.Lmax, 1) + '⌉ = ' + l.tronchi.length });
       riga(G, { id: 'lon' + i + '.A', sim: 'A', nome: 'Area della sezione', v: l.sez.prop.A, um: 'mm²' });
       riga(G, { id: 'lon' + i + '.Jx', sim: 'J<sub>x</sub>', nome: 'Momento d\'inerzia del second\'ordine (flessione)', v: l.sez.prop.Jx, um: 'mm⁴' });
     }
@@ -2189,7 +2655,9 @@ function tabellaMisure(P, M) {
       M.correnti.forEach(s => riga(G, { id: 'cor.' + s.id, sim: s.id, nome: 'Posizione del corrente ' + (s.lato === 'd' ? 'dorsale ' : 'ventrale ') + s.id.slice(2), v: arr(100 * s.x, 10), um: '%',
         regola: 'x = x<sub>0</sub> + i · (x<sub>1</sub> − x<sub>0</sub>) / (n − 1)' + (s.spostato ? '; spostato ' + s.motivo : ''), calcolo: s.spostato ? nf(100 * s.x0, 1) + ' → ' + nf(100 * s.x, 1) : nf(100 * s.x, 1) }));
       const s0 = M.correnti[0];
-      riga(G, { id: 'cor.L', sim: 'L<sub>c</sub>', nome: 'Lunghezza dei correnti', v: s0.L, regola: 'L<sub>c</sub> = (n − 1) · p + t' + (s0.L > (M.n - 1) * M.passo + M.t + 0.01 ? ', per l’inclinazione dell’asse' : ''), calcolo: (M.n - 1) + ' · ' + nf(M.passo, 2) + ' + ' + nf(M.t, 2) + ' = ' + nf((M.n - 1) * M.passo + M.t, 1) + (s0.L > (M.n - 1) * M.passo + M.t + 0.01 ? '; inclinato ' + nf(s0.L, 1) : '') });
+      const Ly = M.yB - M.yA, inc = s0.L > Ly + 0.01;
+      riga(G, { id: 'cor.L', sim: 'L<sub>c</sub>', nome: 'Lunghezza del corrente ' + s0.id, v: s0.L, regola: 'L<sub>c</sub> = Σ Δy · √(1 + t<sub>x</sub>² + t<sub>z</sub>²), da faccia a faccia delle centine d’estremità (y<sub>B</sub> − y<sub>A</sub> = ' + nf(Ly, 1) + ')',
+        calcolo: s0.segmenti.map(q => nf(q.yb - q.ya, 1) + (inc ? ' · ' + nf(q.k, 5) : '')).join(' + ') + ' = ' + nf(s0.L, 1) });
       riga(G, { id: 'cor.nt', sim: 'n<sub>t</sub>', nome: 'Tronchi per corrente', v: s0.tronchi.length, um: 'pz', regola: 'n<sub>t</sub> = ⌈L<sub>c</sub> / L<sub>max</sub>⌉, giunti al centro di una centina', calcolo: '⌈' + nf(s0.L, 1) + ' / ' + nf(M.Lmax, 1) + '⌉ = ' + s0.tronchi.length });
     }
   }
@@ -2200,8 +2668,13 @@ function tabellaMisure(P, M) {
     riga(G, { id: 'ts', sim: 't<sub>s</sub>', nome: 'Spessore del rivestimento', v: P.ts, k: 'ts', tipo: ruolo('ts'), min: 0.4, max: 5, passo: 0.05, regola: 't<sub>s</sub> = max(2 · w ; 0,009 · c̄), con w larghezza del cordone', calcolo: 'max(2 · ' + nf(S.w, 2) + ' ; ' + nf(0.009 * cm, 3) + ') ' + esito(Math.max(2 * S.w, 0.009 * cm), arr(Math.max(2 * S.w, 0.009 * cm), 100)) });
     if (M && M.gusci.length) {
       riga(G, { id: 'gus.n', sim: 'n<sub>g</sub>', nome: 'Gusci (una per campata)', v: M.gusci.reduce((s, q) => s + q.pezzi.length, 0), um: 'pz', regola: 'n<sub>g</sub> = n − 1' + (M.gusci.some(q => q.pezzi.length > 1) ? ', campate divise per l\'altezza della stampante' : ''), calcolo: (M.n - 1) + ' campate' });
-      riga(G, { id: 'gus.L', sim: 'L<sub>g</sub>', nome: 'Lunghezza dei gusci intermedi', v: M.passo, regola: 'L<sub>g</sub> = p (da metà centina a metà centina)', calcolo: nf(M.passo, 2) });
-      riga(G, { id: 'gus.L0', sim: 'L<sub>g1</sub>', nome: 'Lunghezza dei gusci di estremità', v: M.passo + M.t / 2, regola: 'L<sub>g1</sub> = p + t/2', calcolo: nf(M.passo, 2) + ' + ' + nf(M.t / 2, 2) + ' = ' + nf(M.passo + M.t / 2, 2) });
+      const g0 = M.gusci[0], gt = M.gusci[M.gusci.length - 1];
+      if (M.obl) { riga(G, { id: 'gus.asse', sim: '', nome: 'Asse di stampa dei gusci', v: 'longherone 1', um: '', regola: 'fra due centine normali il guscio si stampa con il longherone verticale: ogni strato è una sezione normale al longherone e lo sbalzo è solo la differenza fra la freccia dei bordi e quella del longherone' });
+        riga(G, { id: 'gus.H', sim: 'H<sub>g</sub>', nome: 'Altezze di stampa dei gusci, dalla radice', v: M.gusci.map(q => nf(q.L, 1)).join(' / '), regola: 'fra centine normali: interasse; a cuneo (accanto alle chiusure): fino al punto più lontano del taglio secondo il vento' }); }
+      else { if (M.gusci.length > 2) riga(G, { id: 'gus.L', sim: 'L<sub>g</sub>', nome: 'Lunghezza dei gusci intermedi', v: doppia ? nf(M.passi[1], 2) + ' / ' + nf(M.passi[M.passi.length - 2], 2) : M.passo, regola: 'L<sub>g</sub> = p (da metà centina a metà centina)' + (doppia ? ', nel pannello interno / esterno' : ''), calcolo: doppia ? '' : nf(M.passo, 2) });
+      riga(G, { id: 'gus.L0', sim: 'L<sub>g1</sub>', nome: 'Lunghezza del guscio di radice', v: g0.L, regola: intera ? 'L<sub>g1</sub> = e + p<sub>1</sub>: dal piano di simmetria al piano medio della 2ª centina' : 'L<sub>g1</sub> = p + t/2', calcolo: intera ? nf(M.e, 2) + ' + ' + nf(M.passi[0], 2) + ' = ' + nf(g0.L, 2) : nf(M.passi[0], 2) + ' + ' + nf(M.t / 2, 2) + ' = ' + nf(g0.L, 2) });
+      if (M.gusci.length > 1) riga(G, { id: 'gus.Lt', sim: 'L<sub>gn</sub>', nome: 'Lunghezza del guscio d’estremità', v: gt.L, regola: 'L<sub>gn</sub> = p + t/2', calcolo: nf(M.passi[M.passi.length - 1], 2) + ' + ' + nf(M.t / 2, 2) + ' = ' + nf(gt.L, 2) }); }
+      if (M.gusci.some(q => !q.dritto)) riga(G, { id: 'gus.sp', sim: '', nome: 'Gusci rastremati o a freccia', v: intera ? 'destri e sinistri speculari' : 'per la semiala destra', um: '', regola: 'nessun piano di simmetria: il guscio destro si stampa con la sezione ribaltata lungo la corda (una rotazione, non una specchiatura del pezzo)' });
     }
   }
 
@@ -2210,18 +2683,36 @@ function tabellaMisure(P, M) {
   riga(G, { id: 'g', sim: 'g', nome: 'Gioco di accoppiamento (per lato)', v: P.gioco, k: 'gioco', tipo: 'guida', min: 0, max: 1, passo: 0.05, regola: 'si somma a ogni sede, intaglio e foro' });
   P.longheroni.forEach((sp, i) => {
     const l = M && M.longheroni[i]; if (!l) return;
-    riga(G, { id: 'acc.sede' + i + '.B', sim: 'B<sub>s</sub>', nome: 'Sede del longherone ' + (i + 1) + ' nella centina: larghezza', v: l.sez.B + g2 + l.du, regola: 'B<sub>s</sub> = B + 2g' + (l.du > 0.005 ? ' + t · |t<sub>x</sub>|' : ''), calcolo: nf(l.sez.B, 2) + ' + 2·' + nf(P.gioco, 2) + (l.du > 0.005 ? ' + ' + nf(l.du, 2) : '') + ' = ' + nf(l.sez.B + g2 + l.du, 2) });
-    riga(G, { id: 'acc.sede' + i + '.H', sim: 'H<sub>s</sub>', nome: 'Sede del longherone ' + (i + 1) + ' nella centina: altezza', v: l.sez.H + g2 + l.dv, regola: 'H<sub>s</sub> = H + 2g' + (l.dv > 0.005 ? ' + t · |t<sub>z</sub>|' : ''), calcolo: nf(l.sez.H, 2) + ' + 2·' + nf(P.gioco, 2) + (l.dv > 0.005 ? ' + ' + nf(l.dv, 2) : '') + ' = ' + nf(l.sez.H + g2 + l.dv, 2) });
+    const tC = P.spCentina, bS = m => l.sez.B * Math.hypot(1, m) + g2, dg = m => nf(Math.atan(m) * 180 / Math.PI, 1) + '°';
+    const rS = m => 'B<sub>s</sub> = B' + (m > 2e-3 ? ' / cos δ + 2g, con δ = ' + dg(m) + ' scarto fra longherone e normale alla centina; nello spessore la sede è obliqua (gli strati scorrono in tutto di t · tan δ = ' + nf(tC * m, 2) + ' mm) e resta a misura' : ' + 2g'), cS = m => nf(l.sez.B, 2) + (m > 2e-3 ? ' · ' + nf(Math.hypot(1, m), 4) : '') + ' + 2·' + nf(P.gioco, 2) + ' = ' + nf(bS(m), 2);
+    const mS = M.obl ? l.mN : l.mC;
+    riga(G, { id: 'acc.sede' + i + '.B', sim: 'B<sub>s</sub>', nome: 'Sede del longherone ' + (i + 1) + (M.obl ? ' nelle centine normali' : ' nella centina') + ': larghezza', v: bS(mS), regola: rS(mS), calcolo: cS(mS) });
+    if (M.obl) riga(G, { id: 'acc.sede' + i + '.Bc', sim: 'B<sub>sc</sub>', nome: 'Sede del longherone ' + (i + 1) + ' nelle centine di chiusura: larghezza', v: bS(l.mC), regola: rS(l.mC), calcolo: cS(l.mC) });
+    riga(G, { id: 'acc.sede' + i + '.H', sim: 'H<sub>s</sub>', nome: 'Sede del longherone ' + (i + 1) + ' nella centina: altezza', v: l.sez.H + g2 + l.dvM, regola: 'H<sub>s</sub> = H + 2g' + (l.dvM > 0.005 ? ' + t · |t<sub>z</sub>|' : ''), calcolo: nf(l.sez.H, 2) + ' + 2·' + nf(P.gioco, 2) + (l.dvM > 0.005 ? ' + ' + nf(l.dvM, 2) : '') + ' = ' + nf(l.sez.H + g2 + l.dvM, 2) });
     if (l.giunti.length) {
       const Ls = l.giunti[0].Ls;
       riga(G, { id: 'acc.man' + i, sim: '', nome: 'Manicotto del longherone ' + (i + 1) + ': foro', v: nf(l.sez.B + g2, 2) + ' × ' + nf(l.sez.H + g2, 2), regola: 'foro = (B + 2g) × (H + 2g)', calcolo: '' });
       riga(G, { id: 'acc.manL' + i, sim: 'L<sub>m</sub>', nome: 'Manicotto del longherone ' + (i + 1) + ': lunghezza', v: Ls, regola: 'L<sub>m</sub> = 3 · H, non oltre l − 2', calcolo: 'min(3 · ' + nf(l.sez.H, 2) + ' ; ' + nf(M.passo - M.t - 2, 1) + ') = ' + nf(Ls, 2) });
     }
   });
-  if (M && P.dima && M.passo - M.t > 4) riga(G, { id: 'acc.dima', sim: 'L<sub>d</sub>', nome: 'Dima distanziale', v: M.passo - M.t, regola: 'L<sub>d</sub> = p − t = luce netta', calcolo: nf(M.passo, 2) + ' − ' + nf(M.t, 2) + ' = ' + nf(M.passo - M.t, 2) });
+  if (M) M.giunti.filter(q => !q.dritto).forEach(q => {
+    const l = q.l, i = l.i, sez = l.sez, nm = 'Giunto ' + (q.dove === 'radice' ? 'di radice' : 'alla rottura') + ' del longherone ' + (i + 1);
+    riga(G, { id: 'acc.giu' + i + q.dove + '.a', sim: 'δ', nome: nm + ': deviazione in pianta', v: q.ap * 180 / Math.PI, um: '°', regola: q.dove === 'radice' ? 'δ = 2 · Λ<sub>L</sub> (le due semiali)' : 'δ = Λ<sub>L2</sub> − Λ<sub>L1</sub>' });
+    riga(G, { id: 'acc.giu' + i + q.dove + '.Lg', sim: 'L<sub>g</sub>', nome: nm + ': lunghezza di ciascun braccio', v: q.Lg, regola: 'L<sub>g</sub> = 2 · H, fra 8 e 50 mm', calcolo: 'max(8 ; min(2 · ' + nf(sez.H, 2) + ' ; 50)) = ' + nf(q.Lg, 2) });
+    riga(G, { id: 'acc.giu' + i + q.dove + '.s', sim: 's<sub>g</sub>', nome: nm + ': spessore di fondo e pareti', v: q.sj, regola: 's<sub>g</sub> = max(1,6 ; 0,25 · H)', calcolo: 'max(1,6 ; ' + nf(0.25 * sez.H, 3) + ') = ' + nf(q.sj, 2) });
+    riga(G, { id: 'acc.giu' + i + q.dove + '.d', sim: 'd', nome: nm + ': accorciamento delle teste dei tronchi', v: q.d, regola: 'd = (B/2 + g) · tan(δ/2) + (H/2 + g) · tan(δ<sub>z</sub>/2) + 0,3',
+      calcolo: nf(sez.B / 2 + P.gioco, 2) + ' · ' + nf(Math.tan(q.ap / 2), 4) + ' + ' + nf(sez.H / 2 + P.gioco, 2) + ' · ' + nf(Math.tan(q.av / 2), 4) + ' + 0,3 = ' + nf(q.d, 2) });
+  });
+  if (M && P.dima) M.dime.forEach((d, q) => { const xs = d.pts.map(p => p[0]), La = Math.abs(d.pts[1][0] - d.pts[0][0]), Lb = Math.abs(d.pts[2][0] - d.pts[3][0]);
+    if (d.tipo === 'luce') riga(G, { id: 'acc.dima' + (q || ''), sim: 'L<sub>d</sub>', nome: 'Dima distanziale' + (q ? ' ' + (q + 1) : ''), v: Math.max(...xs), regola: 'L<sub>d</sub> = p − t = luce netta fra due centine parallele', calcolo: nf(Math.max(...xs) + M.t, 2) + ' − ' + nf(M.t, 2) + ' = ' + nf(Math.max(...xs), 2) });
+    else riga(G, { id: 'acc.dima' + (q || ''), sim: 'L<sub>d</sub>', nome: 'Dima di freccia (trapezio) della campata ' + (d.j + 1), v: nf(La, 1) + ' / ' + nf(Lb, 1), regola: 'larga 10 mm, appoggiata al fianco del longherone 1: i due lati lunghi differiscono di 10 · tan φ e fissano distanza e angolo fra la chiusura e la centina normale', calcolo: '|' + nf(La, 2) + ' − ' + nf(Lb, 2) + '| = 10 · ' + nf(Math.abs(La - Lb) / 10, 4) });
+  });
   if (cor && M && M.correnti.length) {
     const s = M.correnti[0];
-    riga(G, { id: 'acc.int.b', sim: 'b<sub>i</sub>', nome: 'Intaglio dei correnti: larghezza', v: P.cB + g2 + s.du, regola: 'b<sub>i</sub> = b<sub>c</sub> + 2g' + (s.du > 0.005 ? ' + t · |t<sub>x</sub>|' : ''), calcolo: nf(P.cB, 2) + ' + 2·' + nf(P.gioco, 2) + (s.du > 0.005 ? ' + ' + nf(s.du, 2) : '') + ' = ' + nf(P.cB + g2 + s.du, 2) });
+    const mI = Math.max(...M.correnti.map(q => (M.obl ? q.mN : q.mC))), mK = Math.max(...M.correnti.map(q => q.mC)), bI = m => P.cB * Math.hypot(1, m) + g2, dg = m => nf(Math.atan(m) * 180 / Math.PI, 1) + '°';
+    const rI = m => 'b<sub>i</sub> = b<sub>c</sub>' + (m > 2e-3 ? ' / cos δ + 2g, con δ = ' + dg(m) + ' scarto fra corrente e normale alla centina; intaglio obliquo nello spessore' : ' + 2g'), cI = m => nf(P.cB, 2) + (m > 2e-3 ? ' · ' + nf(Math.hypot(1, m), 4) : '') + ' + 2·' + nf(P.gioco, 2) + ' = ' + nf(bI(m), 2);
+    riga(G, { id: 'acc.int.b', sim: 'b<sub>i</sub>', nome: 'Intaglio dei correnti' + (M.obl ? ' nelle centine normali' : '') + ': larghezza massima', v: bI(mI), regola: rI(mI), calcolo: cI(mI) });
+    if (M.obl) riga(G, { id: 'acc.int.bc', sim: 'b<sub>ic</sub>', nome: 'Intaglio dei correnti nelle centine di chiusura: larghezza massima', v: bI(mK), regola: rI(mK), calcolo: cI(mK) });
     riga(G, { id: 'acc.int.h', sim: 'h<sub>i</sub>', nome: 'Intaglio dei correnti: profondità', v: P.cH + P.gioco, regola: 'h<sub>i</sub> = h<sub>c</sub> + g (il corrente resta a filo del contorno)', calcolo: nf(P.cH, 2) + ' + ' + nf(P.gioco, 2) + ' = ' + nf(P.cH + P.gioco, 2) });
   }
   if (P.livello === 'completa') {
@@ -2238,7 +2729,7 @@ function tabellaMisure(P, M) {
   return gruppi;
 }
 /* Confronto di ogni tipo di pezzo con il volume utile della stampante. */
-const PLURALI = { corrente: 'Correnti (tutti uguali)', centina: 'Centine (tutte uguali)', guscio: 'Gusci (tutti uguali)', longherone: 'Tronchi di longherone', manicotto: 'Manicotti' };
+const PLURALI = { corrente: 'Correnti (tutti uguali)', centina: 'Centine (tutte uguali)', guscio: 'Gusci (tutti uguali)', longherone: 'Tronchi di longherone', manicotto: 'Manicotti', giunto: 'Giunti angolati (meta\' uguali)' };
 function compatibilita(P, M) {
   const st = P.stampante, S = P.stampa, bordo = 1 + (S.skirt > 0 ? S.skirtDist + S.skirt * S.w : 0), X = st.lx - 2 * bordo, Y = st.ly - 2 * bordo, out = new Map();
   for (const p of M.parti) {
@@ -2260,21 +2751,28 @@ function leggimi(P, M, piatti, stat) {
   riga('Kit generato con ' + NOME_APP + '. Il progetto e\' incorporato nei file .gcode e .3mf:');
   riga('riaprendoli nella webapp si ritrovano tutti i parametri e si possono modificare.'); riga('');
   riga('1. GEOMETRIA'); riga('------------');
-  riga('  Profilo ' + M.def.nome + (P.tipo === 'semiala' ? ', semiala' : ', ala completa a pianta rettangolare'));
-  riga('  Apertura b = ' + n(M.b) + ' mm; corda alla radice ' + n(M.cr) + ' mm' + (M.ct !== M.cr ? ', all\'estremita\' ' + n(M.ct) + ' mm' : ''));
+  const pi = M.pianta, gr = v => n(v) + ' gradi';
+  riga('  Profilo ' + M.def.nome + (P.tipo === 'semiala' ? ', semiala destra' : P.tipo === 'intera' ? ', ala intera (due semiali speculari)' : ', ala completa a pianta rettangolare') +
+    (pi.doppia ? ', a doppia freccia' : pi.semi && pi.pannelli.some(q => Math.abs(q.frLE) > 0.05) ? ', a freccia' : '') + (M.ct !== M.cr ? ', rastremata' : ''));
+  riga('  Apertura b = ' + n(M.b) + ' mm' + (M.intera ? ' (semiala ' + n(M.bh) + ' mm)' : '') + '; corda alla radice ' + n(M.cr) + ' mm' + (pi.doppia ? ', alla rottura ' + n(pi.ck) + ' mm a ' + n(pi.yk) + ' mm dalla radice' : '') + (M.ct !== M.cr ? ', all\'estremita\' ' + n(M.ct) + ' mm' : ''));
+  if (pi.semi) pi.pannelli.forEach((q, i) => riga('  Freccia' + (pi.doppia ? (i ? ' pannello esterno' : ' pannello interno') : '') + ': bordo d\'attacco ' + gr(q.frLE) + ', 25% della corda ' + gr(q.frC4) + ', bordo d\'uscita ' + gr(q.frTE)));
   riga('  Superficie S = ' + n(M.S / 100) + ' cm2; allungamento AR = ' + n(M.AR) + (P.tipo === 'semiala' ? ' (riferito all\'ala completa)' : ''));
-  riga('  Centine: ' + M.n + ', spessore ' + n(M.t) + ' mm, interasse ' + n(M.passo) + ' mm, luce netta ' + n(M.passo - M.t) + ' mm');
-  riga('  Piano medio della prima centina a ' + n(M.e) + ' mm dall\'estremita\' dei longheroni');
+  if (pi.semi) riga('  Corda media aerodinamica ' + n(M.cma) + ' mm a y = ' + n(M.yMac) + ' mm, bordo d\'attacco a x = ' + n(M.xMac) + ' mm; centro aerodinamico a x = ' + n(M.xCa) + ' mm');
+  riga('  Centine' + (M.intera ? ' per semiala' : '') + ': ' + M.n + ', spessore ' + n(M.t) + ' mm' + (M.obl || pi.doppia ? '; interassi' + (M.obl ? ' lungo il longherone 1' : '') + ': ' + M.passi.map(v => n(arr(v, 10))).join(' / ') + ' mm' : ', interasse ' + n(M.passo) + ' mm, luce netta ' + n(M.passo - M.t) + ' mm'));
+  if (M.obl) riga('  Centine di chiusura (' + M.centine.filter(c => c.chiusa).map(c => c.j + 1).join(', ') + ') parallele al piano di simmetria; centine intermedie normali al longherone 1, ruotate di ' + [...new Set(M.centine.filter(c => c.phi).map(c => gr(c.phi * 180 / Math.PI)))].join(' e '));
+  riga('  Piano medio della prima centina a ' + n(M.e) + ' mm ' + (M.intera ? 'dal piano di simmetria' : 'dall\'estremita\' dei longheroni'));
   riga('  Parete minima ' + n(P.parete) + ' mm; gioco di accoppiamento ' + n(P.gioco) + ' mm per lato'); riga('');
   riga('2. LONGHERONI'); riga('-------------');
   M.longheroni.forEach(l => {
     const sp = l.sp, q = l.sez.prop, d = FORME[sp.forma].campi.map(c => c + ' = ' + n(sp[c])).join(', ');
-    riga('  Longherone ' + (l.i + 1) + ': sezione ' + FORME[sp.forma].desc + ' al ' + n(sp.x) + '% della corda (' + d + ' mm), L = ' + n(l.L) + ' mm');
+    riga('  Longherone ' + (l.i + 1) + ': sezione ' + FORME[sp.forma].desc + ' al ' + n(sp.x) + '% della corda' + (Math.abs(l.xt - l.xi) > 1e-6 ? ' alla radice e al ' + n(100 * l.xt) + '% all\'estremita\'' : '') + ' (' + d + ' mm), L = ' + n(l.L) + ' mm' + (M.intera ? ' per semiala' : ''));
+    if (pi.semi && l.segmenti.some(q => Math.abs(q.tx) > 1e-4)) riga('    Freccia dell\'asse ' + l.segmenti.map(q => gr(Math.atan(q.tx) * 180 / Math.PI)).join(' e poi ') + (l.segmenti.length > 1 ? ' (asse spezzato alla rottura)' : ''));
+    l.angolati.forEach(q => riga('    Giunto ' + (q.dove === 'radice' ? 'di radice' : 'alla rottura') + ': ' + (q.dritto ? 'manicotto diritto lungo ' + n(q.Ls) + ' mm' : 'due meta\' a U, bracci di ' + n(q.Lg) + ' mm, deviazione ' + gr(q.ap * 180 / Math.PI) + ', teste dei tronchi accorciate di ' + n(q.d) + ' mm')));
     riga('    A = ' + n(q.A) + ' mm2; momenti d\'inerzia del second\'ordine J_x = ' + n(q.Jx) + ' mm4, J_y = ' + n(q.Jy) + ' mm4');
     riga('    ' + (sp.stampa ? 'Stampa: ' + l.stampa.nota + (l.tronchi.length > 1 ? '; ' + l.tronchi.length + ' tronchi con manicotti' : '') : 'Non stampato: elemento commerciale'));
   });
   if (M.correnti.length) {
-    riga(''); riga('  Correnti: ' + M.correnti.length + ' barre ' + n(P.cB) + ' x ' + n(P.cH) + ' mm lunghe ' + n(M.correnti[0].L) + ' mm' + (M.correnti[0].tronchi.length > 1 ? ', in ' + M.correnti[0].tronchi.length + ' tronchi' : '') + ';');
+    riga(''); riga('  Correnti' + (M.intera ? ' per semiala' : '') + ': ' + M.correnti.length + ' barre ' + n(P.cB) + ' x ' + n(P.cH) + ' mm lunghe ' + n(M.correnti[0].L) + ' mm' + (M.correnti[0].tronchi.length > 1 ? ', in ' + M.correnti[0].tronchi.length + ' tronchi' : '') + ';');
     riga('    intagli nelle centine ' + n(P.cB + 2 * P.gioco) + ' x ' + n(P.cH + P.gioco) + ' mm. Posizioni (% della corda): ' + M.correnti.map(s => s.id + ' ' + n(100 * s.x)).join(', '));
   }
   if (M.gusci.length) {
@@ -2305,17 +2803,30 @@ function leggimi(P, M, piatti, stat) {
   M.avvisi.forEach(a => riga('  - [' + a.liv + '] ' + a.testo));
   riga(''); riga('5. MONTAGGIO'); riga('------------');
   riga('  1) Rimuovere eventuali bave dalle sedi delle centine.');
-  riga('  2) Infilare le centine sui longheroni, tutte con lo stesso verso.');
-  riga('  3) Portare la prima centina con il piano medio a ' + n(M.e) + ' mm dall\'estremita\'' + (P.dima ? ' e posizionare le successive con la dima da ' + n(M.passo - M.t) + ' mm.' : '.'));
+  const dimeP = M.parti.filter(q => q.tipo === 'dima'), nor = M.centine.filter(c => c.phi).map(c => c.j + 1), chi = M.centine.filter(c => c.chiusa).map(c => c.j + 1);
+  if (M.obl) {
+    riga('  2) Infilare sui longheroni le centine normali (' + nor.join(', ') + '): le sedi sono a misura, quindi il longherone le tiene in squadra.');
+    riga('     Distanziarle con la dima diritta, appoggiata lungo il longherone 1.' + (M.centine.some(c => c.tronca) ? ' Le centine tronche (' + M.centine.filter(c => c.tronca).map(c => c.j + 1).join(', ') + ') si incollano di testa alla centina di chiusura.' : ''));
+    riga('  3) Infilare le centine di chiusura (' + chi.join(', ') + '), che il longherone attraversa obliquo in una sede allargata: la dima di freccia');
+    riga('     (a trapezio), appoggiata al fianco posteriore del longherone 1 fra la chiusura e la centina normale vicina, fissa insieme');
+    riga('     la distanza e l\'angolo di freccia. La centina di radice ha il piano medio a ' + n(M.e) + ' mm ' + (M.intera ? 'dal piano di simmetria.' : 'dall\'estremita\' dei longheroni.'));
+  } else {
+    riga('  2) Infilare le centine sui longheroni in ordine numerico, tutte con lo stesso verso.');
+    riga('  3) Portare la prima centina con il piano medio a ' + n(M.e) + ' mm ' + (M.intera ? 'dal piano di simmetria' : 'dall\'estremita\'') + (dimeP.length ? ' e posizionare le successive con ' + (dimeP.length > 1 ? 'le dime da ' : 'la dima da ') + dimeP.map(q => n(q.lx)).join(' e ') + ' mm.' : '.'));
+  }
+  if (M.giunti.some(q => q.dove === 'rottura')) riga('     Alla rottura i due tratti del longherone si uniscono con il giunto a U (le due meta\' sopra e sotto), dentro la centina ' + (M.ik + 1) + '.');
+  if (M.intera) riga('     Ala intera: montare le due semiali (pezzi D e S) e unirle al piano di simmetria con il ' + (M.giunti.some(q => q.dove === 'radice' && !q.dritto) ? 'giunto di radice a U' : 'manicotto di radice') + '; controllare la freccia con la pianta quotata.');
+  if (M.centine.some(c => c.smusso)) riga('     Le centine hanno bordi e sedi obliqui: sono stampate per la semiala destra con la faccia verso la radice sul piano; per la sinistra' + (M.intera ? ' (pezzi S)' : '') + ' si montano capovolte.');
   riga('  4) Verificare l\'allineamento dei bordi d\'uscita su un piano e fissare con cianoacrilato.');
   if (M.correnti.length) riga('  5) Inserire i correnti negli intagli, a filo del contorno delle centine; i tronchi si uniscono al centro di una centina.');
   if (M.gusci.length) {
-    riga('  6) Far scorrere i gusci sulla struttura partendo dall\'estremita\' libera: per primo il guscio della campata 1 (radice),');
+    if (M.gusci.some(q => !q.dritto)) riga('  6) I gusci rastremati o a freccia non sono simmetrici: quelli marcati D vanno sulla semiala destra, gli S sulla sinistra.');
+    riga('  ' + (M.gusci.some(q => !q.dritto) ? '   ' : '6) ') + 'Far scorrere i gusci sulla struttura partendo dall\'estremita\' libera: per primo il guscio della campata 1 (radice),');
     riga('     poi gli altri in ordine. Ogni giunzione fra due gusci cade a meta\' di una centina. Incollare i gusci alle centine.');
   }
   riga(''); riga('6. TABELLA DELLE MISURE'); riga('-----------------------');
   const asc = t => String(t).replace(/<sub>(.*?)<\/sub>/g, '_$1').replace(/<[^>]+>/g, '').replace(/·/g, '*').replace(/−/g, '-').replace(/×/g, 'x').replace(/√/g, 'sqrt').replace(/⌈/g, 'ceil(').replace(/⌉/g, ')')
-    .replace(/c̄/g, 'c_m').replace(/²/g, '2').replace(/⁴/g, '4').replace(/Δ/g, 'D').replace(/→/g, '->').replace(/’/g, "'").replace(/[àá]/g, "a'").replace(/[èé]/g, "e'").replace(/ì/g, "i'").replace(/ò/g, "o'").replace(/ù/g, "u'");
+    .replace(/c̄/g, 'c_m').replace(/Λ/g, 'Lambda').replace(/φ/g, 'phi').replace(/δ/g, 'delta').replace(/τ/g, 'tau').replace(/∫/g, 'int').replace(/Σ/g, 'somma').replace(/°/g, ' gradi').replace(/²/g, '2').replace(/⁴/g, '4').replace(/Δ/g, 'D').replace(/→/g, '->').replace(/’/g, "'").replace(/[àá]/g, "a'").replace(/[èé]/g, "e'").replace(/ì/g, "i'").replace(/ò/g, "o'").replace(/ù/g, "u'");
   tabellaMisure(P, M).forEach(gq => {
     riga('  ' + asc(gq.titolo));
     gq.righe.forEach(q => riga('    ' + asc(q.nome).padEnd(52) + (asc(nf(q.v)) + ' ' + asc(q.um)).padStart(14) + '  [' + q.tipo + ']' + (q.regola ? '  ' + asc(q.regola) : '') + (q.calcolo ? '  ->  ' + asc(q.calcolo) : '')));
@@ -2329,7 +2840,8 @@ G.Ala = {
   poligoniConFori, proprietaSezione, nacaDef, profiloDef, parametriProfilo, FAMIGLIE, AUTORE, nacaProfilo, lineaMedia, limitiSezione, sediEntrano, adatta, ricalcola,
   tabellaMisure, compatibilita, nf, posizioniCorrenti, puntoCorrente, riduzione, LIVELLI, anelloRicampionato, loftGuscio,
   regioneSchizzo, solidoSchizzo, testoRegione, larghezzaTesto, carattereValido, caratteri, MODI, CAR_PREDEFINITO, percorsoForma, ruotaParte, disponiManuale, improntaPezzo, bordoPiano, rettangolo, MAN_CAMPI, MAN_SEZ, sezioneLongherone, sezioneDiStampa, progettoPredefinito, stampaPredefinita, normalizzaProgetto,
-  corde, applicaAR, autoProporzioni, autoSezione, costruisci, estrudi, meshParte, volumeMesh, tagliaMesh, parteDaMesh, disponi, disponiEsterni,
+  guscioInOpera, corde, applicaAR, pianta, stazioni, piantaEStazioni, convertiFreccia, RIF_FR, RIF_NOMI, assi, giuntiAngolati, sedeA, tagliaAla, incrocio, contornoCentina, pianiCentine,
+  autoProporzioni, autoSezione, costruisci, estrudi, meshParte, volumeMesh, tagliaMesh, parteDaMesh, disponi, disponiEsterni,
   numStrati, regioniStrati, percorsiParte, generaGcode, analizzaGcode, modificaGcode, scrivi3mf, leggi3mf, trasformaMesh, durata
 };
 })(typeof window !== 'undefined' ? window : globalThis);
@@ -2353,7 +2865,7 @@ const CHIAVE_LOCALE = 'hangar-ala-progetto';
 const stato = {
   P: null, M: null, errore: null, vista: 'assieme', centina: 0, piatto: 0, disposizione: null,
   gcode: [], valido: false, generato: false, occupato: false, est: null,
-  opz: { rivestimento: true, spaccato: false, strato: 0, solo: false, piano2d: true }, aperti: { livello: true, pianta: true, longheroni: true },
+  opz: { rivestimento: true, spaccato: false, strato: 0, solo: false, piano2d: true }, aperti: { livello: true, pianta: true, freccia: true, longheroni: true },
   tab: null, effetti: null, scrollMisure: 0,
   pezzo: null, riparaPiano: false, ultimaNota: '', sk: { i: 0, sel: -1, str: 'sel', modo: 'pieno', hr: 0.6, poli: null, vb: null, prev: null }
 };
@@ -2376,7 +2888,12 @@ const MODELLI = [
   ['Ala a lamina curva 8 %, monolongherone a T', { nome: 'Ala a lamina curva 8%', profilo: 'lamina', spProf: 8, fProf: 4, pProf: 40, b: 260, cr: 100, longheroni: [{ x: 30, forma: 'T', stampa: true }] }],
   ['Ala NACA 23012, monolongherone a C', { nome: 'Ala monolongherone NACA 23012', naca: '23012', b: 220, cr: 110, longheroni: [{ x: 28, forma: 'C', stampa: true }] }],
   ['Ala completa 280 x 110: centine, 2 longheroni, correnti e rivestimento', { nome: 'Ala completa NACA 2412', naca: '2412', livello: 'completa', b: 280, cr: 110, longheroni: [{ x: 25, forma: 'I', stampa: true }, { x: 62, forma: 'C', stampa: true }] }],
-  ['Semiala rastremata completa 300, corda 120 - 84, con rivestimento', { nome: 'Semiala completa NACA 4412', naca: '4412', livello: 'completa', tipo: 'semiala', b: 300, cr: 120, tr: 0.7, longheroni: [{ x: 28, forma: 'I', stampa: true }] }]
+  ['Semiala rastremata completa 300, corda 120 - 84, con rivestimento', { nome: 'Semiala completa NACA 4412', naca: '4412', livello: 'completa', tipo: 'semiala', b: 300, cr: 120, tr: 0.7, longheroni: [{ x: 28, forma: 'I', stampa: true }] }],
+  ['Semiala trapezia multilongherone, schema dell’F-104: bordo d’attacco 26°', { nome: 'Semiala multilongherone NACA 0012', naca: '0012', livello: 'correnti', tipo: 'semiala', b: 200, cr: 160, tr: 0.5, rifFr: 'le', fr1: 26, longheroni: [{ x: 15, forma: 'rett', stampa: true }, { x: 40, forma: 'I', stampa: true }, { x: 65, forma: 'rett', stampa: true }] }],
+  ['Semiala a freccia 30° al 25 %, centine normali al longherone', { nome: 'Semiala a freccia NACA 2412', naca: '2412', centine: 'normali', tipo: 'semiala', b: 300, cr: 130, tr: 0.5, rifFr: 'c4', fr1: 30, longheroni: [{ x: 28, forma: 'I', stampa: true }] }],
+  ['Ala intera a freccia 25° (bordo d’attacco), rastremata, con rivestimento', { nome: 'Ala a freccia NACA 2412', naca: '2412', livello: 'completa', tipo: 'intera', b: 560, cr: 140, tr: 0.5, rifFr: 'le', fr1: 25, longheroni: [{ x: 28, forma: 'I', stampa: true }] }],
+  ['Ala intera a doppia freccia 5° / 32°, pannello esterno rastremato', { nome: 'Ala a doppia freccia NACA 2412', naca: '2412', livello: 'correnti', tipo: 'intera', b: 640, cr: 160, tr: 0.4, doppia: true, yk: 35, trk: 0.75, rifFr: 'le', fr1: 5, fr2: 32, longheroni: [{ x: 28, xt: 28, via: 'spezzato', forma: 'I', stampa: true }] }],
+  ['Ala intera a freccia negativa −15° al 25 % della corda', { nome: 'Ala a freccia negativa NACA 4412', naca: '4412', tipo: 'intera', b: 520, cr: 120, tr: 0.6, rifFr: 'c4', fr1: -15, longheroni: [{ x: 30, forma: 'I', stampa: true }] }]
 ];
 function daModello(i) {
   const P = A.normalizzaProgetto(Object.assign(A.progettoPredefinito(), JSON.parse(JSON.stringify(MODELLI[i][1]))));
@@ -2400,7 +2917,7 @@ function campo(c) {
     (man ? 'Quota fissata a mano: le altre si adattano. Premere per tornare al valore automatico.' : 'Valore calcolato dalle proporzioni. Premere per fissarlo a mano.') + '">' + (man ? 'fisso' : 'auto') + '</button>';
   return '<div class="campo' + (der ? ' derivato' : '') + '"><label for="' + id + '">' + c.et + (c.sim ? '<span class="sim">' + c.sim + '</span>' : '') + (c.extra || '') + '</label><span class="ingresso"><input type="number" id="' + id +
     '" data-k="' + c.k + '" value="' + v + '" min="' + c.min + '" max="' + c.max + '" step="' + (c.passo || 1) + '"' + (der ? ' readonly tabindex="-1"' : '') + ' inputmode="decimal">' + (c.um ? '<i>' + c.um + '</i>' : '') + '</span>' +
-    (c.nota ? '<p class="nota">' + c.nota + '</p>' : '') + '</div>';
+    (c.nota !== undefined ? '<p class="nota" id="n-' + id + '"' + (c.nota ? '' : ' hidden') + '>' + c.nota + '</p>' : '') + '</div>';
 }
 function gruppo(id, titolo, corpo, conta) {
   return '<details class="gruppo" data-g="' + id + '"' + (stato.aperti[id] ? ' open' : '') + '><summary>' + titolo + (conta ? '<span class="conta">' + conta + '</span>' : '') + '</summary><div class="corpo">' + corpo + '</div></details>';
@@ -2426,6 +2943,24 @@ function selettoreProfilo() {
   }
   return h;
 }
+/* Note che accompagnano i campi della pianta: si aggiornano a ogni ricalcolo. */
+function notaDinamica(k) {
+  const M = stato.M, pi = M && M.pianta, gr = v => num(v, 2) + '°';
+  if (!pi) return '';
+  const fr = q => 'Bordo d’attacco ' + gr(q.frLE) + ' · 25 % ' + gr(q.frC4) + ' · bordo d’uscita ' + gr(q.frTE) + (q.frRif < 0 ? ' — freccia negativa (in avanti).' : '.');
+  if (k === 'centine') return M.obl ? 'Come nelle ali a freccia reali: le centine ' + M.centine.filter(c => c.phi).map(c => c.j + 1).join(', ') + ' sono normali al longherone 1, a passo uniforme lungo il suo asse; le centine di chiusura (' + M.centine.filter(c => c.chiusa).map(c => c.j + 1).join(', ') + ') restano secondo il vento.' + (M.centine.some(c => c.tronca) ? ' Nelle zone triangolari le centine ' + M.centine.filter(c => c.tronca).map(c => c.j + 1).join(', ') + ' sono tronche e terminano contro la chiusura.' : '')
+    : stato.P.centine === 'vento' && pi.semi ? 'Come nell’F-104: centine tutte parallele al piano di simmetria, la prima a filo della radice e l’ultima a filo dell’estremità; longheroni e correnti lungo linee a percentuale costante della corda, convergenti verso l’estremità. Le centine si stampano a strati sfalsati: bordi e sedi sono obliqui nello spessore, a misura sui longheroni.' : 'Con freccia nulla del longherone 1 le due disposizioni coincidono.';
+  if (k === 'fr1') return fr(pi.pannelli[0]);
+  if (k === 'fr2') return pi.pannelli[1] ? fr(pi.pannelli[1]) : '';
+  if (k === 'yk') return pi.doppia ? 'Rottura a ' + num(pi.yk, 1) + ' mm dalla radice.' : '';
+  if (k === 'trk') return pi.doppia ? 'c<sub>k</sub> = ' + num(pi.ck, 1) + ' mm.' : '';
+  if (k === 'tr') return 'Corda all’estremità c<sub>t</sub> = ' + num(M.ct, 1) + ' mm.';
+  if (k === 'mac') return pi.semi ? 'Corda media aerodinamica c̄<sub>A</sub> = ' + num(pi.mac, 1) + ' mm a y = ' + num(pi.yMac, 1) + ' mm; centro aerodinamico a ' + num(pi.xCa, 1) + ' mm dietro il bordo d’attacco della radice.' : '';
+  const m = /^longheroni\.(\d+)\.xt$/.exec(k), l = m && M.longheroni[+m[1]];
+  if (l) return l.segmenti.some(q => Math.abs(q.tx) > 1e-4) ? 'Freccia dell’asse ' + l.segmenti.map(q => gr(Math.atan(q.tx) * 180 / Math.PI)).join(' e poi ') + '.' : 'Asse normale al piano di simmetria.';
+  return '';
+}
+const NOTE_DINAMICHE = ['fr1', 'fr2', 'yk', 'trk', 'tr'];
 function costruisciModulo() {
   const P = stato.P, M = stato.M, e = stato.est;
   let h = '';
@@ -2444,26 +2979,40 @@ function costruisciModulo() {
       '<div class="pulsanti"><button class="btn" data-az="ruota">Ruota di 90°</button><button class="btn" data-az="torna">Torna al progetto</button></div></div>';
   }
   if (!e) {
-    const semi = P.tipo === 'semiala';
+    const semi = P.tipo !== 'completa', intera = P.tipo === 'intera', pi = M && M.pianta, doppia = semi && P.doppia, gr = v => num(v, 2) + '°';
     h += gruppo('livello', 'Cosa costruire', '<div class="terna livelli">' + LIVELLI_UI.map(q => '<button type="button" class="btn" data-az="livello" data-l="' + q[0] + '" aria-pressed="' + (P.livello === q[0]) + '">' + q[1] + '</button>').join('') + '</div>' +
       '<p class="nota">' + LIVELLI_UI.find(q => q[0] === P.livello)[2] + '</p><button type="button" class="btn largo-btn" data-az="vedi-misure">Tabella delle misure e degli accoppiamenti</button>');
     h += gruppo('pianta', 'Profilo e pianta', [
       selettoreProfilo(),
-      campo({ k: 'tipo', et: 'Modello', tipo: 'scelta', opz: [['completa', 'Ala completa rettangolare'], ['semiala', 'Semiala, anche rastremata']] }),
-      campo({ k: 'b', et: semi ? 'Apertura della semiala' : 'Apertura alare', sim: 'b', um: 'mm', min: 40, max: 3000, passo: 1 }),
+      campo({ k: 'tipo', et: 'Modello', tipo: 'scelta', opz: [['completa', 'Ala rettangolare in un pezzo'], ['semiala', 'Semiala destra (anche a freccia e rastremata)'], ['intera', 'Ala intera: due semiali speculari']] }),
+      campo({ k: 'b', et: P.tipo === 'semiala' ? 'Apertura della semiala' : 'Apertura alare', sim: 'b', um: 'mm', min: 40, max: 3000, passo: 1, nota: intera ? 'Apertura totale: ogni semiala è lunga b/2 = ' + num(P.b / 2, 1) + ' mm.' : '' }),
       campo({ k: 'cr', et: semi ? 'Corda alla radice' : 'Corda', sim: semi ? 'c<sub>r</sub>' : 'c', um: 'mm', min: 30, max: 600, passo: 1 }),
-      semi ? campo({ k: 'tr', et: 'Rastremazione', sim: 'c<sub>t</sub>/c<sub>r</sub>', min: 0.3, max: 1, passo: 0.05 }) : '',
+      semi ? campo({ k: 'tr', et: 'Rastremazione', sim: 'c<sub>t</sub>/c<sub>r</sub>', min: 0.3, max: 1, passo: 0.05, nota: notaDinamica('tr') }) : '',
       campo({ k: 'AR', et: 'Allungamento', sim: 'AR', min: 0.5, max: 40, passo: 0.1, sola: !P.arLock,
         extra: ' <button type="button" class="blocco" data-az="arlock" aria-pressed="' + (P.arLock ? 'true' : 'false') + '" title="Con il vincolo attivo corda e apertura restano proporzionali">' + (P.arLock ? 'vincolato' : 'vincola') + '</button>',
-        nota: P.arLock ? 'Vincolo attivo: cambiando la corda si adegua l’apertura e viceversa.' : (semi ? 'AR = 2b / corda media, riferito all’ala completa.' : 'AR = b / c. Attivare il vincolo per mantenerlo costante.') }),
+        nota: P.arLock ? 'Vincolo attivo: cambiando la corda si adegua l’apertura e viceversa.' : (P.tipo === 'semiala' ? 'AR = 2b / c̄, riferito all’ala completa.' : semi ? 'AR = b² / S = b / c̄.' : 'AR = b / c. Attivare il vincolo per mantenerlo costante.') }),
       campo({ k: 'autore', et: 'Progettista', tipo: 'testo', libero: true, nota: 'Compare nella tavola, nel G-code, nel 3MF e nelle istruzioni.' })
     ].join(''));
+    if (semi) h += gruppo('freccia', 'Freccia e pannelli', [
+      '<p class="nota">La freccia è l’angolo fra una linea della pianta e la normale al piano di simmetria.</p>',
+      campo({ k: 'rifFr', et: 'Linea su cui si misura', tipo: 'scelta', opz: [['le', 'Bordo d’attacco'], ['c4', '25 % della corda (linea dei fuochi)'], ['te', 'Bordo d’uscita'], ['lon', 'Asse del 1° longherone']] }),
+      campo({ k: 'fr1', et: doppia ? 'Freccia del pannello interno' : 'Freccia', sim: 'Λ' + (doppia ? '<sub>1</sub>' : ''), um: '°', min: -45, max: 60, passo: 0.5,
+        nota: notaDinamica('fr1') }),
+      campo({ k: 'centine', et: 'Centine intermedie', tipo: 'scelta', opz: [['vento', 'Secondo il vento (schema dell’F-104)'], ['normali', 'Normali al longherone 1']] }),
+      '<p class="nota" id="n-centine">' + notaDinamica('centine') + '</p>',
+      campo({ k: 'doppia', et: 'Doppia freccia', tipo: 'spunta', nota: 'Due pannelli trapezi con freccia e rastremazione diverse, uniti alla rottura da una centina comune.' }),
+      doppia ? campo({ k: 'yk', et: 'Posizione della rottura', sim: 'y<sub>k</sub>/b<sub>s</sub>', um: '%', min: 10, max: 90, passo: 1, nota: notaDinamica('yk') }) : '',
+      doppia ? campo({ k: 'trk', et: 'Corda alla rottura', sim: 'c<sub>k</sub>/c<sub>r</sub>', min: 0.3, max: 1.2, passo: 0.05, nota: notaDinamica('trk') }) : '',
+      doppia ? campo({ k: 'fr2', et: 'Freccia del pannello esterno', sim: 'Λ<sub>2</sub>', um: '°', min: -45, max: 60, passo: 0.5, nota: notaDinamica('fr2') }) : '',
+      '<p class="nota" id="n-mac">' + notaDinamica('mac') + '</p>'
+    ].join(''), pi ? gr(pi.pannelli[0].frRif) + (pi.doppia ? ' / ' + gr(pi.pannelli[1].frRif) : '') : '');
     h += gruppo('centine', 'Centine', [
       campo({ k: 'auto', et: 'Proporzioni automatiche', tipo: 'spunta', nota: 'Numero, spessori, pareti e sezioni dei longheroni seguono corda, apertura e profilo. Con «auto» → «fisso» si blocca una singola quota.' }),
       campo({ k: 'adatta', et: 'Adatta il resto dell’ala', tipo: 'spunta', nota: 'Se un particolare ingrandito non entra più nel profilo, la corda cresce fino ad alloggiarlo e le altre quote la seguono.' }),
-      campo({ k: 'nCentine', et: 'Numero', min: 2, max: 60, passo: 1, auto: true }),
+      campo({ k: 'nCentine', et: doppia ? 'Pannello interno' : intera ? 'Numero per semiala' : 'Numero', min: 2, max: 60, passo: 1, auto: true, nota: doppia ? 'Dalla radice alla rottura, comprese.' : '' }),
+      doppia ? campo({ k: 'nCentine2', et: 'Pannello esterno', min: 2, max: 60, passo: 1, auto: true, nota: 'Dalla rottura all’estremità, comprese: la centina della rottura è in comune.' }) : '',
       campo({ k: 'spCentina', et: 'Spessore', um: 'mm', min: 1.5, max: 20, passo: 0.5, auto: true }),
-      campo({ k: 'e', et: 'Prima centina dall’estremità', um: 'mm', min: 1, max: 300, passo: 1, auto: true }),
+      campo({ k: 'e', et: intera ? 'Prima centina dal piano di simmetria' : 'Prima centina dall’estremità', um: 'mm', min: 1, max: 300, passo: 1, auto: true, nota: intera ? 'Fra le due centine di radice c’è il giunto dei longheroni.' : '' }),
       campo({ k: 'te', et: 'Bordo d’uscita', um: 'mm', min: 0.4, max: 5, passo: 0.05, auto: true }),
       campo({ k: 'parete', et: 'Parete minima', um: 'mm', min: 0.8, max: 10, passo: 0.1, auto: true }),
       campo({ k: 'alleggerimenti', et: 'Finestre di alleggerimento', tipo: 'spunta' }),
@@ -2477,7 +3026,9 @@ function costruisciModulo() {
       l += '<div class="scheda-l"><header><svg class="schizzo" id="sk-' + i + '" viewBox="-1 -1 2 2" aria-hidden="true"></svg><b>Longherone ' + (i + 1) + '</b>' +
         (P.longheroni.length > 1 ? '<button type="button" class="btn piccolo" data-az="togli" data-i="' + i + '">Rimuovi</button>' : '') + '</header>' +
         campo({ k: 'longheroni.' + i + '.forma', et: 'Sezione', tipo: 'scelta', opz: Object.keys(A.FORME).map(k => [k, A.FORME[k].nome]) }) +
-        campo({ k: 'longheroni.' + i + '.x', et: 'Posizione', sim: 'x/c', um: '%', min: 3, max: 90, passo: 1 }) +
+        campo({ k: 'longheroni.' + i + '.x', et: semi ? 'Posizione alla radice' : 'Posizione', sim: semi ? 'x<sub>r</sub>/c' : 'x/c', um: '%', min: 3, max: 90, passo: 1 }) +
+        (semi ? campo({ k: 'longheroni.' + i + '.xt', et: 'Posizione all’estremità', sim: 'x<sub>t</sub>/c', um: '%', min: 3, max: 90, passo: 1, nota: notaDinamica('longheroni.' + i + '.xt') }) : '') +
+        (doppia ? campo({ k: 'longheroni.' + i + '.via', et: 'Asse', tipo: 'scelta', opz: [['retto', 'Rettilineo dalla radice all’estremità'], ['spezzato', 'Spezzato alla rottura (giunto angolato)']] }) : '') +
         f.campi.map(d => campo({ k: 'longheroni.' + i + '.' + d, et: d === 'H' && tonda ? 'Diametro' : ET_DIM[d][0], sim: d === 'H' && tonda ? 'd' : ET_DIM[d][1], um: 'mm', min: 0.6, max: 80, passo: 0.1, auto: true })).join('') +
         campo({ k: 'longheroni.' + i + '.stampa', et: 'Da stampare', tipo: 'spunta', nota: 'Togliere la spunta per un tondino o un tubo commerciale: restano le sedi nelle centine.' }) + '</div>';
     });
@@ -2539,6 +3090,9 @@ function aggiornaValori() {
     if (el.type === 'checkbox') el.checked = !!v; else if (v !== undefined && String(el.value) !== String(v)) el.value = v;
   });
   if (M && !stato.est) {
+    NOTE_DINAMICHE.concat(P.longheroni.map((s, i) => 'longheroni.' + i + '.xt')).forEach(k => { const n = $('#n-' + idDi(k)); if (n) { const t = notaDinamica(k); n.innerHTML = t; n.hidden = !t; } });
+    const nm = $('#n-mac'); if (nm) nm.innerHTML = notaDinamica('mac');
+    const nc = $('#n-centine'); if (nc) nc.innerHTML = notaDinamica('centine');
     M.longheroni.forEach(l => { const s = $('#sk-' + l.i); if (s) s.innerHTML = schizzo(l.sez); });
     const c = $('.gruppo[data-g="centine"] .conta'); if (c) c.textContent = M.n + ' pz';
   }
@@ -2551,7 +3105,7 @@ function aggiornaValori() {
 function disegnaTestata() {
   const svg = $('#t-volo'), M = stato.M;
   if (!svg || !M || stato.est) return;
-  const c = M.centine[0], chiave = [M.def.nome, c.c.toFixed(2), c.area.toFixed(1), M.longheroni.map(l => l.sp.forma + l.xi.toFixed(3) + l.sez.H.toFixed(2) + l.sez.B.toFixed(2)).join()].join('|');
+  const c = M.centine[0], chiave = [M.def.nome, c.c.toFixed(2), c.area.toFixed(1), M.longheroni.map(l => l.sp.forma + c.posLon[l.i].u.toFixed(2) + l.sez.H.toFixed(2) + l.sez.B.toFixed(2)).join()].join('|');
   if (svg.dataset.k === chiave) return;
   svg.dataset.k = chiave;
   let prof;
@@ -2573,7 +3127,7 @@ function disegnaTestata() {
   });
   s += '<path class="t-corda" d="M' + (x0 - 14) + ' ' + yc + 'H' + (x0 + Lc + 14) + '"/>';
   s += '<path class="t-rib" fill-rule="evenodd" d="' + percorso(c.regione) + '"/>';
-  M.longheroni.forEach(l => { s += '<path class="t-lon" fill-rule="evenodd" d="' + percorso(A.sposta(l.sez.regione, l.xi * c.c, prof.medio(l.xi) * c.c)) + '"/>'; });
+  M.longheroni.forEach(l => { const q = c.posLon[l.i]; s += '<path class="t-lon" fill-rule="evenodd" d="' + percorso(A.sposta(l.sez.regione, q.u, q.v)) + '"/>'; });
   s += '<text x="' + (W / 2) + '" y="83" text-anchor="middle">Centina 1 · ' + esc(M.def.nome) + ' · c = ' + num(c.c, 1) + ' mm</text>';
   svg.innerHTML = s;
 }
@@ -2597,7 +3151,7 @@ function confrontaMisure(prima, dopo, chiave) {
   if (!righe.length) return null;
   return { causa: causa ? causa.nome : (ETICHETTE_CHIAVE[chiave] || ''), righe, quando: Date.now() };
 }
-const ETICHETTE_CHIAVE = { livello: 'Cosa costruire', long: 'Longheroni', profilo: 'Profilo', naca: 'Profilo', tipo: 'Modello di ala', arLock: 'Vincolo dell’allungamento', schizzo: 'Schizzo libero', spCentina: 'Spessore della centina', auto: 'Proporzioni automatiche', adatta: 'Adattamento automatico' };
+const ETICHETTE_CHIAVE = { centine: 'Disposizione delle centine', rifFr: 'Linea di riferimento della freccia', doppia: 'Doppia freccia', livello: 'Cosa costruire', long: 'Longheroni', profilo: 'Profilo', naca: 'Profilo', tipo: 'Modello di ala', arLock: 'Vincolo dell’allungamento', schizzo: 'Schizzo libero', spCentina: 'Spessore della centina', auto: 'Proporzioni automatiche', adatta: 'Adattamento automatico' };
 function aggiorna(chiave, strutturale) {
   const P = stato.P, prima = stato.tab;
   try {
@@ -2619,9 +3173,19 @@ function eventiModulo() {
   const box = $('#parametri');
   const leggi = (el, fine) => {
     const k = el.dataset.k, P = stato.P;
-    if (el.type === 'checkbox') { scriviK(P, k, el.checked); return true; }
+    if (el.type === 'checkbox') {
+      if (k === 'doppia' && el.checked && !P.doppia) { // la rottura nasce sulla pianta attuale: stessa forma, ora divisa in due pannelli
+        P.trk = A.arr(1 - (1 - P.tr) * P.yk / 100, 100); P.fr2 = P.fr1;
+      }
+      scriviK(P, k, el.checked); return true;
+    }
     if (el.tagName === 'SELECT' || el.type === 'text' || el.tagName === 'TEXTAREA') {
       if (k === 'stampante.id') { P.stampante = Object.assign({}, A.STAMPANTI[el.value]); return true; }
+      if (k === 'rifFr') { A.convertiFreccia(P, el.value); return true; } // stessa pianta, angolo riferito alla nuova linea
+      if (k === 'tipo') { // semiala e ala intera: b e' l'apertura della semiala o quella totale
+        if (P.tipo === 'semiala' && el.value === 'intera') P.b = A.limita(2 * P.b, 40, 3000);
+        else if (P.tipo === 'intera' && el.value === 'semiala') P.b = A.limita(A.arr(P.b / 2, 10), 40, 3000);
+      }
       const prec = P.profilo, par = k === 'profilo' && el.value === 'libero' ? parametriSicuri() : null; scriviK(P, k, el.value);
       if (par) { P.spProf = par.t; P.fProf = par.f; P.pProf = par.p; } // stessa forma, ora modificabile
       else if (k === 'profilo') P.spProf = el.value === 'lamina' ? 8 : (prec === 'lamina' ? 12 : P.spProf);
@@ -2633,6 +3197,8 @@ function eventiModulo() {
     let v = parseFloat(el.value);
     if (!isFinite(v)) return false;
     if (fine) { v = A.limita(v, +el.min, +el.max); el.value = v; } else if (v < +el.min || v > +el.max) return false;
+    const mx = /^longheroni\.(\d+)\.x$/.exec(k);
+    if (mx) { const sp = P.longheroni[+mx[1]]; if (sp.xt === undefined || sp.xt === null || Math.abs(sp.xt - sp.x) < 1e-9) sp.xt = v; } // asse a percentuale costante: lo resta
     scriviK(P, k, v);
     if (k === 'stampa.h' && stato.P.stampa.h1 < v) stato.P.stampa.h1 = v;
     return true;
@@ -2666,11 +3232,11 @@ function eventiModulo() {
     else if (az === 'parametrico') { rendiParametrico(); pianifica('profilo', true, true); }
     else if (az === 'nlong') {
       const n = +b.dataset.n, base = P.longheroni[0] || { forma: 'I', stampa: true };
-      P.longheroni = A.POSIZIONI[n].map((x, i) => Object.assign({ H: 6, B: 5, tf: 1.2, tw: 1.5, s: 1.2 }, P.longheroni[i] || { forma: base.forma, stampa: true }, { x }));
+      P.longheroni = A.POSIZIONI[n].map((x, i) => Object.assign({ H: 6, B: 5, tf: 1.2, tw: 1.5, s: 1.2, via: 'retto' }, P.longheroni[i] || { forma: base.forma, stampa: true, via: base.via || 'retto' }, { x, xt: x }));
       autoNuovi(); pianifica('long', true, true);
     } else if (az === 'aggiungi') {
       const xs = P.longheroni.map(s => s.x).sort((p, q) => p - q), x = Math.min(85, Math.round((xs[xs.length - 1] || 20) + 20));
-      P.longheroni.push({ x, forma: 'tondo', stampa: true, H: 4, B: 4, tf: 1.2, tw: 1.5, s: 1.2 });
+      P.longheroni.push({ x, xt: x, via: (P.longheroni[0] && P.longheroni[0].via) || 'retto', forma: 'tondo', stampa: true, H: 4, B: 4, tf: 1.2, tw: 1.5, s: 1.2 });
       autoNuovi(); pianifica('long', true, true);
     } else if (az === 'togli') { P.longheroni.splice(+b.dataset.i, 1); pianifica('long', true, true); }
     else if (az === 'torna') { stato.est = null; stato.vista = 'assieme'; stato.gcode = []; stato.generato = false; pianifica('', true, true); }
@@ -2822,7 +3388,7 @@ function toast(testo, tipo) {
 }
 
 // ---------------------------------------------------------------- riepilogo
-const COL_PARTE = { centina: '--accento', longherone: '--acciaio', manicotto: '--bene', dima: '--tenue', esterno: '--acciaio', libero: '--libero', corrente: '--corrente', guscio: '--guscio' };
+const COL_PARTE = { giunto: '--bene', centina: '--accento', longherone: '--acciaio', manicotto: '--bene', dima: '--tenue', esterno: '--acciaio', libero: '--libero', corrente: '--corrente', guscio: '--guscio' };
 function blocchettoGcode() {
   const D = disposizione(), np = D.piatti.length, v = stato.valido;
   let h = '<section><h3>G-code</h3>';
@@ -2839,11 +3405,13 @@ function blocchettoGcode() {
 }
 function tabellaParti(parti) {
   const gr = new Map();
-  parti.forEach(p => { const g = gr.get(p.chiave) || { p, n: 0 }; g.n++; gr.set(p.chiave, g); });
+  parti.forEach(p => { const g = gr.get(p.chiave) || { p, n: 0, lati: new Set() }; g.n++; g.lati.add(p.lato || p.latoG || ''); gr.set(p.chiave, g); });
   let V = 0;
   const righe = [...gr.values()].map(g => {
     const v = A.volumeMesh(A.meshParte(g.p)) * g.n; V += v;
-    return '<tr><td><i class="punto" style="background:var(' + COL_PARTE[g.p.tipo] + ')"></i>' + esc(g.n > 1 ? g.p.nome.replace(/^Centina \d+/, 'Centina').replace(/ - tronco \d+\/\d+$/, ' - tronchi') : g.p.nome) + '</td><td class="n">' + g.n + '</td><td class="n">' + num(g.p.lx, 1) + ' × ' + num(g.p.ly, 1) + ' × ' + num(g.p.lz, 1) + '</td></tr>';
+    let nome = g.p.nome;
+    if (g.n > 1) { nome = nome.replace(/^Centina \d+/, 'Centina').replace(/ - tronco \d+\/\d+/, ' - tronchi'); if (g.lati.has('D') && g.lati.has('S')) nome = nome.replace(/ \((destra|sinistra)\)$/, ' (destra e sinistra)'); }
+    return '<tr><td><i class="punto" style="background:var(' + COL_PARTE[g.p.tipo] + ')"></i>' + esc(nome) + '</td><td class="n">' + g.n + '</td><td class="n">' + num(g.p.lx, 1) + ' × ' + num(g.p.ly, 1) + ' × ' + num(g.p.lz, 1) + '</td></tr>';
   }).join('');
   return '<table class="dati"><tr><th>Parte</th><th class="n">n</th><th class="n">Ingombro mm</th></tr>' + righe + '</table><p class="stato-g" style="margin:6px 0 0">Volume complessivo ' + num(V / 1000, 2) + ' cm³, pari a ' + num(V / 1000 * stato.P.stampa.densita, 1) + ' g di PLA a pieno.</p>';
 }
@@ -2873,7 +3441,7 @@ function disegnaRiepilogo() {
     box.innerHTML = h; return;
   }
   if (!M) { box.innerHTML = '<section><h3>Avvisi</h3><ul class="avvisi"><li class="errore"><b>errore</b>' + esc(stato.errore || 'Progetto non valido.') + '</li></ul></section>'; return; }
-  const D = disposizione(), semi = P.tipo === 'semiala', ef = stato.effetti;
+  const D = disposizione(), semi = P.tipo === 'semiala', pi = M.pianta, ef = stato.effetti;
   if (ef && Date.now() - ef.quando < 600000) h += '<section class="ef-breve"><h3>Ultima modifica</h3><p>' + (ef.causa ? '«' + ef.causa + '»: ' : '') + (ef.righe.length === 1 ? 'è cambiata una misura' : 'si sono adeguate ' + ef.righe.length + ' misure') +
     '.</p><ul>' + ef.righe.filter(q => !q.diretta).slice(0, 4).map(q => '<li>' + q.nome + ': <b>' + esc(q.prima) + ' → ' + esc(q.dopo) + '</b> ' + q.um + '</li>').join('') + '</ul><button class="btn piccolo" data-az="vedi-misure">Vedi tutte nella scheda Misure</button></section>';
   h += '<section><h3>Geometria <small>' + esc(M.def.nome) + '</small></h3><div class="tessere">' +
@@ -2881,9 +3449,11 @@ function disegnaRiepilogo() {
     '<div><span>Allungamento AR</span><b>' + num(M.AR, 2) + '</b></div>' +
     '<div><span>' + (M.ct !== M.cr ? 'Corda media aerodinamica' : 'Corda') + '</span><b>' + num(M.cma, 1) + ' <small>mm</small></b></div>' +
     '<div><span>Spessore massimo</span><b>' + num(M.def.t * M.cr, 1) + ' <small>mm</small></b></div>' +
-    '<div><span>Passo delle centine</span><b>' + num(M.passo, 1) + ' <small>mm</small></b></div>' +
-    '<div><span>Luce netta</span><b>' + num(M.passo - M.t, 1) + ' <small>mm</small></b></div></div>' +
-    (semi ? '<p class="stato-g" style="margin:6px 0 0">S della sola semiala; AR riferito all’ala completa di apertura 2b.</p>' : '') + '</section>';
+    (pi.semi ? '<div><span>Freccia al 25 %' + (pi.doppia ? ' (int. / est.)' : '') + '</span><b>' + pi.pannelli.map(q => num(pi.doppia ? Math.round(q.frC4) || 0 : q.frC4, 1) + '°').join(' / ') + '</b></div>' +
+      '<div><span>Centro aerodinamico</span><b>' + num(pi.xCa, 1) + ' <small>mm</small></b></div>' : '') +
+    '<div><span>' + (M.obl ? 'Interassi lungo il longherone' : 'Passo delle centine') + '</span><b>' + (M.obl || pi.doppia ? num(Math.min(...M.passi), 0) + ' – ' + num(Math.max(...M.passi), 0) : num(M.passo, 1)) + ' <small>mm</small></b></div>' +
+    '<div><span>' + (M.obl ? 'Centine normali / chiusure' : 'Luce netta') + '</span><b>' + (M.obl ? M.centine.filter(c => c.phi).length + (M.centine.some(c => c.tronca) ? ' (' + M.centine.filter(c => c.tronca).length + ' tr.)' : '') + ' / ' + M.centine.filter(c => c.chiusa).length : (pi.doppia ? num(Math.min(...M.luci), 0) + ' – ' + num(Math.max(...M.luci), 0) : num(M.passo - M.t, 1)) + ' <small>mm</small>') + '</b></div></div>' +
+    (semi ? '<p class="stato-g" style="margin:6px 0 0">S della sola semiala; AR riferito all’ala completa di apertura 2b.</p>' : M.intera ? '<p class="stato-g" style="margin:6px 0 0">S e AR dell’ala intera; centine, longheroni e correnti elencati per le due semiali.</p>' : '') + '</section>';
   const av = M.avvisi.slice();
   if (stato.errore) av.unshift({ liv: 'errore', testo: stato.errore + ' Il disegno mostra l’ultima configurazione valida.' });
   D.fuori.forEach(p => av.push({ liv: 'errore', testo: p.nome + ' non entra nel piano di stampa (' + num(p.lx, 0) + ' × ' + num(p.ly, 0) + ' × ' + num(p.lz, 0) + ' mm).' }));
@@ -2955,8 +3525,9 @@ function rendi() {
     tre.r.render(tre.scena, tre.camera);
   });
 }
-function inquadra(g, az, el, firma) {
-  const v = stato.vista, vecchia = tre.cam[v];
+function inquadra(g, az, el, firma, genere) {
+  const v = stato.vista, nuovo = genere !== undefined && (tre.gen = tre.gen || {})[v] !== genere, vecchia = nuovo ? null : tre.cam[v];
+  if (genere !== undefined) tre.gen[v] = genere; // cambiando genere di ala si torna alla vista consigliata
   if (vecchia && tre.inq[v] === firma) return;
   const box = new T3.Box3().setFromObject(g), ce = new T3.Vector3(), dim = new T3.Vector3(); box.getCenter(ce); box.getSize(dim);
   const R = Math.max(10, dim.length() / 2), cv = tre.r.domElement, asp = (cv.parentElement.clientWidth || 4) / (cv.parentElement.clientHeight || 3);
@@ -2985,44 +3556,62 @@ function svuota() {
   tre.scena.remove(tre.gruppo); tre.gruppo = null;
 }
 function gruppoAssieme() {
-  const g = new T3.Group(), M = stato.M, geo = {};
-  M.centine.forEach((c, j) => {
-    const p = M.parti[j], q = geo[p.chiave] || (geo[p.chiave] = geometria(A.meshParte(p)));
-    const s = solido(q, css('--accento'), 1); s.rotation.x = Math.PI / 2; s.position.set(c.xLE + c.ox, c.y + M.t / 2, c.oy); g.add(s);
+  const g = new T3.Group(), dx = new T3.Group(), M = stato.M, P = stato.P, geo = {}, intera = M.intera;
+  g.add(dx); // semiala destra (o ala in un pezzo): con l'ala intera la sinistra ne e' l'immagine speculare
+  M.centine.forEach(c => { // dal piano di stampa al piano della centina: u lungo la traccia, spessore lungo la normale
+    const m0 = A.meshParte(c.parte), cf = Math.cos(c.phi), sf = Math.sin(c.phi), v = new Float32Array(m0.v.length);
+    for (let i = 0; i < v.length; i += 3) { const u = m0.v[i] + c.ox, w = m0.v[i + 2] - M.t / 2; v[i] = c.xLE + u * cf + w * sf; v[i + 1] = c.yLE - u * sf + w * cf; v[i + 2] = m0.v[i + 1] + c.oy; }
+    dx.add(solido(geometria({ v, t: m0.t }, true), css('--accento'), 1));
   });
-  const barra = (reg, len, l, w0) => { // sezione nel piano della centina, asse lungo l'apertura
-    const m = A.estrudi(reg, len), v = m.v;
-    for (let i = 0; i < v.length; i += 3) { const u = v[i], z = v[i + 1], w = v[i + 2] + w0; v[i] = l.origine.x + u + w * l.tx; v[i + 1] = w; v[i + 2] = l.origine.z + z + w * l.tz; }
-    return geometria(m, true);
+  // prisma retto lungo un asse rettilineo (x = ox + tx y, z = oz + tz y): sezione normale all'asse, teste a squadra
+  const lungoAsse = (m, q, y0, e1, e2, inverti) => {
+    const k = Math.hypot(1, q.tx, q.tz), a = [q.tx / k, 1 / k, q.tz / k], P0 = [q.ox + q.tx * y0, y0, q.oz + q.tz * y0], v = m.v;
+    for (let i = 0; i < v.length; i += 3) { const u = v[i], z = v[i + 1], w = v[i + 2]; for (let d = 0; d < 3; d++) v[i + d] = P0[d] + u * e1[d] + z * e2[d] + w * a[d]; }
+    return geometria(m, inverti);
   };
-  M.longheroni.forEach(l => {
-    g.add(solido(barra(l.sez.regione, M.b, l, 0), l.sp.stampa ? css('--acciaio') : '#8b96a1', 1));
-    l.giunti.forEach(gi => g.add(solido(barra(gi.regione, gi.Ls, l, gi.y - gi.Ls / 2), css('--bene'), 1)));
-  });
+  const vett = (p, r) => [p[1] * r[2] - p[2] * r[1], p[2] * r[0] - p[0] * r[2], p[0] * r[1] - p[1] * r[0]], vers = p => { const n = Math.hypot(p[0], p[1], p[2]); return p.map(x => x / n); };
+  const barra = (reg, q, y0, y1) => { // larghezza orizzontale, normale all'asse in pianta
+    const k = Math.hypot(1, q.tx, q.tz), r = Math.hypot(1, q.tx), eh = [1 / r, -q.tx / r, 0];
+    return lungoAsse(A.estrudi(reg, (y1 - y0) * k), q, y0, eh, vett(eh, [q.tx / k, 1 / k, q.tz / k]), true);
+  };
   const gira = (m, f) => { const v = m.v; for (let i = 0; i < v.length; i += 3) { const q = f(v[i], v[i + 1], v[i + 2]); v[i] = q[0]; v[i + 1] = q[1]; v[i + 2] = q[2]; } return m; };
-  M.correnti.forEach(s => { // sezione b x h a filo del contorno, asse rettilineo dalla prima all'ultima centina
-    const q = s.posa, P = stato.P, sez = [[-P.cB / 2, 0], [P.cB / 2, 0], [P.cB / 2, P.cH], [-P.cB / 2, P.cH]].map(([a, d]) => [q.S[0] + q.tau[0] * a - q.n[0] * d, q.S[1] + q.tau[1] * a - q.n[1] * d]);
-    const m = gira(A.estrudi(A.unisci([A.toC(sez)]), M.yB - M.yA), (x, y, w) => [x + w * s.tx, M.yA + w, y + w * s.tz]);
-    g.add(solido(geometria(m, true), css('--corrente'), 1));
+  M.longheroni.forEach(l => {
+    const col = l.sp.stampa ? css('--acciaio') : '#8b96a1';
+    if (l.tronchi.length) l.tronchi.forEach(tr => dx.add(solido(barra(l.sez.regione, tr, tr.y0, tr.y1), col, 1)));
+    else l.segmenti.forEach(q => dx.add(solido(barra(l.sez.regione, q, q.ya, q.yb), col, 1)));
+    l.giunti.forEach(gi => { const d = gi.Ls / 2 / Math.hypot(1, gi.tx, gi.tz), s = solido(barra(gi.regione, gi, gi.y - d, gi.y + d), css('--bene'), 1); (intera && Math.abs(gi.y) < 1e-6 ? g : dx).add(s); });
   });
+  M.giunti.filter(q => !q.dritto && q.bb).forEach(q => { // giunti angolati: due meta' a U attorno alle teste dei tronchi
+    const z0 = q.l.sez.H / 2 + P.gioco + q.sj, gr = [[q.est, 0, q.sj], [q.pareti, q.sj, q.sj + q.hw]];
+    [1, -1].forEach(sg => gr.forEach(([reg, a, b]) => {
+      const m = gira(A.estrudi(reg, b - a), (x, y, z) => [q.X + x, q.y + y, q.Z + sg * (z + a - z0)]);
+      (q.dove === 'radice' ? g : dx).add(solido(geometria(m, sg < 0), css('--bene'), 1));
+    }));
+  });
+  M.correnti.forEach(s => s.segmenti.forEach(q => { // barra b x h con la faccia esterna a filo del contorno, un tratto rettilineo per pannello
+    const k = q.k, a = [q.tx / k, 1 / k, q.tz / k], t0 = [q.tau[0], 0, q.tau[1]], ta = t0[0] * a[0] + t0[2] * a[2], t3 = vers(t0.map((x, i) => x - ta * a[i]));
+    let d3 = vett(a, t3); const dentro = -(d3[0] * q.n[0] + d3[2] * q.n[1]) > 0; if (!dentro) d3 = d3.map(x => -x);
+    dx.add(solido(lungoAsse(A.estrudi([A.rettangolo(-P.cB / 2, 0, P.cB / 2, P.cH)], (q.yb - q.ya) * k), q, q.ya, t3, d3, !dentro), css('--corrente'), 1));
+  }));
   const gusci = M.parti.filter(p => p.tipo === 'guscio');
-  if (gusci.length && stato.opz.rivestimento) { // gusci veri: dalla posizione di stampa a quella di montaggio
+  if (gusci.length && stato.opz.rivestimento) { // gusci veri: dalla posizione di stampa a quella di montaggio (una rotazione)
     const piani = stato.opz.spaccato ? [new T3.Plane(new T3.Vector3(0, 0, -1), 0)] : [];
     gusci.forEach(p => {
-      const m0 = A.meshParte(p), m = gira({ v: new Float32Array(m0.v), t: m0.t }, (x, y, z) => [x + p.posa.x0, p.posa.ya + z, y + p.posa.z0]), geo = geometria(m, true), gr = new T3.Group();
-      gr.add(new T3.Mesh(geo.g, new T3.MeshStandardMaterial({ color: new T3.Color(css('--guscio')), roughness: 0.55, metalness: 0.05, transparent: true, opacity: stato.opz.spaccato ? 0.95 : 0.42, side: T3.DoubleSide, depthWrite: !!stato.opz.spaccato, clippingPlanes: piani })));
-      gr.add(new T3.LineSegments(geo.e, new T3.LineBasicMaterial({ color: new T3.Color(css('--inchiostro')), transparent: true, opacity: 0.35, clippingPlanes: piani })));
+      const ge = geometria(A.guscioInOpera(p)), gr = new T3.Group();
+      gr.add(new T3.Mesh(ge.g, new T3.MeshStandardMaterial({ color: new T3.Color(css('--guscio')), roughness: 0.55, metalness: 0.05, transparent: true, opacity: stato.opz.spaccato ? 0.95 : 0.42, side: T3.DoubleSide, depthWrite: !!stato.opz.spaccato, clippingPlanes: piani })));
+      gr.add(new T3.LineSegments(ge.e, new T3.LineBasicMaterial({ color: new T3.Color(css('--inchiostro')), transparent: true, opacity: 0.35, clippingPlanes: piani })));
       g.add(gr);
     });
-  } else if (stato.opz.rivestimento && M.centine.length > 1) { // pelle traslucida tra le centine
-    const np = M.centine[0].pts.length, pos = [], idx = [];
-    M.centine.forEach(c => c.pts.forEach(p => pos.push(c.xLE + p[0] * c.c, c.y, p[1] * c.c)));
-    for (let j = 0; j < M.centine.length - 1; j++) for (let i = 0; i < np; i++) {
+  } else if (stato.opz.rivestimento && M.centine.length > 1) { // pelle traslucida tra le centine (con l'ala intera fino al piano di simmetria)
+    const st = (intera ? [{ yLE: 0, phi: 0, c: M.cr, xLE: M.pianta.xLE(0), pts: M.centine[0].pts }] : []).concat(M.centine.filter(c => !c.tronca)), np = st[0].pts.length, pos = [], idx = [];
+    st.forEach(c => c.pts.forEach(p => pos.push(c.xLE + p[0] * c.c * Math.cos(c.phi), c.yLE - p[0] * c.c * Math.sin(c.phi), p[1] * c.c))); // stesse percentuali di corda: generatrici dell'ala
+    for (let j = 0; j < st.length - 1; j++) for (let i = 0; i < np; i++) {
       const a = j * np + i, b = j * np + (i + 1) % np, a2 = a + np, b2 = b + np; idx.push(a, b, b2, a, b2, a2);
     }
     const sg = new T3.BufferGeometry(); sg.setAttribute('position', new T3.BufferAttribute(new Float32Array(pos), 3)); sg.setIndex(idx); sg.computeVertexNormals();
-    g.add(new T3.Mesh(sg, new T3.MeshStandardMaterial({ color: new T3.Color(css('--acciaio')), transparent: true, opacity: 0.16, side: T3.DoubleSide, depthWrite: false, roughness: 0.5 })));
+    dx.add(new T3.Mesh(sg, new T3.MeshStandardMaterial({ color: new T3.Color(css('--acciaio')), transparent: true, opacity: 0.16, side: T3.DoubleSide, depthWrite: false, roughness: 0.5 })));
   }
+  if (intera) { const sx = dx.clone(); sx.scale.y = -1; g.add(sx); } // stesse geometrie e materiali: la semiala sinistra e' speculare
   return g;
 }
 function piano(bb) {
@@ -3120,7 +3709,9 @@ function eventiMisure() {
     if (el.min !== '') v = Math.max(+el.min, v); if (el.max !== '') v = Math.min(+el.max, v);
     stato.scrollMisure = tav.scrollTop;
     if (el.dataset.mq) { const d = quotaDef(el.dataset.mq); if (d) aggiorna(d.scrivi(v), true); return; }
-    const k = el.dataset.mk; scriviK(stato.P, k, v);
+    const k = el.dataset.mk, mx = /^longheroni\.(\d+)\.x$/.exec(k);
+    if (mx) { const sp = stato.P.longheroni[+mx[1]]; if (sp.xt === undefined || sp.xt === null || Math.abs(sp.xt - sp.x) < 1e-9) sp.xt = v; }
+    scriviK(stato.P, k, v);
     if (el.dataset.auto) fissa(k, true);
     aggiorna(k, true);
   });
@@ -3178,36 +3769,80 @@ function cartiglio(xDx, yBasso, u) {
     r.map((q, i) => '<text x="' + (x + 0.8 * u) + '" y="' + (y + (1.05 + 1.35 * i + (i ? 0.45 : 0)) * u) + '" font-size="' + (0.95 * u) + '"' + (q[1] ? ' font-weight="600"' : '') + '>' + esc(q[0]) + '</text>').join('') + '</g>';
 }
 function svgPianta() {
-  const M = stato.M, cs = M.centine, x0 = Math.min(...cs.map(c => c.xLE)), x1 = Math.max(...cs.map(c => c.xLE + c.c));
-  const W = M.b, H = x1 - x0, u = Math.max(W, 2.2 * H) / 62, m = 5.2 * u, alta = H + 2 * m + 8.2 * u;
-  let s = '<svg data-nome="pianta" viewBox="' + vbFisso('pianta', [-m, x0 - m - u, W + 2 * m, alta].join(' ')) + '" role="img" aria-label="Vista in pianta quotata">';
-  s += '<text class="titolo" x="' + (-m + u) + '" y="' + (x0 - m + u * 0.6) + '" font-size="' + 1.25 * u + '">Vista in pianta · ' + esc(M.def.nome) + ' · ' + M.n + ' centine · ' + M.longheroni.length + (M.longheroni.length === 1 ? ' longherone' : ' longheroni') + '</text>';
-  s += '<path class="bordo" d="M' + cs.map(c => c.y + ' ' + c.xLE).join('L') + 'M' + cs.map(c => c.y + ' ' + (c.xLE + c.c)).join('L') + '"/>';
+  const M = stato.M, pi = M.pianta, cs = M.centine, bh = M.bh, intera = M.intera, semi = pi.semi, t = M.t;
+  const st = (pi.doppia ? [0, pi.yk, bh] : [0, bh]).map(y => ({ y, a: pi.xLE(y), b: pi.xLE(y) + pi.c(y) }));
+  const x0 = Math.min(...st.map(q => q.a)), x1 = Math.max(...st.map(q => q.b)), W = intera ? 2 * bh : bh, H = x1 - x0;
+  const u = Math.max(W, 2.2 * H) / 62, m = 5.2 * u, extra = semi && Math.abs(pi.xLE(bh)) > 0.5 ? 2.8 * u : 0, xs0 = intera ? -bh : 0;
+  const alta = H + 2 * m + 8.2 * u + (pi.doppia ? 2.6 * u : 0) + (M.obl ? 2.4 * u : 0), vb = [xs0 - m, x0 - m - u, W + 2 * m + extra, alta];
+  const P2 = (y, x) => y.toFixed(2) + ' ' + x.toFixed(2), Lpath = pts => 'M' + pts.map(p => P2(p[0], p[1])).join('L');
+  let s = '<svg data-nome="pianta" viewBox="' + vbFisso('pianta', vb.join(' ')) + '" role="img" aria-label="Vista in pianta quotata">';
+  s += '<text class="titolo" x="' + (xs0 - m + u) + '" y="' + (x0 - m + u * 0.6) + '" font-size="' + 1.25 * u + '">Vista in pianta · ' + esc(M.def.nome) + ' · ' + (intera ? '2 × ' : '') + M.n + ' centine · ' +
+    M.longheroni.length + (M.longheroni.length === 1 ? ' longherone' : ' longheroni') + (pi.doppia ? ' · doppia freccia' : semi && pi.pannelli.some(q => Math.abs(q.frLE) > 0.05) ? ' · a freccia' : '') + '</text>';
+  // geometria della semiala destra; con l'ala intera la sinistra e' la sua immagine speculare
+  let g = '<path class="sagoma" d="' + Lpath(st.map(q => [q.y, q.a]).concat(st.slice().reverse().map(q => [q.y, q.b]))) + 'Z"/>';
+  if (semi) g += '<path class="asse" d="' + Lpath(st.map(q => [q.y, q.a + 0.25 * (q.b - q.a)])) + '"><title>Linea al 25 % della corda</title></path>';
   M.longheroni.forEach(l => {
-    const h = l.sez.B / 2, a = l.origine.x, b = l.origine.x + M.b * l.tx;
-    s += '<path class="longh' + (l.sp.stampa ? '' : ' comm') + '" d="M0 ' + (a - h) + 'L' + W + ' ' + (b - h) + 'L' + W + ' ' + (b + h) + 'L0 ' + (a + h) + 'Z"/>';
-    l.giunti.forEach(gi => { const xc = l.origine.x + gi.y * l.tx, hh = l.sez.B / 2 + 2; s += '<rect class="manic" x="' + (gi.y - gi.Ls / 2) + '" y="' + (xc - hh) + '" width="' + gi.Ls + '" height="' + 2 * hh + '"/>'; });
+    const h = l.sez.B / 2, tr = l.tronchi.length ? l.tronchi : l.segmenti.map(q => Object.assign({ y0: q.ya, y1: q.yb }, q));
+    const fascia = (q, y0, y1, hh) => { const r = Math.hypot(1, q.tx), a = q.ox + q.tx * y0, b = q.ox + q.tx * y1, dy = hh * q.tx / r, dX = hh / r; return Lpath([[y0 + dy, a - dX], [y1 + dy, b - dX], [y1 - dy, b + dX], [y0 - dy, a + dX]]) + 'Z'; }; // larghezza misurata normalmente all'asse
+    tr.forEach(q => { g += '<path class="longh' + (l.sp.stampa ? '' : ' comm') + '" d="' + fascia(q, q.y0, q.y1, h) + '"/>'; });
+    l.giunti.filter(gi => !(intera && Math.abs(gi.y) < 1e-6)).forEach(gi => { const d = gi.Ls / 2 / Math.hypot(1, gi.tx); g += '<path class="manic" d="' + fascia(gi, gi.y - d, gi.y + d, h + 2) + '"/>'; });
   });
-  M.correnti.filter(q => q.lato === 'd').forEach(q => { s += '<path class="corr-l" d="M' + M.yA + ' ' + q.posa.S[0] + 'L' + M.yB + ' ' + (q.posa.S[0] + (M.yB - M.yA) * q.tx) + '"/>'; });
-  cs.forEach(c => { s += '<rect class="contorno" x="' + (c.y - M.t / 2) + '" y="' + c.xLE + '" width="' + M.t + '" height="' + c.c + '"/>'; });
-  const ul = cs[cs.length - 1], rastr = M.ct !== M.cr;
-  s += quotaH(0, W, x0 - 2.6 * u, 'b = ' + num(W, 1), u, x0 - 0.4 * u, 'b');
-  s += quotaV(cs[0].xLE, cs[0].xLE + cs[0].c, -2.6 * u, (rastr ? pedice('c', 'r') : 'c = ') + num(cs[0].c, 1), u, cs[0].y - M.t / 2 - 0.3 * u, 'cr');
-  if (rastr) s += quotaV(ul.xLE, ul.xLE + ul.c, W + 2.6 * u, pedice('c', 't') + num(ul.c, 1), u, ul.y + M.t / 2 + 0.3 * u, 'ct');
-  s += quotaH(cs[0].y, cs[1].y, x1 + 2.9 * u, 'passo ' + num(M.passo, 1), u, x1 + 0.4 * u, 'passo');
-  s += quotaH(0, cs[0].y, x1 + 2.9 * u, num(M.e, 1), u, x1 + 0.4 * u, 'e');
-  s += quotaH(ul.y - M.t / 2, ul.y + M.t / 2, x1 + 2.9 * u, 't = ' + num(M.t, 1), u, x1 + 0.4 * u, 't');
-  s += cartiglio(W + m - 0.3 * u, (x0 - m - u) + alta - 0.3 * u, u);
+  const contornoGiunto = q => q.est.map(p => 'M' + A.fromC(p).map(r => P2(q.y + r[1], q.X + r[0])).join('L') + 'Z').join('');
+  M.giunti.filter(q => !q.dritto && q.dove === 'rottura').forEach(q => { g += '<path class="manic" d="' + contornoGiunto(q) + '"><title>Giunto alla rottura del longherone ' + (q.i + 1) + '</title></path>'; });
+  M.correnti.filter(q => q.lato === 'd').forEach(q => q.segmenti.forEach(sg => { g += '<path class="corr-l" d="' + Lpath([[sg.ya, sg.ox + sg.tx * sg.ya], [sg.yb, sg.ox + sg.tx * sg.yb]]) + '"/>'; }));
+  cs.forEach(c => { const cf = Math.cos(c.phi), sf = Math.sin(c.phi), pt = (u, w) => [c.yLE - u * sf + w * cf, c.xLE + u * cf + w * sf];
+    g += '<path class="contorno" d="' + Lpath([pt(c.imp[0][0], -t / 2), pt(c.imp[0][1], -t / 2), pt(c.imp[1][1], t / 2), pt(c.imp[1][0], t / 2)]) + 'Z"><title>Centina ' + (c.j + 1) + (c.tronca ? ': tronca contro la centina di chiusura, normale al longherone 1' : c.phi ? ': normale al longherone 1' : M.obl && c.chiusa ? ': di chiusura, parallela al piano di simmetria' : '') + '</title></path>'; });
+  s += '<g>' + g + '</g>' + (intera ? '<g transform="scale(-1 1)">' + g + '</g>' : '');
+  if (intera) {
+    s += '<path class="asse" d="M0 ' + (x0 - 1.2 * u) + 'V' + (x1 + 1.2 * u) + '"><title>Piano di simmetria</title></path>';
+    M.giunti.filter(q => q.dove === 'radice').forEach(q => {
+      if (!q.dritto) s += '<path class="manic" d="' + contornoGiunto(q) + '"><title>Giunto di radice del longherone ' + (q.i + 1) + '</title></path>';
+      else { const hh = q.l.sez.B / 2 + 2; s += '<rect class="manic" x="' + (-q.Ls / 2) + '" y="' + (q.X - hh) + '" width="' + q.Ls + '" height="' + 2 * hh + '"/>'; }
+    });
+  }
+  // corda media aerodinamica e centro aerodinamico
+  if (semi) {
+    const ya = pi.yMac, xa = pi.xMac, xc = pi.xCa;
+    s += '<path class="mac" d="M' + P2(ya, xa) + 'V' + (xa + pi.mac).toFixed(2) + '"><title>Corda media aerodinamica: ' + num(pi.mac, 1) + ' mm a y = ' + num(ya, 1) + ' mm</title></path>';
+    s += '<circle class="fuoco" cx="' + ya.toFixed(2) + '" cy="' + xc.toFixed(2) + '" r="' + (0.45 * u).toFixed(2) + '"><title>Centro aerodinamico (25 % della MAC): x = ' + num(xc, 1) + ' mm</title></circle>';
+    s += '<text class="et-mac" x="' + (ya + 0.5 * u).toFixed(2) + '" y="' + (xa + 0.8 * pi.mac).toFixed(2) + '" font-size="' + 0.9 * u + '">' + pedice('c̄', 'A') + num(pi.mac, 1) + '</text>';
+    // angoli di freccia: riferimento parallelo all'apertura e arco fino al bordo d'attacco
+    pi.pannelli.forEach((q, i) => {
+      const dy = q.yb - q.ya, r = Math.min(0.32 * dy, 9 * u), a = q.frLE * Math.PI / 180, xA = q.xa;
+      s += '<path class="quota" d="M' + P2(q.ya, xA) + 'H' + (q.ya + 1.25 * r).toFixed(2) + 'M' + P2(q.ya + r, xA) + 'A' + r.toFixed(2) + ' ' + r.toFixed(2) + ' 0 0 ' + (a >= 0 ? 1 : 0) + ' ' + P2(q.ya + r * Math.cos(a), xA + r * Math.sin(a)) + '"/>';
+      // etichetta fuori dalla sagoma: sopra il bordo d'attacco, allineata a sinistra (con freccia positiva il bordo scende verso destra)
+      const tx = q.ya + (a >= 0 ? 0.5 : 0.12) * dy, ty = Math.min(pi.xLE(tx), pi.xLE(Math.min(q.yb, tx + 9 * u))) - 1.0 * u, nome = { le: 'LE', c4: 'c/4', te: 'TE', lon: 'L' }[stato.P.rifFr] || '';
+      s += '<text x="' + tx.toFixed(2) + '" y="' + ty.toFixed(2) + '" font-size="' + u + '" text-anchor="start"' + attrQ('fr' + (i + 1)) + '>Λ<tspan dy="0.3em" font-size="70%">' + nome + (pi.doppia ? i + 1 : '') + '</tspan><tspan dy="-0.3em"> = ' + num(q.frRif, 2) + '°</tspan></text>';
+      if (stato.P.rifFr !== 'le') s += '<text x="' + tx.toFixed(2) + '" y="' + (ty - 1.15 * u).toFixed(2) + '" font-size="' + 0.78 * u + '" text-anchor="start" class="tenue">bordo d’attacco ' + num(q.frLE, 2) + '°</text>';
+    });
+  }
+  const ul = cs[cs.length - 1], rastr = M.ct !== M.cr, rq = x1 + 2.9 * u;
+  s += quotaH(xs0, bh, x0 - 2.6 * u, 'b = ' + num(M.b, 1), u, x0 - 0.4 * u, 'b');
+  if (intera) s += quotaV(st[0].a, st[0].b, -0.6 * u, (rastr || pi.doppia ? pedice('c', 'r') : 'c = ') + num(M.cr, 1), u, -0.6 * u, 'cr');
+  else s += quotaV(st[0].a, st[0].b, -2.6 * u, (rastr || pi.doppia ? pedice('c', 'r') : 'c = ') + num(M.cr, 1), u, cs[0].y - t / 2 - 0.3 * u, 'cr');
+  if (rastr || pi.doppia) s += quotaV(st[st.length - 1].a, st[st.length - 1].b, bh + 2.6 * u, pedice('c', 't') + num(M.ct, 1), u, ul.y + t / 2 + 0.3 * u, 'ct');
+  if (extra) s += quotaV(st[0].a, st[st.length - 1].a, bh + 5.4 * u, pedice('x', 'LE,t') + num(pi.xLE(bh), 1), u, bh + 0.3 * u);
+  if (pi.doppia) {
+    const k = st[1], ck = cs[M.ik];
+    s += quotaV(k.a, k.b, k.y + 1.3 * u, pedice('c', 'k') + num(pi.ck, 1), u, k.y + 1.3 * u, 'ck');
+    s += quotaH(0, pi.yk, rq + 2.6 * u, pedice('y', 'k') + num(pi.yk, 1), u, x1 + 0.4 * u, 'yk');
+    if (M.ik + 1 < cs.length && !M.obl) s += quotaH(ck.y, cs[M.ik + 1].y, rq, pedice('p', '2') + num(M.passi[M.ik], 1), u, x1 + 0.4 * u, 'passo2');
+  }
+  if (M.obl) s += '<text x="' + ((cs[0].y + ul.y) / 2).toFixed(2) + '" y="' + (rq + (pi.doppia ? 5 : 2.4) * u) + '" font-size="' + 0.9 * u + '" text-anchor="middle" class="tenue">interassi lungo il longherone 1: ' + M.passi.map(v => num(v, 1)).join(' · ') + '</text>';
+  else s += quotaH(cs[0].y, cs[1].y, rq, (pi.doppia ? pedice('p', '1') : 'passo ') + num(M.passo, 1), u, x1 + 0.4 * u, 'passo');
+  if (M.e > t) s += quotaH(0, cs[0].y, rq, num(M.e, 1), u, x1 + 0.4 * u, 'e');
+  s += quotaH(ul.y - t / 2, ul.y + t / 2, rq, 't = ' + num(t, 1), u, x1 + 0.4 * u, 't');
+  s += cartiglio(vb[0] + vb[2] - 0.3 * u, vb[1] + alta - 0.3 * u, u);
   return s + '</svg>';
 }
 function svgCentina() {
   const P = stato.P, M = stato.M, c = M.centine[stato.centina] || M.centine[0], pr = A.ingombro(c.profC), def = M.def;
   const W = c.c, u = W / 58, m = 4.5 * u, nl = M.longheroni.length;
   const alto = -pr.y1 - (2.2 + 1.9 * nl) * u - 2.4 * u, basso = -pr.y0 + 4.6 * u + 8 * u;
-  const prof = A.nacaProfilo(def, P.te / c.c), cinque = def.serie === 5;
+  const prof = c.prof, cinque = def.serie === 5; // sezione dell'ala nel piano della centina, usata come un profilo
   const conCurv = !cinque && ['naca', 'simm', 'libero', 'lamina'].includes(def.fam);
   let s = '<svg data-nome="centina" viewBox="' + vbFisso('centina', [-m, alto, W + 2 * m, basso - alto].join(' ')) + '" role="img" aria-label="Centina quotata e modificabile">';
-  s += '<text class="titolo" x="' + (-m + u) + '" y="' + (alto + 1.7 * u) + '" font-size="' + 1.25 * u + '">Centina ' + (c.j + 1) + ' di ' + M.n + ' · corda ' + num(c.c, 1) + ' mm · estrusione ' + num(M.t, 1) + ' mm · area ' + num(c.area, 0) + ' mm² (' + num(100 * c.area / c.areaProfilo, 0) + '% del profilo pieno)</text>';
+  s += '<text class="titolo" x="' + (-m + u) + '" y="' + (alto + 1.7 * u) + '" font-size="' + 1.25 * u + '">Centina ' + (c.j + 1) + ' di ' + M.n + (c.tronca ? ' · tronca, normale al longherone 1' : c.phi ? ' · normale al longherone 1' : M.obl && c.chiusa ? ' · di chiusura' + (c.rottura ? ' alla rottura' : '') : c.rottura ? ' (rottura)' : '') + ' · y = ' + num(c.y, 1) + (c.phi ? ' · lunghezza ' : ' · corda ') + num(c.c, 1) + ' mm · estrusione ' + num(M.t, 1) + ' mm · area ' + num(c.area, 0) + ' mm² (' + num(100 * c.area / c.areaProfilo, 0) + '% del profilo pieno)</text>';
   s += '<path class="contorno" d="' + c.regione.map(p => 'M' + A.fromC(p).map(q => q[0].toFixed(3) + ' ' + (-q[1]).toFixed(3)).join('L') + 'Z').join('') + '"/>';
   s += '<path class="asse" d="M' + (-1.5 * u) + ' 0H' + (W + 1.5 * u) + '"/>';
   let lm = '';
@@ -3217,15 +3852,16 @@ function svgCentina() {
     const anello = A.sottrai(c.profC, A.offset(c.profC, -P.ts));
     s += '<path class="pelle" fill-rule="evenodd" d="' + percorsoD(anello) + '"/>';
   }
-  M.correnti.forEach(sc => { // sezione dei correnti negli intagli
-    const q = A.puntoCorrente(prof, c.c, sc.x, sc.lato, M.rid), sz = [[-P.cB / 2, 0], [P.cB / 2, 0], [P.cB / 2, P.cH], [-P.cB / 2, P.cH]].map(([a, d]) => [q.S[0] + q.tau[0] * a - q.n[0] * d, -(q.S[1] + q.tau[1] * a - q.n[1] * d)]);
+  c.corr.forEach(q => { // sezione dei correnti negli intagli
+    const sc = M.correnti.find(o => o.id === q.id), sz = [[-P.cB / 2, 0], [P.cB / 2, 0], [P.cB / 2, P.cH], [-P.cB / 2, P.cH]].map(([a, d]) => [q.S[0] + q.tau[0] * a - q.n[0] * d, -(q.S[1] + q.tau[1] * a - q.n[1] * d)]);
     s += '<path class="corr" d="M' + sz.map(p => p[0].toFixed(3) + ' ' + p[1].toFixed(3)).join('L') + 'Z"><title>Corrente ' + sc.id + ' al ' + num(100 * sc.x, 1) + ' % della corda</title></path>';
   });
   M.longheroni.forEach((l, i) => {
-    const x = l.xi * c.c, v = prof.medio(l.xi) * c.c, yy = -pr.y1 - (1.6 + 1.9 * (nl - 1 - i)) * u;
+    if (!c.posLon[i]) return; // in una centina tronca il longherone puo' passare oltre la testa
+    const x = c.posLon[i].u, v = c.posLon[i].v, yy = -pr.y1 - (1.6 + 1.9 * (nl - 1 - i)) * u;
     s += '<path class="asse" d="M' + x + ' ' + (-pr.y1 - 0.2 * u) + 'V' + (-pr.y0 + 0.8 * u) + '"/>';
     if (l.nonEntra) s += '<rect class="ko" x="' + (x - l.sez.B / 2 - P.gioco) + '" y="' + (-v - l.sez.H / 2 - P.gioco) + '" width="' + (l.sez.B + 2 * P.gioco) + '" height="' + (l.sez.H + 2 * P.gioco) + '"/>';
-    s += quotaH(0, x, yy, num(x, 1) + ' (' + num(l.sp.x, 1) + '%)', u, -pr.y1 - 0.3 * u, 'x.' + i);
+    s += quotaH(0, x, yy, num(x, 1) + ' (' + num(100 * l.pos[c.j].f, 1) + '%)', u, -pr.y1 - 0.3 * u, 'x.' + i);
     s += maniglia('long.' + i, x, -v, u, 'Trascina per spostare il longherone ' + (i + 1) + ' lungo la corda', true);
     s += maniglia('dim.' + i, x + l.sez.B / 2, -v - l.sez.H / 2, u, 'Trascina per ingrandire o ridurre la sezione del longherone ' + (i + 1));
   });
@@ -3283,7 +3919,11 @@ function quotaDef(q) {
   if (q === 'e') return diretta('e', 1, 300);
   if (q === 't') return diretta('spCentina', 1.5, 20);
   if (q === 'ct') return { leggi: () => A.arr(M.ct, 10), scrivi: v => { P.tr = L(A.arr(v / P.cr, 1000), 0.3, 1); return 'tr'; } };
-  if (q === 'passo') return { leggi: () => A.arr(M.passo, 10), scrivi: v => { P.nCentine = L(Math.round((P.b - 2 * M.e) / Math.max(v, 1)) + 1, 2, 60); fissa('nCentine', true); return 'nCentine'; } };
+  if (q === 'passo') return { leggi: () => A.arr(M.passo, 10), scrivi: v => { const lun = M.doppia ? M.stazioni.yk - M.e : M.bh - M.e - M.stazioni.eT; P.nCentine = L(Math.round(lun / Math.max(v, 1)) + 1, 2, 60); fissa('nCentine', true); return 'nCentine'; } };
+  if (q === 'passo2' && M.doppia) return { leggi: () => A.arr(M.passi[M.ik], 10), scrivi: v => { P.nCentine2 = L(Math.round((M.bh - M.stazioni.eT - M.stazioni.yk) / Math.max(v, 1)) + 1, 2, 60); fissa('nCentine2', true); return 'nCentine2'; } };
+  if (q === 'yk' && M.doppia) return { leggi: () => A.arr(M.pianta.yk, 10), scrivi: v => { P.yk = L(A.arr(100 * v / M.bh, 10), 10, 90); return 'yk'; } };
+  if (q === 'ck' && M.doppia) return { leggi: () => A.arr(M.pianta.ck, 10), scrivi: v => { P.trk = L(A.arr(v / P.cr, 1000), 0.3, 1.2); return 'trk'; } };
+  if (q === 'fr1' || q === 'fr2') return { neg: true, leggi: () => P[q], scrivi: v => { P[q] = L(A.arr(v, 100), -45, 60); return q; } };
   if (q === 'sp' || q === 'f' || q === 'p') {
     const par = parametriSicuri();
     return { leggi: () => par[q === 'sp' ? 't' : q], scrivi: v => {
@@ -3293,13 +3933,22 @@ function quotaDef(q) {
     } };
   }
   let m = /^x\.(\d+)$/.exec(q);
-  if (m && M) { const sp = P.longheroni[+m[1]], c = (M.centine[stato.centina] || M.centine[0]).c; return { leggi: () => A.arr(sp.x * c / 100, 10), scrivi: v => { sp.x = L(A.arr(100 * v / c, 10), 3, 90); return 'long'; } }; }
+  if (m && M) { const i = +m[1], c = M.centine[stato.centina] || M.centine[0]; return { leggi: () => A.arr(c.posLon[i].u, 10), scrivi: v => { spostaLongherone(i, c.j, A.arr(100 * c.prof.xi(v), 10)); return 'long'; } }; }
   m = /^L\.(\d+)\.(\w+)$/.exec(q);
   if (m) { const sp = P.longheroni[+m[1]], k = m[2]; return { leggi: () => sp[k], scrivi: v => { sp[k] = L(v, 0.4, 120); fissa('longheroni.' + m[1] + '.' + k, true); return 'long'; } }; }
   m = /^sk\.(\w)$/.exec(q);
   const f = m && skCorrente() && skCorrente().forme[stato.sk.sel];
   if (f) return { leggi: () => f[m[1]], scrivi: v => { f[m[1]] = m[1] === 'a' ? L(v, 1, 300) : L(v, 0.5, 1000); return 'schizzo'; } };
   return null;
+}
+/* Spostamento di un longherone misurato sulla centina j (f in % della corda di quella centina):
+   sulla radice cambia x_r, sull'estremita' x_t, altrove si traslano entrambe; un asse a percentuale costante resta tale. */
+function spostaLongherone(i, j, f) {
+  const P = stato.P, M = stato.M, sp = P.longheroni[i], l = M.longheroni[i], L = A.limita, xt = sp.xt === undefined || sp.xt === null ? sp.x : sp.xt;
+  if (Math.abs(xt - sp.x) < 1e-9 || !M.pianta.semi) { sp.x = sp.xt = L(f, 3, 90); return; }
+  if (j === 0) sp.x = L(f, 3, 90);
+  else if (j === M.n - 1) sp.xt = L(f, 3, 90);
+  else { const d = f - 100 * l.pos[j].f; sp.x = L(A.arr(sp.x + d, 100), 3, 90); sp.xt = L(A.arr(xt + d, 100), 3, 90); }
 }
 function chiudiQuota() { const v = $('.quota-inp'); if (v) v.remove(); }
 function apriQuota(el) {
@@ -3313,7 +3962,7 @@ function apriQuota(el) {
   const conferma = () => {
     if (fatto) return; fatto = true;
     const v = parseFloat(String(inp.value).replace(',', '.')); inp.remove();
-    if (isFinite(v) && v > 0 && v !== def.leggi()) aggiorna(def.scrivi(v), true);
+    if (isFinite(v) && (v > 0 || def.neg) && v !== def.leggi()) aggiorna(def.scrivi(v), true);
   };
   inp.addEventListener('keydown', ev => { ev.stopPropagation(); if (ev.key === 'Enter') conferma(); else if (ev.key === 'Escape') { fatto = true; inp.remove(); } });
   inp.addEventListener('blur', conferma);
@@ -3330,8 +3979,8 @@ function iniziaManiglia(ev, h) {
   document.querySelectorAll('#tavola svg[data-nome]').forEach(e => { vb[e.dataset.nome] = e.getAttribute('viewBox'); });
   const mat = h.ownerSVGElement.getScreenCTM().inverse(), m = /^(long|dim)\.(\d+)$/.exec(h.dataset.h), tipo = m ? m[1] : h.dataset.h, i = m ? +m[2] : -1, adatta = P.adatta;
   if (tipo === 'curv' || tipo === 'sp') { if (P.profilo === 'naca' || (tipo === 'curv' && P.profilo === 'simm')) rendiParametrico(); }
-  const pr = A.nacaProfilo(A.profiloDef(P), P.te / c.c), t0 = P.spProf, yU0 = pr.yU(0.3) * c.c, m0 = pr.medio(0.3) * c.c, piatta = P.profilo === 'piano';
-  const u0 = i >= 0 ? M.longheroni[i].xi * c.c : 0, v0 = i >= 0 ? pr.medio(M.longheroni[i].xi) * c.c : 0;
+  const pr = c.prof, t0 = P.spProf, yU0 = pr.yU(0.3) * c.c, m0 = pr.medio(0.3) * c.c, piatta = P.profilo === 'piano';
+  const u0 = i >= 0 && c.posLon[i] ? c.posLon[i].u : 0, v0 = i >= 0 && c.posLon[i] ? c.posLon[i].v : 0;
   let k = 'profilo', mosso = false, raf = 0;
   P.adatta = false; // durante il trascinamento si vede l'eventuale errore: l'adattamento scatta al rilascio
   const t = { vb,
@@ -3339,7 +3988,7 @@ function iniziaManiglia(ev, h) {
       const pt = puntoSvg(e, mat), u = pt.x, v = -pt.y;
       if (tipo === 'curv') { P.fProf = L(A.arr(100 * v / c.c, 10), 0, 12); P.pProf = L(Math.round(100 * u / c.c), 10, 90); }
       else if (tipo === 'sp') P.spProf = L(A.arr(piatta ? t0 * v / yU0 : t0 * (v - m0) / (yU0 - m0), 10), 3, 30);
-      else if (tipo === 'long') { P.longheroni[i].x = L(A.arr(100 * u / c.c, 2), 3, 90); k = 'long'; }
+      else if (tipo === 'long') { spostaLongherone(i, c.j, A.arr(100 * c.prof.xi(u), 2)); k = 'long'; }
       else if (tipo === 'dim') {
         const sp = P.longheroni[i], H = L(A.arr(2 * Math.abs(v - v0), 10), 1.5, 120), B = L(A.arr(2 * Math.abs(u - u0), 10), 1, 120), tonda = sp.forma === 'tondo' || sp.forma === 'tubo';
         sp.H = tonda ? Math.max(H, B) : H; fissa('longheroni.' + i + '.H', true);
@@ -3776,7 +4425,7 @@ function eventiCad() {
 // ---------------------------------------------------------------- viste
 const SCHEDE = [['assieme', 'Assieme 3D'], ['misure', 'Misure'], ['tavola', 'Disegno 2D'], ['schizzo', 'Schizzo libero'], ['piatto', 'Piano di stampa'], ['gcode', 'G-code']];
 function legendaParti(M) {
-  const tipi = new Set(M ? M.parti.map(p => p.tipo) : []), voci = [['centina', 'Centine'], ['longherone', 'Longheroni'], ['corrente', 'Correnti'], ['guscio', 'Gusci'], ['manicotto', 'Manicotti'], ['dima', 'Dima'], ['libero', 'Pezzi liberi']];
+  const tipi = new Set(M ? M.parti.map(p => p.tipo) : []), voci = [['centina', 'Centine'], ['longherone', 'Longheroni'], ['corrente', 'Correnti'], ['guscio', 'Gusci'], ['manicotto', 'Manicotti'], ['giunto', 'Giunti angolati'], ['dima', 'Dime'], ['libero', 'Pezzi liberi']];
   return voci.filter(q => tipi.has(q[0])).map(q => '<span><i style="background:var(' + COL_PARTE[q[0]] + ')"></i>' + q[1] + '</span>').join('');
 }
 function disegnaSchede() {
@@ -3820,9 +4469,11 @@ function disegnaVista() {
   } else if (!tre.ok) msg = 'La grafica 3D non è disponibile in questo browser. Restano utilizzabili la tavola quotata e il salvataggio dei file.';
   else if (v === 'assieme' && M) {
     tre.gruppo = gruppoAssieme(); tre.scena.add(tre.gruppo);
-    inquadra(tre.gruppo, -1.05, 0.42, [M.b, M.cr, M.ct].map(x => Math.round(x / 15)).join('_'));
-    s = '<label><input type="checkbox" id="op-riv"' + (stato.opz.rivestimento ? ' checked' : '') + '> Rivestimento' + (M.gusci.length ? '' : ' (indicativo)') + '</label>' + (M.gusci.length ? '<label><input type="checkbox" id="op-spacc"' + (stato.opz.spaccato ? ' checked' : '') + '> Spaccato</label>' : '') + '<button class="btn piccolo" data-az="inquadra">Inquadra</button><span class="spazio"></span><span>b = ' + num(M.b, 1) + ' mm · c = ' + num(M.cr, 1) + (M.ct !== M.cr ? ' → ' + num(M.ct, 1) : '') + ' mm</span>';
-    l = '<span><i style="background:var(--accento)"></i>Centine</span><span><i style="background:var(--acciaio)"></i>Longheroni</span>' + (M.correnti.length ? '<span><i style="background:var(--corrente)"></i>Correnti</span>' : '') + (M.gusci.length ? '<span><i style="background:var(--guscio)"></i>Gusci</span>' : '') + (M.longheroni.some(q => q.giunti.length) ? '<span><i style="background:var(--bene)"></i>Manicotti</span>' : '') + (M.longheroni.some(q => !q.sp.stampa) ? '<span><i style="background:#8b96a1"></i>Commerciali</span>' : '');
+    const vistaAla = M.intera ? [0.55, 0.82] : [-1.05, 0.42]; // ala intera: da dietro e dall'alto, si legge la pianta
+    inquadra(tre.gruppo, vistaAla[0], vistaAla[1], [M.b, M.cr, M.ct, M.pianta.xLE(M.bh)].map(x => Math.round(x / 15)).join('_'), M.intera ? 'intera' : 'semiala');
+    s = '<label><input type="checkbox" id="op-riv"' + (stato.opz.rivestimento ? ' checked' : '') + '> Rivestimento' + (M.gusci.length ? '' : ' (indicativo)') + '</label>' + (M.gusci.length ? '<label><input type="checkbox" id="op-spacc"' + (stato.opz.spaccato ? ' checked' : '') + '> Spaccato</label>' : '') + '<button class="btn piccolo" data-az="inquadra">Inquadra</button><span class="spazio"></span><span>b = ' + num(M.b, 1) + ' mm · c = ' + num(M.cr, 1) + (M.pianta.doppia ? ' → ' + num(M.ck, 1) : '') + (M.ct !== M.cr ? ' → ' + num(M.ct, 1) : '') + ' mm' +
+      (M.pianta.semi && M.pianta.pannelli.some(q => Math.abs(q.frLE) > 0.05) ? ' · Λ<sub>c/4</sub> = ' + M.pianta.pannelli.map(q => num(q.frC4, 1) + '°').join(' / ') : '') + '</span>';
+    l = '<span><i style="background:var(--accento)"></i>Centine</span><span><i style="background:var(--acciaio)"></i>Longheroni</span>' + (M.correnti.length ? '<span><i style="background:var(--corrente)"></i>Correnti</span>' : '') + (M.gusci.length ? '<span><i style="background:var(--guscio)"></i>Gusci</span>' : '') + (M.longheroni.some(q => q.giunti.length) || M.giunti.length ? '<span><i style="background:var(--bene)"></i>' + (M.giunti.some(q => !q.dritto) ? 'Manicotti e giunti' : 'Manicotti') + '</span>' : '') + (M.longheroni.some(q => !q.sp.stampa) ? '<span><i style="background:#8b96a1"></i>Commerciali</span>' : '');
   } else if (v === 'piatto') {
     tre.gruppo = gruppoPiatto(); tre.scena.add(tre.gruppo);
     inquadra(tre.gruppo, -Math.PI / 2, 0.95, stato.P.stampante.lx + '_' + stato.P.stampante.ly);
@@ -3905,7 +4556,7 @@ function avvia() {
   aggiorna('', true);
   if (!stato.M) { stato.P = daModello(0); aggiorna('', true); } // progetto memorizzato non piu' valido
 }
-window.HangarAla = { stato, apriFile, generaTutto, disposizione, aggiorna };
+window.HangarAla = { stato, apriFile, generaTutto, disposizione, aggiorna, tre, rendi };
 if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', avvia); else avvia();
 })();
 
