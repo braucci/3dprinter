@@ -378,6 +378,69 @@ button.bd { cursor: pointer; }
 #tavola .fuoco { fill: var(--carta); stroke: var(--bene); stroke-width: 1.6; vector-effect: non-scaling-stroke; }
 #tavola .et-mac { fill: var(--bene); font-weight: 600; }
 #tavola text.tenue { fill: var(--tenue); }
+/* centine didattiche */
+.terna.livelli { display: grid; grid-template-columns: 1fr 1fr; }
+#tavola .segno { fill: var(--inchiostro); fill-opacity: .6; }
+#tavola .costr { fill: none; stroke: var(--bene); stroke-width: .8; stroke-opacity: .75; vector-effect: non-scaling-stroke; }
+#tavola .costr.cerchio { stroke-dasharray: 4 3; stroke-width: 1.1; }
+#tavola .base-vista { fill: none; stroke: var(--tenue); stroke-width: 1; stroke-dasharray: 6 4; vector-effect: non-scaling-stroke; }
+/* kit con i soli pezzi liberi */
+.banda-liberi { border-left: 3px solid var(--libero); }
+.banda-liberi .pulsanti { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+.strumenti label.evid { font-weight: 600; color: var(--libero); }
+/* schizzo libero: componenti, aggancio, elenco delle forme */
+.strumenti .a-capo { flex-basis: 100%; height: 0; }
+.strumenti .btn[disabled] { opacity: .45; cursor: default; }
+.segm.componenti .btn { border-color: var(--libero); }
+#tavola .sk-f.cav { stroke-dasharray: 2 2; }
+#tavola .sk-ag { fill: none; stroke: var(--bene); stroke-width: 2; vector-effect: non-scaling-stroke; pointer-events: none; }
+#tavola .sk-letto { fill: none; stroke: var(--tenue); stroke-width: 1.4; stroke-dasharray: 8 3 2 3; vector-effect: non-scaling-stroke; pointer-events: none; }
+#tavola .sk-letto-t { fill: var(--tenue); pointer-events: none; }
+#tavola .sk-taglio { fill: var(--errore); fill-opacity: .35; pointer-events: none; }
+/* pannello delle forme dello schizzo */
+.ispettore { display: none; position: absolute; top: 10px; right: 10px; bottom: 10px; width: 280px; flex-direction: column; gap: 8px; z-index: 3; font-size: 12.5px; }
+.tela.con-isp .ispettore { display: flex; }
+.tela.con-isp .legenda { max-width: calc(100% - 320px); }
+.ispettore section { background: var(--foglio); border: 1px solid var(--linea); border-radius: 4px; padding: 8px; overflow: auto; box-shadow: 0 2px 8px rgba(0,0,0,.06); }
+.ispettore .isp-lista { flex: 0 1 auto; max-height: 34%; }
+.ispettore .isp-forma { flex: 0 1 auto; min-height: 0; }
+.ispettore h4 { margin: 0 0 6px; font-size: 11px; letter-spacing: .06em; text-transform: uppercase; color: var(--tenue); font-weight: 600; }
+.ispettore .isp-forma h4 { font-size: 13px; letter-spacing: 0; text-transform: none; color: var(--inchiostro); }
+.ispettore h5 { margin: 10px 0 4px; padding-top: 6px; border-top: 1px solid var(--linea); font-size: 10.5px; letter-spacing: .06em; text-transform: uppercase; color: var(--tenue); font-weight: 600; }
+.ispettore label { display: grid; grid-template-columns: minmax(0, 1fr) 104px; align-items: center; gap: 6px; margin: 3px 0; }
+.ispettore label.tx { grid-template-columns: 1fr; gap: 2px; }
+.ispettore label.ck { display: flex; gap: 6px; }
+.ispettore input[type="number"], .ispettore input[type="text"], .ispettore select { width: 100%; box-sizing: border-box; border: 1px solid var(--linea); border-radius: 3px; padding: 3px 5px; background: var(--foglio); font: inherit; }
+.ispettore .nota { margin: 6px 0; color: var(--tenue); font-size: 11.5px; line-height: 1.4; }
+.ispettore .btn.largo { width: 100%; margin: 4px 0; }
+.ispettore .isp-az { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 10px; padding-top: 8px; border-top: 1px solid var(--linea); }
+.ispettore .btn.pericolo { color: var(--errore); }
+.ispettore .isp-lista button { display: grid; grid-template-columns: 10px 1fr; column-gap: 6px; width: 100%; text-align: left; background: none; border: 0; border-radius: 3px; padding: 4px; cursor: pointer; color: var(--inchiostro); font: inherit; }
+.ispettore .isp-lista button small { grid-column: 2; color: var(--tenue); }
+.ispettore .isp-lista button:hover { background: var(--carta); }
+.ispettore .isp-lista button.sel { background: var(--carta); box-shadow: inset 2px 0 0 var(--acciaio); }
+.ispettore .isp-lista i { width: 10px; height: 10px; border-radius: 2px; margin-top: 3px; background: var(--inchiostro); }
+.ispettore .isp-lista i.cav { background: none; border: 2.5px solid var(--inchiostro); box-sizing: border-box; }
+.ispettore .isp-lista i.m-foro { background: none; border: 1.5px dashed var(--errore); }
+.ispettore .isp-lista i.m-rilievo { background: var(--accento); }
+.ispettore .isp-lista i.m-incavo { background: var(--acciaio); }
+.strumenti .btn.ico { display: inline-flex; align-items: center; gap: 5px; padding: 3px 7px; }
+.strumenti .btn.ico svg { width: 18px; height: 18px; fill: currentColor; fill-opacity: .18; stroke: currentColor; stroke-width: 1.4; stroke-linejoin: round; }
+.strumenti .btn.ico svg .tratto { fill: none; stroke-width: 2; }
+.strumenti .btn.ico svg .vuoto-ico { fill: var(--foglio); fill-opacity: 1; stroke-width: 1; }
+@media (max-width: 800px) { .ispettore { width: 200px; } .tela.con-isp .legenda { max-width: calc(100% - 230px); } }
+#tavola .sk-xy { position: absolute; top: 10px; left: 10px; padding: 3px 8px; font-size: 11.5px; background: var(--foglio); border: 1px solid var(--linea); border-radius: 3px; color: var(--tenue); pointer-events: none; }
+#tavola .sk-xy:empty { display: none; }
+.strumenti [data-b="sk-esempio"] { width: 150px; }
+.strumenti [data-b="sk-nome"] { width: 150px; }
+.strumenti [data-b="sk-sel"] { max-width: 230px; }
+.strumenti [data-b="sk-n"] { width: 52px; }
+.strumenti:has([data-b="sk-solo"]) { gap: 6px 10px; }
+.strumenti [data-b="sk-nome"] { width: 130px; }
+.strumenti [data-b="sk-or"] { width: 118px; }
+.strumenti [data-b="sk-h"], .strumenti [data-b="sk-pc"] { width: 58px; }
+.strumenti input[data-b="sk-n"] { width: 46px; }
+.strumenti .coppia { display: inline-flex; align-items: center; gap: 8px; }
 
 </style>
 </head>
@@ -411,6 +474,7 @@ button.bd { cursor: pointer; }
     <div class="tela">
       <canvas id="gl"></canvas>
       <div id="tavola"></div>
+      <div class="ispettore" aria-label="Forme del pezzo libero"></div>
       <div class="vuoto"></div>
       <div class="legenda"></div>
       <div class="guida">Trascina per ruotare &middot; Maiusc o tasto destro per spostare &middot; rotellina per lo zoom<br>Trascina qui un file .gcode o .3mf per aprirlo</div>
@@ -766,7 +830,8 @@ function progettoPredefinito() {
     naca: '4412', profilo: 'naca', spProf: 12, fProf: 4, pProf: 40, autore: AUTORE, tipo: 'completa', b: 230, cr: 96, tr: 1, AR: 2.4, arLock: false, auto: true, adatta: true, man: {},
     rifFr: 'c4', centine: 'vento', fr1: 0, fr2: 0, doppia: false, yk: 40, trk: 1, nCentine2: 3,
     nCentine: 4, spCentina: 6, te: 0.96, e: 10, parete: 1.7, rAll: 2.1, gioco: 0.25, alleggerimenti: true, dima: true,
-    livello: 'struttura', cNd: 2, cNv: 2, cB: 2.5, cH: 2.1, cX0: 12, cX1: 60, ts: 0.9,
+    livello: 'struttura', soloLiberi: false, dCorde: '200', dCopie: 1, dSp: 5, dCorda: true, dMedia: true, dSpessore: true, dFreccia: true, dStazioni: true, dScritta: true, dModo: 'incavo', dH: 0.6, dTesto: '', dBase: true,
+    cNd: 2, cNv: 2, cB: 2.5, cH: 2.1, cX0: 12, cX1: 60, ts: 0.9,
     longheroni: [{ x: 30, xt: 30, via: 'retto', forma: 'I', stampa: true, H: 7.2, B: 6, tf: 1.45, tw: 1.8, s: 1.2 }],
     piano: { manuale: false, pos: {} }, schizzi: [],
     stampante: Object.assign({}, STAMPANTI.mk3s), stampa: stampaPredefinita()
@@ -784,7 +849,7 @@ function conforma(val, rif) {
   }
   return o;
 }
-const LIVELLI = ['struttura', 'correnti', 'completa'];
+const LIVELLI = ['struttura', 'correnti', 'completa', 'profilo'];
 const MAN_CAMPI = ['nCentine', 'nCentine2', 'spCentina', 'e', 'te', 'parete', 'rAll', 'cNd', 'cNv', 'cB', 'cH', 'ts'], MAN_SEZ = ['H', 'B', 'tf', 'tw', 's'];
 const finito = (v, d, a, b) => (v !== null && v !== '' && isFinite(+v) ? limita(+v, a, b) : d);
 const testoSano = (v, d, n) => (typeof v === 'string' ? v.replace(/[\u0000-\u001f\u007f<>]/g, ' ').trim().slice(0, n) : '') || d;
@@ -800,16 +865,31 @@ function sanaSchizzo(k, i) {
       const pts = (Array.isArray(f.pts) ? f.pts : []).slice(0, 400).filter(q => Array.isArray(q) && isFinite(+q[0]) && isFinite(+q[1])).map(q => [limita(+q[0], -2000, 2000), limita(+q[1], -2000, 2000)]);
       return pts.length >= 3 ? Object.assign(b, { t: 'p', pts }) : null;
     }
+    if (b.m !== 'foro' && +f.pc > 0) b.pc = finito(f.pc, 1.2, 0.3, 50); // solo contorno
+    if (['cen', 'lon', 'cor'].includes(f.t)) { if (f.mh) b.mh = true; if (f.mv) b.mv = true; } // specchiate
     b.x = finito(f.x, 0, -2000, 2000); b.y = finito(f.y, 0, -2000, 2000);
+    const ang = finito(f.ang, 0, -360, 360), g = finito(f.g, 0, 0, 2);
     if (f.t === 'c') return Object.assign(b, { t: 'c', d: finito(f.d, 10, 0.5, 1000) });
+    if (f.t === 'g') return Object.assign(b, { t: 'g', d: finito(f.d, 10, 0.5, 1000), n: Math.round(finito(f.n, 6, 3, 24)), ang });
+    if (f.t === 'lon') { const q = limitiSezione({ forma: FORME[f.forma] ? f.forma : 'I', H: finito(f.H, 8, 1.5, 120), B: finito(f.B, 6.6, 1, 120), tf: finito(f.tf, 1.6, 0.4, 60), tw: finito(f.tw, 2, 0.4, 60), s: finito(f.s, 1.3, 0.4, 60) }); return Object.assign(b, { t: 'lon', ang, g }, q); }
+    if (f.t === 'cor') return Object.assign(b, { t: 'cor', forma: FORME_COR[f.forma] ? f.forma : 'rett', b: finito(f.b, 4, 0.8, 100), h: finito(f.h, 3, 0.8, 100), s: finito(f.s, 1, 0.4, 20), ang, g });
+    if (f.t === 'cen') {
+      const fam = FAMIGLIE[f.profilo] ? f.profilo : 'naca', naca = String(f.naca || '4412').replace(/[^0-9]/g, '').slice(0, 5);
+      try { profiloDef({ profilo: fam, naca, spProf: f.spProf, fProf: f.fProf, pProf: f.pProf }); } catch (err) { return null; }
+      return Object.assign(b, { t: 'cen', ang, g, profilo: fam, naca, spProf: finito(f.spProf, 12, 3, 30), fProf: finito(f.fProf, 4, 0, 12), pProf: finito(f.pProf, 40, 10, 90),
+        c: finito(f.c, 100, 20, 1000), te: finito(f.te, 0, 0, 10), sf: FORME[f.sf] ? f.sf : '', sx: finito(f.sx, 30, 3, 90), sH: finito(f.sH, 0, 0, 120),
+        cd: Math.round(finito(f.cd, 0, 0, 8)), cv: Math.round(finito(f.cv, 0, 0, 8)), cb: finito(f.cb, 3, 0.8, 20), ch: finito(f.ch, 2, 0.8, 20), all: !!f.all, pm: finito(f.pm, 0, 0, 20), ra: finito(f.ra, 0, 0, 20) });
+    }
     if (f.t === 't') {
       const testo = (typeof f.testo === 'string' ? f.testo : '').replace(/[\u0000-\u001f\u007f]/g, ' ').slice(0, 80) || 'Testo';
       return Object.assign(b, { t: 't', testo, font: carattereValido(f.font), a: finito(f.a, 8, 1, 300), sp: finito(f.sp, 0, -5, 20), ang: finito(f.ang, 0, -360, 360),
         al: ['sx', 'c', 'dx'].includes(f.al) ? f.al : 'c', gr: finito(f.gr, 0, -1, 2) });
     }
-    return Object.assign(b, { t: 'r', w: finito(f.w, 10, 0.5, 1000), h: finito(f.h, 10, 0.5, 1000) });
+    const r = Object.assign(b, { t: 'r', w: finito(f.w, 10, 0.5, 1000), h: finito(f.h, 10, 0.5, 1000) });
+    if (+f.r > 0) r.r = finito(f.r, 0, 0, 500); if (ang) r.ang = ang;
+    return r;
   }).filter(Boolean);
-  return { nome: testoSano(k.nome, 'Pezzo libero ' + (i + 1), 40), h: finito(k.h, 3, 0.4, 200), n: Math.round(finito(k.n, 1, 1, 20)), forme };
+  return { nome: testoSano(k.nome, 'Pezzo libero ' + (i + 1), 40), h: finito(k.h, 3, 0.4, 1000), n: Math.round(finito(k.n, 1, 1, 20)), st: k.st !== false, or: k.or === 'coricato' ? 'coricato' : 'piedi', forme };
 }
 function normalizzaProgetto(p) {
   const d = progettoPredefinito(), o = conforma(p, d);
@@ -838,6 +918,8 @@ function normalizzaProgetto(p) {
   if (!['le', 'c4', 'te', 'lon'].includes(o.rifFr)) o.rifFr = 'c4';
   if (o.centine !== 'normali') o.centine = 'vento';
   o.fr1 = limita(o.fr1, -45, 60); o.fr2 = limita(o.fr2, -45, 60); o.yk = limita(o.yk, 10, 90); o.trk = limita(o.trk, 0.3, 1.2);
+  o.dCorde = String(o.dCorde).replace(/[^0-9.,; ]/g, '').slice(0, 80) || '200'; o.dCopie = limita(Math.round(o.dCopie), 1, 20); o.dSp = limita(o.dSp, 1.2, 80); o.dH = limita(o.dH, 0.2, 3);
+  if (o.dModo !== 'rilievo') o.dModo = 'incavo'; o.dTesto = testoSano(o.dTesto, '', 24);
   o.nCentine2 = limita(Math.round(o.nCentine2), 2, 60); if (o.tipo === 'completa') o.doppia = false;
   o.naca = o.naca.replace(/[^0-9]/g, '').slice(0, 5);
   if (!FAMIGLIE[o.profilo]) o.profilo = 'naca';
@@ -1239,6 +1321,7 @@ function adatta(P) {
 }
 /* Ricalcolo completo dopo una modifica: vincolo di AR, quote automatiche, adattamento. */
 function ricalcola(P, chiave) {
+  if (P.livello === 'profilo') { P.longheroni.forEach(limitiSezione); return []; } // centine didattiche: nessuna struttura da proporzionare
   if (!P.arLock || ['b', 'cr', 'AR', 'tr', 'trk', 'yk', 'doppia', 'tipo', 'arLock'].includes(chiave)) applicaAR(P, chiave === 'b' ? 'b' : 'cr');
   P.longheroni.forEach(limitiSezione);
   if (P.auto) autoProporzioni(P);
@@ -1322,11 +1405,94 @@ function larghezzaTesto(f) {
   return pen * f.a / F.cap;
 }
 
+// ---------------------------------------------------------------- componenti dello schizzo libero
+/* Forme parametriche oltre a rettangolo, cerchio, poligono e testo:
+   g   poligono regolare (n lati, diametro del cerchio circoscritto);
+   cen centina: profilo e corda, con sede del longherone, intagli dei correnti e finestre;
+   lon sezione di longherone (le stesse forme della struttura);
+   cor sezione di corrente: rettangolare, a L, a Z, a omega (cappello), a T.
+   Ogni forma puo' essere piena o ridotta al solo contorno di parete pc. */
+const FORME_COR = {
+  rett: { nome: 'Rettangolare', campi: ['b', 'h'] }, L: { nome: 'A L (angolare)', campi: ['b', 'h', 's'] }, Z: { nome: 'A Z', campi: ['b', 'h', 's'] },
+  omega: { nome: 'A omega (cappello)', campi: ['b', 'h', 's'] }, T: { nome: 'A T', campi: ['b', 'h', 's'] }
+};
+/* Proporzioni di una sezione di longherone di altezza H (le stesse delle proporzioni automatiche). */
+function proporzioniSezione(forma, H) {
+  const o = { forma: FORME[forma] ? forma : 'I', H: arr(H, 10), B: arr(0.83 * H, 10), tf: Math.max(0.9, arr(0.2 * H, 20)), tw: Math.max(0.9, arr(0.25 * H, 20)), s: Math.max(0.9, arr(0.16 * H, 20)) };
+  if (o.forma === 'C') o.B = arr(0.62 * H, 10); if (o.forma === 'scat') o.B = arr(0.7 * H, 10); if (o.forma === 'rett') o.B = arr(0.5 * H, 10);
+  if (o.forma === 'T') { o.tf = Math.max(0.9, arr(0.22 * H, 20)); o.tw = Math.max(0.9, arr(0.28 * H, 20)); }
+  return limitiSezione(o);
+}
+function sezioneCorrente(f) {
+  const b = f.b, h = f.h, s = limita(f.s || 1, 0.4, Math.max(0.4, Math.min(b, h) / 2 - 0.05)), R = (x0, y0, x1, y1) => rettangolo(x0, y0, x1, y1), cw = b / 2;
+  switch (f.forma) {
+    case 'L': return unisci([R(-b / 2, -h / 2, b / 2, -h / 2 + s), R(-b / 2, -h / 2, -b / 2 + s, h / 2)]);
+    case 'Z': return unisci([R(-s / 2, -h / 2, b / 2, -h / 2 + s), R(-s / 2, -h / 2, s / 2, h / 2), R(-b / 2, h / 2 - s, s / 2, h / 2)]);
+    case 'omega': return unisci([R(-b / 2, -h / 2, -cw / 2 + s, -h / 2 + s), R(cw / 2 - s, -h / 2, b / 2, -h / 2 + s), R(-cw / 2, -h / 2, -cw / 2 + s, h / 2), R(cw / 2 - s, -h / 2, cw / 2, h / 2), R(-cw / 2, h / 2 - s, cw / 2, h / 2)]);
+    case 'T': return unisci([R(-b / 2, h / 2 - s, b / 2, h / 2), R(-s / 2, -h / 2, s / 2, h / 2)]);
+    default: return [R(-b / 2, -h / 2, b / 2, h / 2)];
+  }
+}
+/* Rotazione di ang gradi attorno all'origine, poi traslazione in (x, y). */
+function giraSposta(paths, ang, x, y) {
+  const a = (ang || 0) * Math.PI / 180, c = Math.cos(a), s = Math.sin(a);
+  return paths.map(p => p.map(q => { const u = q.X / SC, v = q.Y / SC; return { X: Math.round((x + u * c - v * s) * SC), Y: Math.round((y + u * s + v * c) * SC) }; }));
+}
+const memoCentine = new Map();
+/* Centina dello schizzo nel suo riferimento (bordo d'attacco in 0, corda lungo x): contorno del profilo
+   meno la sede del longherone, gli intagli dei correnti e le finestre di alleggerimento. */
+function centinaSchizzo(f) {
+  const id = JSON.stringify([f.profilo, f.naca, f.spProf, f.fProf, f.pProf, f.c, f.te, f.sf, f.sx, f.sH, f.g, f.cd, f.cv, f.cb, f.ch, f.all, f.pm, f.ra]);
+  if (memoCentine.has(id)) return memoCentine.get(id);
+  const c = f.c, def = profiloDef(f), te = f.te > 0 ? f.te : Math.max(0.8, 0.01 * c), pr = nacaProfilo(def, te / c, 120), g = f.g || 0, pm = f.pm > 0 ? f.pm : Math.max(1.5, 0.018 * c);
+  const profC = unisci([toC(pr.pts.map(p => [p[0] * c, p[1] * c]))]), interno = offset(profC, -pm, JT.jtRound);
+  let sede = [], sp = null, L = [];
+  if (f.sf && FORME[f.sf]) { // sede del longherone: altezza scelta, oppure la massima che lascia la parete minima
+    const x = limita(f.sx, 3, 90) / 100, u = x * c, v = pr.medio(x) * c, th = pr.spessore(x) * c;
+    let H = f.sH > 0 ? f.sH : Math.max(1.5, 0.95 * (th - 2 * (pm + g)));
+    for (let it = 0; it < 60; it++) {
+      sp = proporzioniSezione(f.sf, H); if (f.sH > 0) sp.H = f.sH;
+      const sz = sezioneLongherone(sp); sede = sposta(offset(sz.esterno, g, sz.tonda ? JT.jtRound : JT.jtMiter), u, v);
+      if (f.sH > 0 || area(sottrai(sede, interno)) < 1e-3 || H <= 1.5) break;
+      H *= 0.96;
+    }
+    L = [{ i: 0, xi: x, sez: sezioneLongherone(sp), du: 0 }];
+  }
+  const intagli = [], corr = (f.cd || 0) + (f.cv || 0) > 0 ? posizioniCorrenti({ cH: f.ch, gioco: g, parete: pm, cNd: f.cd || 0, cNv: f.cv || 0, cX0: 12, cX1: 60, cB: f.cb }, L, c, pr, 0) : [];
+  corr.forEach(s => { const q = puntoCorrente(pr, c, s.x, s.lato, 0), w = f.cb / 2 + g; intagli.push(rettLocale(q.S, q.tau, q.n, -w, w, -3, f.ch + g)); });
+  const intU = intagli.length ? unisci(intagli) : [], zone = sede.length ? [(b => ({ a: b.x0 - pm, b: b.x1 + pm }))(ingombro(sede))] : [];
+  const fin = f.all ? finestreAlleggerimento({ parete: pm, rAll: f.ra > 0 ? f.ra : Math.max(1.5, 0.022 * c) }, pr, c, intU.length ? sottrai(profC, intU) : profC, zone, 0) : [];
+  const via = [].concat(sede, intU, fin), reg = via.length ? sottrai(profC, unisci(via)) : profC;
+  const r = { regione: reg, profC, pr, sp, corr, te, pm, nFin: fin.length };
+  if (memoCentine.size > 60) memoCentine.clear();
+  memoCentine.set(id, r);
+  return r;
+}
+/* Specchiatura nel riferimento della forma (prima della rotazione): mh scambia destra e sinistra, mv alto e basso. */
+const specchiaLoc = (reg, f) => (f.mh || f.mv ? unisci(reg.map(p => p.map(q => ({ X: f.mh ? -q.X : q.X, Y: f.mv ? -q.Y : q.Y })).reverse())) : reg);
 function percorsoForma(f) {
-  if (f.t === 't') return testoRegione(f);
-  let p = f.t === 'c' ? sposta([cerchio(f.d)], f.x, f.y)[0] : f.t === 'p' ? toC(f.pts) : rettangolo(f.x, f.y, f.x + f.w, f.y + f.h);
-  if (!CL.Clipper.Orientation(p)) p = p.slice().reverse();
-  return unisci([p]);
+  let reg;
+  if (f.t === 't') reg = testoRegione(f);
+  else if (f.t === 'cen') reg = giraSposta(specchiaLoc(centinaSchizzo(f).regione, f), f.ang, f.x, f.y);
+  else if (f.t === 'lon') { // da foro: la sede segue il contorno esterno della sezione, piu' il gioco
+    const sz = sezioneLongherone(Object.assign({}, f, { forma: FORME[f.forma] ? f.forma : 'I' }));
+    reg = giraSposta(specchiaLoc(f.m === 'foro' ? offset(sz.esterno, f.g || 0, sz.tonda ? JT.jtRound : JT.jtMiter) : sz.regione, f), f.ang, f.x, f.y);
+  } else if (f.t === 'cor') { const sz = sezioneCorrente(f); reg = giraSposta(specchiaLoc(f.m === 'foro' && f.g > 0 ? offset(sz, f.g, JT.jtMiter) : sz, f), f.ang, f.x, f.y); }
+  else {
+    let p;
+    if (f.t === 'c') p = sposta([cerchio(f.d)], f.x, f.y)[0];
+    else if (f.t === 'p') p = toC(f.pts);
+    else if (f.t === 'g') { const n = limita(Math.round(f.n) || 6, 3, 24), a0 = (f.ang || 0) * Math.PI / 180, q = []; for (let i = 0; i < n; i++) { const a = a0 + 2 * Math.PI * i / n + Math.PI / 2; q.push([f.x + f.d / 2 * Math.cos(a), f.y + f.d / 2 * Math.sin(a)]); } p = toC(q); }
+    else if (f.r > 0 || f.ang) { // rettangolo raccordato e/o ruotato attorno al proprio centro
+      let q = [rettangolo(-f.w / 2, -f.h / 2, f.w / 2, f.h / 2)]; const r = Math.min(f.r || 0, f.w / 2 - 0.01, f.h / 2 - 0.01);
+      if (r > 0) q = offset(offset(q, -r, JT.jtMiter), r, JT.jtRound);
+      p = giraSposta(q, f.ang, f.x + f.w / 2, f.y + f.h / 2)[0];
+    } else p = rettangolo(f.x, f.y, f.x + f.w, f.y + f.h);
+    if (!CL.Clipper.Orientation(p)) p = p.slice().reverse();
+    reg = unisci([p]);
+  }
+  if (f.pc > 0 && f.m !== 'foro' && reg.length) reg = sottrai(reg, offset(reg, -f.pc, JT.jtMiter)); // solo il contorno, di parete pc
+  return reg;
 }
 const pulisci = reg => CL.Clipper.CleanPolygons(reg, 2).filter(q => q.length > 2);
 /* Regione di base dello schizzo: unione delle forme piene meno l'unione dei fori. */
@@ -1414,7 +1580,321 @@ function puntoCorrente(pr, c, x, lato, rid) {
 /* Rettangolo nel riferimento locale (tangente, normale entrante). */
 const rettLocale = (S, tau, nrm, a0, a1, d0, d1) => toC([[a0, d0], [a1, d0], [a1, d1], [a0, d1]].map(([a, d]) => [S[0] + tau[0] * a - nrm[0] * d, S[1] + tau[1] * a - nrm[1] * d]));
 
+/* Sezione di una barra coricata: il basso del disegno appoggia sul piano. Se la base non e' piana
+   (tondo, profilo) la sezione si spiana quanto basta per un appoggio largo almeno il 40 % (max 3 mm). */
+function barraSchizzo(reg, S) {
+  const bb = ingombro(reg), W = bb.x1 - bb.x0, H = bb.y1 - bb.y0, larghezza = y => { const r = interseca(reg, [rettangolo(bb.x0 - 1, y, bb.x1 + 1, y + 0.05)]); return r.length ? ingombro(r).x1 - ingombro(r).x0 : 0; };
+  const serve = Math.min(3, 0.4 * W);
+  let taglio = 0;
+  while (larghezza(bb.y0 + taglio + 0.02) < serve && taglio < 0.25 * H) taglio += 0.05;
+  const r = taglio > 0 ? interseca(reg, [rettangolo(bb.x0 - 1, bb.y0 + taglio, bb.x1 + 1, bb.y1 + 1)]) : reg, b2 = ingombro(r);
+  return { regione: sposta(r, -b2.x0, -b2.y0), ly: b2.x1 - b2.x0, lz: b2.y1 - b2.y0, taglio: arr(taglio, 100), appoggio: larghezza(bb.y0 + taglio + 0.02), zLetto: bb.y0 + taglio };
+}
+/* Pezzi liberi: schizzi 2D estrusi, aggiunti al kit in ogni modo di lavoro. */
+function pezziLiberi(P, parti, avv) {
+  const S = P.stampa, schizzi = [], av = [], avvL = (liv, testo) => { av.push({ liv, testo }); avv(liv, testo); };
+  schizzi.avvisi = av;
+  (P.schizzi || []).forEach((sk, i) => {
+    const so = solidoSchizzo(sk), nome = sk.nome || 'Pezzo libero ' + (i + 1), reg = so.base;
+    so.avvisi.forEach(t => avvL('attenzione', nome + ': ' + t + '.'));
+    if (!so.gradini.length) { schizzi.push({ i, regione: [], area: 0, solido: so }); return; }
+    const bb = ingombro([].concat(...so.gradini.map(g => g.regione))), nc = limita(Math.round(sk.n) || 1, 1, 20);
+    const gr = so.gradini.map(g => ({ z0: g.z0, z1: g.z1, regione: sposta(g.regione, -bb.x0, -bb.y0) }));
+    schizzi.push({ i, regione: reg, bb, area: area(reg), solido: so, lz: so.lz });
+    if (sk.or === 'coricato') { // barra: la forma disegnata e' la sezione, l'estrusione e' la lunghezza; si stampa coricata
+      const B = barraSchizzo(reg, S), q = schizzi[schizzi.length - 1], Lb = sk.h, Lmax = P.stampante.lx - 2 * (4 + Math.max(0, S.brim) + (S.skirt > 0 ? S.skirtDist : 0));
+      q.barra = B;
+      if (so.gradini.length > 1) avvL('attenzione', nome + ': in una barra coricata rilievi e incavi non si stampano (conta solo la sezione: forme piene meno fori).');
+      if (B.taglio > 0) avvL('info', nome + ': sezione senza una base piana, spianata di ' + nf(B.taglio, 2) + ' mm per appoggiare sul piano (larghezza di appoggio ' + nf(B.appoggio, 1) + ' mm).');
+      if (Lb > Lmax) avvL('errore', nome + ': barra lunga ' + nf(Lb, 1) + ' mm, oltre i ' + nf(Lmax, 1) + ' mm utili del piano di stampa.');
+      if (sk.st === false) return;
+      for (let k = 0; k < nc; k++) parti.push({ id: 'S' + (i + 1) + (nc > 1 ? '.' + (k + 1) : ''), tipo: 'libero', nome, chiave: 'libb|' + i + '|' + Lb, lx: Lb, ly: B.ly, lz: B.lz, rif: { schizzo: i }, brim: true, barra: { regione: B.regione, L: Lb } });
+      return;
+    }
+    const forma = gr.length === 1 && gr[0].z0 === 0 ? { prisma: { regione: gr[0].regione, h: gr[0].z1 } } : { gradini: gr };
+    if (sk.st === false) return; // escluso dal kit: resta nel progetto e nel disegno
+    for (let q = 0; q < nc; q++) parti.push(Object.assign({ id: 'S' + (i + 1) + (nc > 1 ? '.' + (q + 1) : ''), tipo: 'libero', nome, chiave: 'lib|' + i,
+      lx: bb.x1 - bb.x0, ly: bb.y1 - bb.y0, lz: so.lz, rif: { schizzo: i } }, forma));
+    if (reg.length && offset(reg, -S.w).length === 0) avvL('attenzione', nome + ': spessori inferiori a due cordoni (' + arr(2 * S.w, 100) + ' mm), la stampa puo\' risultare incompleta.');
+    const sott = (sk.forme || []).filter(f => f.t === 't' && f.m !== 'foro' && f.m !== 'incavo').some(f => { const r = testoRegione(f), a = area(r); return a > 0 && area(offset(offset(r, -0.45 * S.w, JT.jtRound), 0.45 * S.w, JT.jtRound)) < 0.8 * a; });
+    if (sott) avvL('attenzione', nome + ': alcune lettere hanno tratti piu\' sottili del cordone (' + S.w + ' mm). Aumentare l\'altezza delle lettere, l\'ingrossamento o scegliere un carattere piu\' pieno.');
+  });
+
+
+  return schizzi;
+}
+// ---------------------------------------------------------------- centine didattiche
+/* Una o piu' centine del profilo scelto, piene, con incisi (o in rilievo) gli
+   elementi che lo definiscono: corda, linea media, spessore massimo, freccia
+   massima, stazioni ogni 10 % della corda e la sigla. Servono a spiegare in
+   classe com'e' fatto un profilo alare. Corde: «200, 150, 100» (mm). */
+function cordeDidattiche(P) {
+  const v = String(P.dCorde || '').split(/[;,\s]+/).map(s => parseFloat(s)).filter(x => isFinite(x) && x > 0).map(x => limita(arr(x, 10), 20, 1000)).slice(0, 12);
+  return v.length ? v : [200];
+}
+const nacaSpessori = def => !!def && !def.dir && (def.serie === 4 || def.serie === 5); // legge degli spessori NACA: vale r_LE = 1,1019 t^2 c
+function striscia(pts, w) { // fascia larga w attorno a una spezzata aperta
+  const co = new CL.ClipperOffset(3, 0.004 * SC), out = new CL.Paths();
+  co.AddPath(toC(pts), JT.jtRound, CL.EndType.etOpenButt); co.Execute(out, w / 2 * SC);
+  return out;
+}
+function centinaDidattica(P, def, c, j) {
+  const S = P.stampa, t = P.dSp, w = arr(Math.max(2 * S.w, 0.005 * c), 100), te = Math.max(2 * S.w + 0.05, 0.005 * c), pr = nacaProfilo(def, te / c, 160);
+  const profC = unisci([toC(pr.pts.map(p => [p[0] * c, p[1] * c]))]), mg = Math.max(1.2, 1.5 * w), dentro = offset(profC, -mg, JT.jtRound);
+  let xt = 0.3, tm = 0, xf = 0, fm = 0; // massimi misurati sul contorno (spessore verticale, freccia della linea media)
+  for (let x = 0.004; x <= 0.996; x += 0.002) { const s = pr.spessore(x), m = pr.medio(x); if (s > tm) { tm = s; xt = x; } if (m > fm) { fm = m; xf = x; } }
+  const curvo = fm * c > 0.3, L = Math.max(1.5, 0.012 * c), voci = [];
+  if (P.dCorda) voci.push({ k: 'corda', reg: striscia([[0, 0], [c, 0]], w) });
+  if (P.dMedia && curvo) { const q = []; for (let i = 0; i <= 120; i++) { const x = (1 - Math.cos(Math.PI * i / 120)) / 2; q.push([x * c, pr.medio(x) * c]); } voci.push({ k: 'media', reg: striscia(q, w) }); }
+  if (P.dSpessore) voci.push({ k: 'spessore', reg: striscia([[xt * c, pr.yL(xt) * c], [xt * c, pr.yU(xt) * c]], w), x: xt * c });
+  if (P.dFreccia && curvo) voci.push({ k: 'freccia', reg: striscia([[xf * c, 0], [xf * c, fm * c]], w), x: xf * c });
+  if (P.dStazioni) [0.1, 0.2, 0.25, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9].forEach(f => { const l = f === 0.25 ? 2 * L : f === 0.5 ? 1.5 * L : L; voci.push({ k: 'stazione', reg: striscia([[f * c, -l], [f * c, l]], w), x: f * c, l, f }); });
+  voci.forEach(v => { v.reg = interseca(v.reg, dentro); });
+  // scritta: la piu' grande che entra, sopra o sotto i segni orizzontali, senza toccare i segni verticali
+  const testo = (P.dTesto || '').trim() || (def.nome.length <= 12 ? def.nome : def.codice);
+  let scritta = null;
+  if (P.dScritta && testo) {
+    const k = larghezzaTesto({ testo, font: CAR_PREDEFINITO, a: 10, sp: 0 }) / 10, cl = Math.max(1, w), dx = 0.25, N = Math.floor(c / dx) + 1;
+    const orizz = x => { const ys = []; if (P.dCorda) ys.push(0); if (P.dMedia && curvo) ys.push(pr.medio(x) * c); return ys; };
+    const lim = []; for (let i = 0; i < N; i++) {
+      const xx = i * dx, x = xx / c, yU = pr.yU(x) * c - mg - 0.3, yL = pr.yL(x) * c + mg + 0.3, ys = orizz(x);
+      let su = ys.length ? Math.max(...ys) + w / 2 + cl : yL, giu = ys.length ? Math.min(...ys) - w / 2 - cl : yU;
+      voci.forEach(v => { if (v.k === 'stazione' && Math.abs(v.x - xx) < w / 2 + cl) { su = Math.max(su, v.l + w / 2 + cl); giu = Math.min(giu, -v.l - w / 2 - cl); } });
+      const blocco = voci.some(v => (v.k === 'spessore' || v.k === 'freccia') && Math.abs(v.x - xx) < w / 2 + cl);
+      lim.push({ sopra: blocco ? [1, -1] : [su, yU], sotto: blocco ? [1, -1] : [yL, giu] });
+    }
+    const amax = Math.min(14, 0.09 * c);
+    for (const lato of ['sopra', 'sotto']) for (let i0 = Math.ceil(mg / dx); i0 < N; i0 += 2) {
+      const prova = a => { const i1 = i0 + Math.ceil(k * a / dx); if (i1 >= N) return null; let lo = -Infinity, hi = Infinity; for (let i = i0; i <= i1; i++) { const b = lim[i][lato]; if (b[0] > lo) lo = b[0]; if (b[1] < hi) hi = b[1]; if (hi - lo < a) return null; } return [lo, hi]; };
+      let a0 = 2.5, a1 = amax;
+      if (!prova(a0)) continue;
+      for (let it = 0; it < 16; it++) { const am = (a0 + a1) / 2; if (prova(am)) a0 = am; else a1 = am; }
+      const a = Math.floor(a0 * 10) / 10, b = prova(a), xc = i0 * dx + k * a / 2;
+      if (b && (!scritta || a > scritta.a + 0.05 || (Math.abs(a - scritta.a) <= 0.05 && Math.abs(xc - 0.5 * c) < Math.abs(scritta.x - 0.5 * c)))) scritta = { testo, a, x: xc, y: (b[0] + b[1]) / 2, lato };
+    }
+    if (scritta) scritta.reg = interseca(testoRegione({ t: 't', testo, font: CAR_PREDEFINITO, a: scritta.a, sp: 0, ang: 0, al: 'c', gr: 0, x: scritta.x, y: scritta.y }), dentro);
+  }
+  const segni = voci.length ? unisci([].concat(...voci.map(v => v.reg))) : [], tutto = unisci(segni.concat(scritta ? scritta.reg : []));
+  const ril = P.dModo === 'rilievo', h = limita(P.dH, 0.2, Math.max(0.2, t - 0.8)), hR = ril && tutto.length ? h : 0;
+  const gr = !tutto.length ? [{ z0: 0, z1: t, regione: profC }] : ril ? [{ z0: 0, z1: t, regione: profC }, { z0: t, z1: t + h, regione: tutto }]
+    : [{ z0: 0, z1: t - h, regione: profC }, { z0: t - h, z1: t, regione: sottrai(profC, tutto) }];
+  const bb = ingombro(profC), grS = gr.map(q => ({ z0: q.z0, z1: q.z1, regione: sposta(q.regione, -bb.x0, -bb.y0) }));
+  const parte = { id: 'C' + (j + 1), tipo: 'centina', nome: 'Centina didattica ' + def.nome + ' (c = ' + arr(c, 10) + ' mm)', chiave: 'did|' + def.nome + '|' + c + '|' + t + '|' + area(tutto).toFixed(2) + '|' + h + (ril ? 'r' : 'i'),
+    lx: bb.x1 - bb.x0, ly: bb.y1 - bb.y0, lz: t + hR, rif: { centina: j }, gradini: grS };
+  const rLE = nacaSpessori(def) ? 1.1019 * def.t * def.t * c : null;
+  return { j, c, y: 0, xLE: 0, yLE: 0, phi: 0, chiusa: true, tronca: false, u0: 0, u1: c, imp: [[bb.x0, bb.x1], [bb.x0, bb.x1]], smusso: false, prof: pr, regione: profC, profC, contorno: profC,
+    intagli: [], sedi: [], finestre: [], posLon: [], corr: [], zs: [], parte, ox: bb.x0, oy: bb.y0, area: area(profC), areaProfilo: area(profC), pts: pr.pts, rottura: false,
+    didattica: { voci, segni, scritta, w, te, h, hR, ril, mg, xt, tm, xf, fm, curvo, rLE, L } };
+}
+/* Basetta: blocco con una cava larga quanto la centina (piu' il gioco) il cui fondo segue il ventre;
+   copre la parte centrale della corda ed e' aperta alle estremita'. Si stampa in piedi (cava verso l'alto). */
+function basettaDidattica(P, cen) {
+  const c = cen.c, pr = cen.prof, D = cen.didattica, t = P.dSp, g = P.gioco, d = limita(arr(0.035 * c + 2, 10), 5, 12), fondo = 2, parete = Math.max(3, 0.5 * t);
+  const Wc = t + D.hR + 2 * g, W = arr(Math.max(Wc + 2 * parete, 0.13 * c, 24), 10), N = 400, xs = [], yl = [];
+  for (let i = 0; i <= N; i++) { const x = i / N; xs.push(x * c); yl.push(pr.yL(x) * c); }
+  const ymin = Math.min(...yl), zTop = ymin + d, zBot = ymin - g - fondo, H = zTop - zBot, xa = 0.12 * c, xb = 0.78 * c, L = xb - xa;
+  const intervalli = y => { const out = []; let a = null; for (let i = 0; i <= N; i++) { const qui = yl[i] - g <= y; if (qui && a === null) a = xs[i] - g; if ((!qui || i === N) && a !== null) { out.push([Math.max(xa, a), Math.min(xb, (qui ? xs[i] : xs[i - 1]) + g)]); a = null; } } return out.filter(q => q[1] > q[0]); };
+  const pieno = [rettangolo(0, 0, L, W)], y0c = (W - Wc) / 2, gr = [{ z0: 0, z1: fondo * 0.5, regione: pieno }];
+  let prec = null;
+  for (let z = fondo * 0.5; z < H - 1e-9; z += 0.25) {
+    const z1 = Math.min(H, z + 0.25), iv = intervalli(zBot + (z + z1) / 2), firma = iv.map(q => q[0].toFixed(2) + ':' + q[1].toFixed(2)).join('|');
+    const reg = iv.length ? sottrai(pieno, unisci(iv.map(q => rettangolo(q[0] - xa, y0c, q[1] - xa, y0c + Wc)))) : pieno;
+    if (prec && prec.firma === firma) prec.z1 = z1; else { prec = { z0: z, z1, regione: reg, firma }; gr.push(prec); }
+  }
+  gr.forEach(q => delete q.firma);
+  if (gr.length > 1 && gr[0].regione === gr[1].regione) { gr[1].z0 = 0; gr.shift(); }
+  const parte = { id: 'B' + (cen.j + 1), tipo: 'basetta', nome: 'Basetta della centina da ' + arr(c, 10) + ' mm', chiave: 'bas|' + c + '|' + t + '|' + g + '|' + D.hR + '|' + P.naca + P.profilo + P.spProf + P.fProf + P.pProf,
+    lx: L, ly: W, lz: H, rif: { centina: cen.j }, gradini: gr };
+  return { parte, xa, xb, L, W, Wc, d, H, zTop, zBot, fondo, parete };
+}
+function costruisciDidattico(P) {
+  const avvisi = [], avv = (liv, testo) => avvisi.push({ liv, testo });
+  const def = profiloDef(P), S = P.stampa, st = P.stampante, margine = 4 + (S.skirt > 0 ? S.skirtDist : 0), Lmax = st.lx - 2 * margine;
+  const corde = cordeDidattiche(P), copie = limita(Math.round(P.dCopie) || 1, 1, 20), centine = [], parti = [];
+  corde.forEach((c, j) => {
+    const cen = centinaDidattica(P, def, c, j);
+    if (P.dBase) cen.base = basettaDidattica(P, cen);
+    centine.push(cen);
+    for (let q = 0; q < copie; q++) {
+      const s = copie > 1 ? String.fromCharCode(97 + q) : '';
+      parti.push(Object.assign({}, cen.parte, { id: cen.parte.id + s }));
+      if (cen.base) parti.push(Object.assign({}, cen.base.parte, { id: cen.base.parte.id + s }));
+    }
+    if (c > Lmax) avv('errore', 'La corda di ' + arr(c, 10) + ' mm non entra nel piano di stampa: il massimo e\' ' + arr(Lmax, 1) + ' mm con i margini attuali.');
+  });
+  const D0 = centine[0].didattica;
+  if (P.dSp + D0.hR > st.lz) avv('errore', 'Spessore di ' + P.dSp + ' mm: piu\' dell\'altezza utile della stampante (' + st.lz + ' mm).');
+  if (!D0.curvo && (P.dMedia || P.dFreccia)) avv('info', def.nome + ' e\' simmetrico: la linea media coincide con la corda e la freccia e\' nulla, quindi non si incidono.');
+  centine.forEach(cn => {
+    const Dd = cn.didattica;
+    if (P.dScritta && !Dd.scritta) avv('attenzione', 'Centina da ' + arr(cn.c, 10) + ' mm: la scritta non trova posto fra i segni (altezza minima 2,5 mm). Togliere qualche segno, accorciare il testo o aumentare la corda.');
+    else if (Dd.scritta && Dd.scritta.a < 3) avv('attenzione', 'Centina da ' + arr(cn.c, 10) + ' mm: scritta alta solo ' + nf(Dd.scritta.a, 1) + ' mm, poco leggibile.');
+  });
+  avv('info', 'Segni ' + (D0.ril ? 'in rilievo alti ' : 'incisi profondi ') + nf(D0.h, 2) + ' mm (' + Math.round(D0.h / S.h) + ' strati da ' + nf(S.h, 2) + ' mm), larghi ' + nf(D0.w, 2) + ' mm: corda, linea media, spessore massimo, freccia massima e stazioni ogni 10 % della corda, dove scelti.');
+  if (P.dSp > 20) avv('info', 'Spessore di ' + P.dSp + ' mm: piu\' che una centina e\' un tronco d\'ala. Riempimento ' + S.riemp + ' %: valutare un valore basso per risparmiare filamento.');
+  const schizzi = pezziLiberi(P, parti, avv), c0 = centine[0];
+  return { didattico: true, livello: 'profilo', def, corde, copie, n: centine.length, t: P.dSp, cr: corde[0], ct: corde[corde.length - 1], cm: corde[0], b: 0, bh: 0, e: 0, S: 0, Sh: 0, AR: 0, k: 1,
+    passo: 0, passi: [], luci: [], Lmax, margine, pianta: null, stazioni: null, cma: c0.c, rid: 0, obl: false, intera: false, doppia: false, ik: -1,
+    longheroni: [], correnti: [], gusci: [], giunti: [], dime: [], centine, schizzi, parti, avvisi, errori: avvisi.filter(a => a.liv === 'errore').length };
+}
+function tabellaDidattica(P, M) {
+  const gruppi = [], g = (id, titolo, nota) => { const q = { id, titolo, nota: nota || '', righe: [] }; gruppi.push(q); return q; };
+  const riga = (G, o) => { G.righe.push(Object.assign({ um: 'mm', tipo: 'calc', regola: '', calcolo: '', passo: 0.1 }, o)); };
+  const S = P.stampa, st = P.stampante, def = M ? M.def : profiloDef(P), corde = cordeDidattiche(P), c = corde[0], c0 = M && M.centine[0], D = c0 && c0.didattica;
+  const par = ['simm', 'piano', 'lamina', 'libero', 'ellittico'].includes(P.profilo), cod = def.codice || '', dig = n => '«' + cod.slice(n[0], n[1]) + '»';
+  let G = g('profilo', '1 · Il profilo ' + def.nome, 'Che cosa dice la sigla, con i numeri della prima centina (c = ' + nf(c, 1) + ' mm).');
+  riga(G, { id: 'prof', sim: '', nome: 'Profilo', v: def.nome, um: '', regola: FAMIGLIE[P.profilo] ? FAMIGLIE[P.profilo].desc : '' });
+  if (def.serie === 4 && !def.dir) {
+    const intero = /^\d{4}$/.test(cod);
+    riga(G, { id: 'n4.m', sim: 'f/c', nome: intero ? 'Prima cifra ' + dig([0, 1]) + ': freccia massima della linea media' : 'Freccia massima della linea media', v: arr(def.m * 100, 10), um: '%',
+      k: P.profilo === 'libero' ? 'fProf' : null, tipo: P.profilo === 'libero' ? 'guida' : 'calc', min: 0, max: 12, passo: 0.5, regola: 'f = (f/c) · c', calcolo: nf(def.m, 3) + ' · ' + nf(c, 1) + ' = ' + nf(def.m * c, 2) + ' mm' });
+    riga(G, { id: 'n4.p', sim: 'x<sub>f</sub>/c', nome: intero ? 'Seconda cifra ' + dig([1, 2]) + ': posizione della freccia massima' : 'Posizione della freccia massima', v: def.m > 0 ? arr(def.p * 100, 10) : '—', um: def.m > 0 ? '%' : '',
+      k: P.profilo === 'libero' && def.m > 0 ? 'pProf' : null, tipo: P.profilo === 'libero' && def.m > 0 ? 'guida' : 'calc', min: 10, max: 90, passo: 5,
+      regola: def.m > 0 ? 'decimi di corda dal bordo d’attacco: x<sub>f</sub> = (x<sub>f</sub>/c) · c' : 'profilo simmetrico: linea media e corda coincidono', calcolo: def.m > 0 ? nf(def.p, 2) + ' · ' + nf(c, 1) + ' = ' + nf(def.p * c, 1) + ' mm' : '' });
+  } else if (def.serie === 5) {
+    riga(G, { id: 'n5.L', sim: 'C<sub>L</sub>', nome: 'Prima cifra ' + dig([0, 1]) + ': coefficiente di portanza di progetto', v: def.cl, um: '', regola: 'C<sub>L</sub> = 0,15 · L, con L prima cifra', calcolo: '0,15 · ' + cod[0] + ' = ' + nf(def.cl, 2) });
+    riga(G, { id: 'n5.P', sim: 'x<sub>f</sub>/c', nome: 'Seconda cifra ' + dig([1, 2]) + ': posizione della freccia massima', v: arr(def.p * 100, 10), um: '%', regola: 'x<sub>f</sub>/c = P / 20, con P seconda cifra', calcolo: cod[1] + ' / 20 = ' + nf(def.p, 3) + ' → ' + nf(def.p * c, 1) + ' mm' });
+    riga(G, { id: 'n5.Q', sim: '', nome: 'Terza cifra ' + dig([2, 3]) + ': tipo di linea media', v: def.reflex ? 'reflex' : 'normale', um: '', regola: def.reflex ? '1 = linea media che risale verso il bordo d’uscita: momento di beccheggio quasi nullo (ali volanti)' : '0 = linea media semplice, che scende fino al bordo d’uscita' });
+  } else if (def.dir) {
+    if (def.m !== undefined) {
+      riga(G, { id: 'pr.f', sim: 'f/c', nome: 'Freccia massima della linea media', v: arr(def.m * 100, 10), um: '%', k: 'fProf', tipo: 'guida', min: 0, max: 12, passo: 0.5, regola: 'f = (f/c) · c', calcolo: nf(def.m, 3) + ' · ' + nf(c, 1) + ' = ' + nf(def.m * c, 2) + ' mm' });
+      riga(G, { id: 'pr.p', sim: 'x<sub>f</sub>/c', nome: 'Posizione della freccia massima', v: arr(def.p * 100, 10), um: '%', k: 'pProf', tipo: 'guida', min: 10, max: 90, passo: 5, regola: 'x<sub>f</sub> = (x<sub>f</sub>/c) · c', calcolo: nf(def.p, 2) + ' · ' + nf(c, 1) + ' = ' + nf(def.p * c, 1) + ' mm' });
+    }
+  }
+  riga(G, { id: 'pr.t', sim: 't/c', nome: (def.serie === 4 && /^\d{4}$/.test(cod)) || def.serie === 5 ? 'Ultime due cifre ' + dig([cod.length - 2, cod.length]) + ': spessore massimo' : 'Spessore massimo', v: arr(def.t * 100, 10), um: '%',
+    k: par ? 'spProf' : null, tipo: par ? 'guida' : 'calc', min: 3, max: 30, passo: 0.5, regola: 't = (t/c) · c', calcolo: nf(def.t, 3) + ' · ' + nf(c, 1) + ' = ' + nf(def.t * c, 2) + ' mm' });
+  if (nacaSpessori(def)) {
+    riga(G, { id: 'pr.xt', sim: 'x<sub>t</sub>/c', nome: 'Posizione dello spessore massimo', v: 30, um: '%', regola: 'la legge degli spessori NACA y<sub>t</sub> = 5t (0,2969 √x − 0,1260 x − 0,3516 x² + 0,2843 x³ − 0,1015 x⁴) ha il massimo per x ≈ 0,30', calcolo: '0,30 · ' + nf(c, 1) + ' = ' + nf(0.3 * c, 1) + ' mm' });
+    riga(G, { id: 'pr.r', sim: 'r<sub>LE</sub>', nome: 'Raggio del bordo d’attacco', v: 1.1019 * def.t * def.t * c, regola: 'r<sub>LE</sub> = 1,1019 · (t/c)² · c', calcolo: '1,1019 · ' + nf(def.t, 3) + '² · ' + nf(c, 1) + ' = ' + nf(1.1019 * def.t * def.t * c, 2) });
+    riga(G, { id: 'pr.A', sim: 'A', nome: 'Area della sezione', v: 0.685 * def.t * c * c, um: 'mm²', regola: 'A ≈ 0,685 · (t/c) · c², integrale della legge degli spessori (la linea media non cambia l’area)', calcolo: '0,685 · ' + nf(def.t, 3) + ' · ' + nf(c, 1) + '² = ' + nf(0.685 * def.t * c * c, 0) + (c0 ? '; misurata sul contorno ' + nf(c0.area, 0) : '') });
+  } else if (c0) riga(G, { id: 'pr.A', sim: 'A', nome: 'Area della sezione', v: c0.area, um: 'mm²', regola: 'misurata sul contorno' });
+  if (D) {
+    riga(G, { id: 'mis.t', sim: 't', nome: 'Spessore massimo misurato sulla centina', v: D.tm * c, regola: 'massimo di (y<sub>dorso</sub> − y<sub>ventre</sub>) misurato in verticale', calcolo: nf(D.tm * c, 2) + ' mm a x = ' + nf(D.xt * c, 1) + ' mm (' + nf(100 * D.xt, 1) + ' %)' });
+    if (D.curvo) riga(G, { id: 'mis.f', sim: 'f', nome: 'Freccia massima misurata sulla centina', v: D.fm * c, regola: 'massimo della linea media sopra la corda', calcolo: nf(D.fm * c, 2) + ' mm a x = ' + nf(D.xf * c, 1) + ' mm (' + nf(100 * D.xf, 1) + ' %)' });
+  }
+  G = g('centine', '2 · Centine da stampare', 'Una centina piena per ogni corda, con i segni sulla faccia superiore.');
+  corde.forEach((cc, i) => riga(G, { id: 'dc' + i, sim: 'c<sub>' + (i + 1) + '</sub>', nome: 'Corda della centina ' + (i + 1), v: cc, q: 'dc.' + i, tipo: 'guida', min: 20, max: 1000, passo: 1,
+    regola: 'scelta dall’operatore' + (M ? ' (non oltre L<sub>max</sub> = ' + nf(M.Lmax, 1) + ' mm)' : ''), calcolo: 't = ' + nf(def.t * cc, 1) + ' mm' + (def.m > 0 || def.serie === 5 ? '; f ≈ ' + nf((D ? D.fm : def.m || 0) * cc, 1) + ' mm' : '') }));
+  riga(G, { id: 'dCopie', sim: 'n', nome: 'Copie di ciascuna centina', v: P.dCopie, um: 'pz', k: 'dCopie', tipo: 'guida', min: 1, max: 20, passo: 1 });
+  riga(G, { id: 'dSp', sim: 's', nome: 'Spessore della centina', v: P.dSp, k: 'dSp', tipo: 'guida', min: 1.2, max: 80, passo: 0.5 });
+  if (D) {
+    riga(G, { id: 'd.te', sim: 't<sub>e</sub>', nome: 'Bordo d’uscita', v: D.te, regola: 't<sub>e</sub> = max(2w + 0,05 ; 0,005 · c), con w larghezza del cordone: il minimo stampabile', calcolo: 'max(' + nf(2 * S.w + 0.05, 2) + ' ; ' + nf(0.005 * c, 2) + ') = ' + nf(D.te, 2) });
+    riga(G, { id: 'd.w', sim: 'w<sub>s</sub>', nome: 'Larghezza dei segni', v: D.w, regola: 'w<sub>s</sub> = max(2w ; 0,005 · c)', calcolo: 'max(' + nf(2 * S.w, 2) + ' ; ' + nf(0.005 * c, 2) + ') = ' + nf(D.w, 2) });
+    riga(G, { id: 'dH', sim: 'h<sub>s</sub>', nome: D.ril ? 'Altezza dei segni in rilievo' : 'Profondità dei segni incisi', v: P.dH, k: 'dH', tipo: 'guida', min: 0.2, max: 3, passo: 0.2, regola: 'conviene un multiplo dello strato (' + nf(S.h, 2) + ' mm)', calcolo: nf(P.dH, 2) + ' / ' + nf(S.h, 2) + ' = ' + nf(P.dH / S.h, 1) + ' strati' });
+    riga(G, { id: 'd.m', sim: 'm', nome: 'Distanza dei segni dal contorno', v: D.mg, regola: 'm = max(1,2 ; 1,5 · w<sub>s</sub>): il bordo della centina resta integro', calcolo: 'max(1,2 ; ' + nf(1.5 * D.w, 2) + ') = ' + nf(D.mg, 2) });
+    if (D.scritta) riga(G, { id: 'd.a', sim: 'a', nome: 'Altezza della scritta «' + D.scritta.testo + '»', v: D.scritta.a, regola: 'la più grande che entra ' + (D.scritta.lato === 'sopra' ? 'sopra' : 'sotto') + ' i segni, senza toccarli (non oltre 14 mm né 0,09 · c)' });
+  }
+  if (P.dBase && c0 && c0.base) {
+    const B = c0.base;
+    G = g('basetta', '3 · Basetta', 'Per esporre la centina in piedi: la cava ha il fondo a forma di ventre.');
+    riga(G, { id: 'b.wc', sim: 'b<sub>c</sub>', nome: 'Larghezza della cava', v: B.Wc, regola: 'b<sub>c</sub> = s + 2g' + (D.hR ? ' + h<sub>s</sub> (segni in rilievo)' : ''), calcolo: nf(P.dSp, 2) + ' + 2·' + nf(P.gioco, 2) + (D.hR ? ' + ' + nf(D.hR, 2) : '') + ' = ' + nf(B.Wc, 2) });
+    riga(G, { id: 'gioco', sim: 'g', nome: 'Gioco nella cava (per lato)', v: P.gioco, k: 'gioco', tipo: 'guida', min: 0, max: 1, passo: 0.05 });
+    riga(G, { id: 'b.d', sim: 'd', nome: 'Profondità della cava (nel punto più basso del ventre)', v: B.d, regola: 'd = 0,035 · c + 2, fra 5 e 12 mm', calcolo: '0,035 · ' + nf(c, 1) + ' + 2 = ' + nf(0.035 * c + 2, 2) + ' → ' + nf(B.d, 1) });
+    riga(G, { id: 'b.L', sim: 'L<sub>b</sub>', nome: 'Lunghezza', v: B.L, regola: 'dal 12 % al 78 % della corda; la cava è aperta alle estremità', calcolo: '0,66 · ' + nf(c, 1) + ' = ' + nf(B.L, 1) });
+    riga(G, { id: 'b.W', sim: 'W', nome: 'Larghezza', v: B.W, regola: 'W = max(b<sub>c</sub> + 2 · parete ; 0,13 · c ; 24)', calcolo: 'max(' + nf(B.Wc + 2 * B.parete, 1) + ' ; ' + nf(0.13 * c, 1) + ' ; 24) = ' + nf(B.W, 1) });
+    riga(G, { id: 'b.H', sim: 'H', nome: 'Altezza', v: B.H, regola: 'H = d + g + fondo (2 mm)', calcolo: nf(B.d, 1) + ' + ' + nf(P.gioco, 2) + ' + 2 = ' + nf(B.H, 2) });
+  }
+  G = g('stampante', (gruppi.length + 1) + ' · Stampante', 'Ogni pezzo deve stare nel volume utile.');
+  const marg = M ? M.margine : 4 + (S.skirt > 0 ? S.skirtDist : 0);
+  riga(G, { id: 'st.xy', sim: '', nome: 'Piano di stampa', v: st.lx + ' × ' + st.ly, regola: st.nome });
+  riga(G, { id: 'st.z', sim: 'Z', nome: 'Altezza utile', v: st.lz, regola: st.nome });
+  riga(G, { id: 'st.L', sim: 'L<sub>max</sub>', nome: 'Corda massima di una centina', v: st.lx - 2 * marg, regola: 'L<sub>max</sub> = X − 2m, con m = 4 + distanza dello skirt', calcolo: st.lx + ' − 2·' + nf(marg, 1) + ' = ' + nf(st.lx - 2 * marg, 1) });
+  return gruppi;
+}
+/* Istruzioni del kit con i soli pezzi liberi. */
+function leggimiLiberi(P, M, piatti, stat) {
+  const S = P.stampa, st = P.stampante, r = [], n = v => String(arr(v, 100)).replace('.', ','), riga = t => r.push(t), titolo = M.nomiLiberi.length === 1 ? M.nomiLiberi[0] : P.nome + ' - pezzi liberi';
+  riga(titolo.toUpperCase()); riga('='.repeat(Math.max(20, titolo.length)));
+  riga('Progettista: ' + (P.autore || AUTORE) + '  -  ' + new Date().toLocaleDateString('it-IT')); riga('');
+  riga('Pezzi liberi disegnati nello schizzo 2D di ' + NOME_APP + ' ed estrusi. Il progetto completo e\' incorporato nei file .gcode e .3mf:');
+  riga('riaprendoli nella webapp si ritrovano anche ' + (P.livello === 'profilo' ? 'le centine didattiche' : 'l\'ala') + ', esclusa da questo kit.'); riga('');
+  riga('1. PEZZI'); riga('--------');
+  M.schizzi.filter(q => q.area > 0 && P.schizzi[q.i].st !== false).forEach(q => {
+    const k = P.schizzi[q.i], so = q.solido;
+    riga('  ' + k.nome + ': ' + n(q.bb.x1 - q.bb.x0) + ' x ' + n(q.bb.y1 - q.bb.y0) + ' mm, base alta ' + n(k.h) + ' mm' + (so.lz > k.h + 1e-6 ? ', ingombro in altezza ' + n(so.lz) + ' mm' : '') + '; area ' + n(q.area) + ' mm2; ' + k.n + (k.n === 1 ? ' copia' : ' copie'));
+    const tipi = { r: 'rettangoli', c: 'cerchi', p: 'poligoni', t: 'scritte' }, conta = {};
+    (k.forme || []).forEach(f => { const c = tipi[f.t] + (f.m && f.m !== 'pieno' ? ' (' + f.m + ')' : ''); conta[c] = (conta[c] || 0) + 1; });
+    riga('    forme: ' + Object.keys(conta).map(c => conta[c] + ' ' + c).join(', '));
+    (k.forme || []).filter(f => f.t === 't').forEach(f => riga('    scritta "' + f.testo + '" alta ' + n(f.a) + ' mm' + (f.m === 'rilievo' ? ', in rilievo di ' + n(f.hr) + ' mm' : f.m === 'incavo' ? ', incisa per ' + n(f.hr) + ' mm' : f.m === 'foro' ? ', passante' : '')));
+  });
+  riga(''); riga('2. STAMPA'); riga('---------');
+  riga('  Stampante: ' + st.nome + ', piano ' + st.lx + ' x ' + st.ly + ' mm, ugello ' + st.ugello + ' mm');
+  riga('  Strato ' + n(S.h) + ' mm (primo ' + n(S.h1) + '), cordone ' + n(S.w) + ' mm, ' + S.perimetri + ' perimetri, riempimento ' + S.riemp + '% a linee incrociate');
+  riga('  Temperature: ugello ' + S.tU1 + '/' + S.tU + ' C, piano ' + S.tP + ' C. Nessun supporto.');
+  piatti.forEach((pl, k) => {
+    riga(''); riga('  Piatto ' + (k + 1) + ' di ' + piatti.length + (stat && stat[k] ? ': ' + stat[k].strati + ' strati, tempo stimato ' + durata(stat[k].tempo) + ', filamento ' + n(stat[k].filamento / 1000) + ' m (' + n(stat[k].massa) + ' g)' : ''));
+    pl.items.forEach(it => riga('    ' + it.parte.nome.padEnd(40) + ' X ' + n(it.x).padStart(6) + ' - ' + n(it.x + it.parte.lx).padEnd(6) + '  Y ' + n(it.y).padStart(6) + ' - ' + n(it.y + it.parte.ly)));
+  });
+  riga(''); riga('3. AVVERTENZE'); riga('-------------');
+  riga('  - G-code prodotto dallo slicer interno della webapp: controllare l\'anteprima e sorvegliare il primo strato.');
+  riga('  - Lo slicer interno non genera supporti: le parti in rilievo poggiano sempre sul pezzo sottostante.');
+  M.avvisi.forEach(a => riga('  - [' + a.liv + '] ' + a.testo));
+  return r.join('\r\n') + '\r\n';
+}
+function leggimiDidattico(P, M, piatti, stat) {
+  const S = P.stampa, st = P.stampante, r = [], n = v => String(arr(v, 100)).replace('.', ','), riga = t => r.push(t), def = M.def, c0 = M.centine[0], D = c0.didattica, c = c0.c;
+  riga(P.nome.toUpperCase()); riga('='.repeat(Math.max(20, P.nome.length)));
+  riga('Progettista: ' + (P.autore || AUTORE) + '  -  ' + new Date().toLocaleDateString('it-IT')); riga('');
+  riga('Centine didattiche generate con ' + NOME_APP + '. Il progetto e\' incorporato nei file .gcode e .3mf.'); riga('');
+  riga('1. IL PROFILO ' + def.nome); riga('-'.repeat(14 + def.nome.length));
+  if (def.serie === 4 && !def.dir && /^\d{4}$/.test(def.codice)) {
+    const k = def.codice;
+    riga('  ' + k[0] + '  -> freccia massima della linea media: ' + k[0] + '% della corda');
+    riga('  ' + k[1] + '  -> posizione della freccia massima: ' + k[1] + '0% della corda dal bordo d\'attacco' + (def.m === 0 ? ' (profilo simmetrico: nessuna freccia)' : ''));
+    riga('  ' + k.slice(2) + ' -> spessore massimo: ' + Number(k.slice(2)) + '% della corda, a circa il 30% della corda');
+  } else if (def.serie === 5) {
+    const k = def.codice;
+    riga('  ' + k[0] + '  -> coefficiente di portanza di progetto C_L = 0,15 x ' + k[0] + ' = ' + n(def.cl));
+    riga('  ' + k[1] + '  -> freccia massima a ' + k[1] + '/20 = ' + n(100 * def.p) + '% della corda');
+    riga('  ' + k[2] + '  -> linea media ' + (def.reflex ? 'reflex (risale verso il bordo d\'uscita)' : 'normale'));
+    riga('  ' + k.slice(3) + ' -> spessore massimo: ' + Number(k.slice(3)) + '% della corda');
+  } else riga('  ' + (FAMIGLIE[P.profilo] ? FAMIGLIE[P.profilo].desc : ''));
+  riga('  Sulla centina da ' + n(c) + ' mm: spessore massimo ' + n(D.tm * c) + ' mm a ' + n(D.xt * c) + ' mm dal bordo d\'attacco' + (D.curvo ? '; freccia massima ' + n(D.fm * c) + ' mm a ' + n(D.xf * c) + ' mm' : '') +
+    (D.rLE ? '; raggio del bordo d\'attacco ' + n(D.rLE) + ' mm' : '') + '.'); riga('');
+  riga('2. LE CENTINE'); riga('-------------');
+  riga('  Corde: ' + M.corde.map(n).join(', ') + ' mm; ' + M.copie + (M.copie === 1 ? ' copia' : ' copie') + ' di ciascuna; spessore ' + n(P.dSp) + ' mm.');
+  const nomi = { corda: 'corda (dal bordo d\'attacco al bordo d\'uscita)', media: 'linea media', spessore: 'spessore massimo (segmento verticale)', freccia: 'freccia massima (dalla corda alla linea media)', stazione: 'stazioni al 10, 20, 25, 30 ... 90% della corda (piu\' lunghe al 25% e al 50%)' };
+  const usati = [...new Set(D.voci.map(v => v.k))];
+  if (usati.length || D.scritta) riga('  Segni ' + (D.ril ? 'in rilievo alti ' : 'incisi profondi ') + n(D.h) + ' mm e larghi ' + n(D.w) + ' mm: ' + usati.map(k => nomi[k]).concat(D.scritta ? ['scritta «' + D.scritta.testo + '» alta ' + n(D.scritta.a) + ' mm'] : []).join('; ') + '.');
+  if (c0.base) riga('  Basetta: ' + n(c0.base.L) + ' x ' + n(c0.base.W) + ' x ' + n(c0.base.H) + ' mm, cava larga ' + n(c0.base.Wc) + ' mm con il fondo a forma di ventre; si stampa in piedi.');
+  riga(''); riga('3. STAMPA'); riga('---------');
+  riga('  Stampante: ' + st.nome + ', piano ' + st.lx + ' x ' + st.ly + ' mm, ugello ' + st.ugello + ' mm');
+  riga('  Strato ' + n(S.h) + ' mm (primo ' + n(S.h1) + '), cordone ' + n(S.w) + ' mm, ' + S.perimetri + ' perimetri, riempimento ' + S.riemp + '% a linee incrociate');
+  riga('  Temperature: ugello ' + S.tU1 + '/' + S.tU + ' C, piano ' + S.tP + ' C. Nessun supporto.');
+  piatti.forEach((pl, k) => {
+    riga(''); riga('  Piatto ' + (k + 1) + ' di ' + piatti.length + (stat && stat[k] ? ': ' + stat[k].strati + ' strati, tempo stimato ' + durata(stat[k].tempo) + ', filamento ' + n(stat[k].filamento / 1000) + ' m (' + n(stat[k].massa) + ' g)' : ''));
+    pl.items.forEach(it => riga('    ' + it.parte.nome.padEnd(46) + ' X ' + n(it.x).padStart(6) + ' - ' + n(it.x + it.parte.lx).padEnd(6) + '  Y ' + n(it.y).padStart(6) + ' - ' + n(it.y + it.parte.ly)));
+  });
+  riga(''); riga('4. IN CLASSE'); riga('------------');
+  riga('  1) Riconoscere sulla centina i segni: corda, linea media, spessore e freccia massimi, stazioni.');
+  riga('  2) Misurare con il calibro corda, spessore massimo e sua posizione; confrontarli con le cifre della sigla.');
+  riga('  3) Con piu\' corde dello stesso profilo: verificare che spessore e freccia crescono in proporzione alla corda');
+  riga('     (il profilo e\' definito in percentuale della corda).');
+  if (c0.base) riga('  4) Infilare la centina nella basetta: il ventre appoggia sul fondo della cava.');
+  riga(''); riga('5. AVVERTENZE'); riga('-------------');
+  riga('  - G-code prodotto dallo slicer interno della webapp: controllare l\'anteprima e sorvegliare il primo strato.');
+  M.avvisi.forEach(a => riga('  - [' + a.liv + '] ' + a.testo));
+  riga(''); riga('6. TABELLA DELLE MISURE'); riga('-----------------------');
+  const asc = t => String(t).replace(/<sub>(.*?)<\/sub>/g, '_$1').replace(/<[^>]+>/g, '').replace(/·/g, '*').replace(/−/g, '-').replace(/×/g, 'x').replace(/√/g, 'sqrt').replace(/[«»]/g, '"')
+    .replace(/²/g, '2').replace(/³/g, '3').replace(/⁴/g, '4').replace(/→/g, '->').replace(/’/g, "'").replace(/≈/g, '~').replace(/—/g, '-').replace(/[àá]/g, "a'").replace(/[èé]/g, "e'").replace(/ì/g, "i'").replace(/ò/g, "o'").replace(/ù/g, "u'");
+  tabellaDidattica(P, M).forEach(gq => {
+    riga('  ' + asc(gq.titolo));
+    gq.righe.forEach(q => riga('    ' + asc(q.nome).padEnd(56) + (asc(nf(q.v)) + ' ' + asc(q.um)).padStart(12) + (q.regola ? '  ' + asc(q.regola) : '') + (q.calcolo ? '  ->  ' + asc(q.calcolo) : '')));
+  });
+  return r.join('\r\n') + '\r\n';
+}
+
+/* Costruzione del progetto. Con «solo pezzi liberi» l'ala resta calcolata (si vede nel disegno e
+   nell'assieme) ma il kit contiene soltanto i pezzi disegnati nello schizzo libero. */
 function costruisci(P) {
+  const M = P.livello === 'profilo' ? costruisciDidattico(P) : costruisciAla(P);
+  if (!P.soloLiberi) return M;
+  const lib = M.parti.filter(p => p.tipo === 'libero'), av = (M.schizzi.avvisi || []).slice(), nomi = [...new Set(lib.map(p => p.nome))];
+  av.unshift(lib.length ? { liv: 'info', testo: 'Si stampano solo i pezzi liberi dello schizzo (' + nomi.join(', ') + '): ' + (P.livello === 'profilo' ? 'le centine didattiche restano' : 'l\'ala resta') + ' nel progetto ma non entra nel kit.' }
+    : { liv: 'attenzione', testo: 'Si stampano solo i pezzi liberi, ma non ce ne sono: disegnarne uno nella scheda «Schizzo libero» (o spuntare «Nel kit» su quelli esistenti).' });
+  return Object.assign(M, { parti: lib, soloLiberi: true, nomiLiberi: nomi, esclusi: M.parti.length - lib.length, avvisi: av, errori: av.filter(a => a.liv === 'errore').length });
+}
+function costruisciAla(P) {
   const avvisi = [], avv = (liv, testo) => avvisi.push({ liv, testo });
   const def = profiloDef(P);
   const { pi, st: sta } = piantaEStazioni(P);
@@ -1701,23 +2181,7 @@ function costruisci(P) {
     dx.forEach(p => parti.push(Object.assign({}, p, { id: p.id.slice(0, -1) + 'S', nome: p.nome.replace(' (destra)', ' (sinistra)'), lato: 'S' })));
   }
 
-  // --- pezzi liberi: schizzi 2D estrusi
-  const schizzi = [];
-  (P.schizzi || []).forEach((sk, i) => {
-    const so = solidoSchizzo(sk), nome = sk.nome || 'Pezzo libero ' + (i + 1), reg = so.base;
-    so.avvisi.forEach(t => avv('attenzione', nome + ': ' + t + '.'));
-    if (!so.gradini.length) { schizzi.push({ i, regione: [], area: 0, solido: so }); return; }
-    const bb = ingombro([].concat(...so.gradini.map(g => g.regione))), nc = limita(Math.round(sk.n) || 1, 1, 20);
-    const gr = so.gradini.map(g => ({ z0: g.z0, z1: g.z1, regione: sposta(g.regione, -bb.x0, -bb.y0) }));
-    schizzi.push({ i, regione: reg, bb, area: area(reg), solido: so, lz: so.lz });
-    const forma = gr.length === 1 && gr[0].z0 === 0 ? { prisma: { regione: gr[0].regione, h: gr[0].z1 } } : { gradini: gr };
-    for (let q = 0; q < nc; q++) parti.push(Object.assign({ id: 'S' + (i + 1) + (nc > 1 ? '.' + (q + 1) : ''), tipo: 'libero', nome, chiave: 'lib|' + i,
-      lx: bb.x1 - bb.x0, ly: bb.y1 - bb.y0, lz: so.lz, rif: { schizzo: i } }, forma));
-    if (reg.length && offset(reg, -S.w).length === 0) avv('attenzione', nome + ': spessori inferiori a due cordoni (' + arr(2 * S.w, 100) + ' mm), la stampa puo\' risultare incompleta.');
-    const sott = (sk.forme || []).filter(f => f.t === 't' && f.m !== 'foro' && f.m !== 'incavo').some(f => { const r = testoRegione(f), a = area(r); return a > 0 && area(offset(offset(r, -0.45 * S.w, JT.jtRound), 0.45 * S.w, JT.jtRound)) < 0.8 * a; });
-    if (sott) avv('attenzione', nome + ': alcune lettere hanno tratti piu\' sottili del cordone (' + S.w + ' mm). Aumentare l\'altezza delle lettere, l\'ingrossamento o scegliere un carattere piu\' pieno.');
-  });
-
+  const schizzi = pezziLiberi(P, parti, avv);
 
   // --- avvisi
   const cordaMax = Math.max(cr, ct, pi.ck || 0);
@@ -2502,6 +2966,7 @@ const ET_SIM = { H: 'H', B: 'B', tf: 't<sub>f</sub>', tw: 't<sub>w</sub>', s: 's
 const esito = (grezzo, adottato) => (Math.abs(grezzo - adottato) < 5e-4 ? '= ' + nf(adottato) : '= ' + nf(grezzo, 3) + ' → ' + nf(adottato) + ' (arrotondato)');
 const nf = (v, d = 2) => (typeof v === 'number' ? String(arr(v, Math.pow(10, d))).replace('.', ',') : String(v));
 function tabellaMisure(P, M) {
+  if (P.livello === 'profilo') return tabellaDidattica(P, M && M.didattico ? M : null);
   const gruppi = [], g = (id, titolo, nota) => { const q = { id, titolo, nota: nota || '', righe: [] }; gruppi.push(q); return q; };
   const ruolo = k => (P.auto ? (P.man && P.man[k] ? 'fissa' : 'auto') : 'guida');
   const ruoloS = (sp, k) => (P.auto ? (sp.man && sp.man[k] ? 'fissa' : 'auto') : 'guida');
@@ -2729,7 +3194,7 @@ function tabellaMisure(P, M) {
   return gruppi;
 }
 /* Confronto di ogni tipo di pezzo con il volume utile della stampante. */
-const PLURALI = { corrente: 'Correnti (tutti uguali)', centina: 'Centine (tutte uguali)', guscio: 'Gusci (tutti uguali)', longherone: 'Tronchi di longherone', manicotto: 'Manicotti', giunto: 'Giunti angolati (meta\' uguali)' };
+const PLURALI = { corrente: 'Correnti (tutti uguali)', centina: 'Centine (tutte uguali)', guscio: 'Gusci (tutti uguali)', longherone: 'Tronchi di longherone', manicotto: 'Manicotti', giunto: 'Giunti angolati (meta\' uguali)', basetta: 'Basette' };
 function compatibilita(P, M) {
   const st = P.stampante, S = P.stampa, bordo = 1 + (S.skirt > 0 ? S.skirtDist + S.skirt * S.w : 0), X = st.lx - 2 * bordo, Y = st.ly - 2 * bordo, out = new Map();
   for (const p of M.parti) {
@@ -2744,6 +3209,8 @@ function compatibilita(P, M) {
 }
 
 function leggimi(P, M, piatti, stat) {
+  if (M.soloLiberi) return leggimiLiberi(P, M, piatti, stat);
+  if (M.didattico) return leggimiDidattico(P, M, piatti, stat);
   const S = P.stampa, st = P.stampante, r = [], n = v => String(arr(v, 100)).replace('.', ',');
   const riga = t => r.push(t);
   riga(P.nome.toUpperCase()); riga('='.repeat(Math.max(20, P.nome.length)));
@@ -2840,7 +3307,7 @@ G.Ala = {
   poligoniConFori, proprietaSezione, nacaDef, profiloDef, parametriProfilo, FAMIGLIE, AUTORE, nacaProfilo, lineaMedia, limitiSezione, sediEntrano, adatta, ricalcola,
   tabellaMisure, compatibilita, nf, posizioniCorrenti, puntoCorrente, riduzione, LIVELLI, anelloRicampionato, loftGuscio,
   regioneSchizzo, solidoSchizzo, testoRegione, larghezzaTesto, carattereValido, caratteri, MODI, CAR_PREDEFINITO, percorsoForma, ruotaParte, disponiManuale, improntaPezzo, bordoPiano, rettangolo, MAN_CAMPI, MAN_SEZ, sezioneLongherone, sezioneDiStampa, progettoPredefinito, stampaPredefinita, normalizzaProgetto,
-  guscioInOpera, corde, applicaAR, pianta, stazioni, piantaEStazioni, convertiFreccia, RIF_FR, RIF_NOMI, assi, giuntiAngolati, sedeA, tagliaAla, incrocio, contornoCentina, pianiCentine,
+  FORME_COR, proporzioniSezione, sezioneCorrente, centinaSchizzo, giraSposta, barraSchizzo, guscioInOpera, cordeDidattiche, costruisciDidattico, tabellaDidattica, nacaSpessori, spNACA, corde, applicaAR, pianta, stazioni, piantaEStazioni, convertiFreccia, RIF_FR, RIF_NOMI, assi, giuntiAngolati, sedeA, tagliaAla, incrocio, contornoCentina, pianiCentine,
   autoProporzioni, autoSezione, costruisci, estrudi, meshParte, volumeMesh, tagliaMesh, parteDaMesh, disponi, disponiEsterni,
   numStrati, regioniStrati, percorsiParte, generaGcode, analizzaGcode, modificaGcode, scrivi3mf, leggi3mf, trasformaMesh, durata
 };
@@ -2865,9 +3332,9 @@ const CHIAVE_LOCALE = 'hangar-ala-progetto';
 const stato = {
   P: null, M: null, errore: null, vista: 'assieme', centina: 0, piatto: 0, disposizione: null,
   gcode: [], valido: false, generato: false, occupato: false, est: null,
-  opz: { rivestimento: true, spaccato: false, strato: 0, solo: false, piano2d: true }, aperti: { livello: true, pianta: true, freccia: true, longheroni: true },
-  tab: null, effetti: null, scrollMisure: 0,
-  pezzo: null, riparaPiano: false, ultimaNota: '', sk: { i: 0, sel: -1, str: 'sel', modo: 'pieno', hr: 0.6, poli: null, vb: null, prev: null }
+  opz: { rivestimento: true, spaccato: false, strato: 0, solo: false, piano2d: true }, aperti: { livello: true, pianta: true, freccia: true, longheroni: true, didattica: true },
+  tab: null, effetti: null, scrollMisure: 0, storia: { P: null, pass: [], fut: [], ult: null },
+  pezzo: null, riparaPiano: false, ultimaNota: '', sk: { i: 0, sel: -1, str: 'sel', modo: 'pieno', hr: 0.6, pc: 0, lati: 6, passo: 1, agg: true, poli: null, vb: null, prev: null, ag: null }
 };
 /* Quote fissate a mano: restano tali mentre le altre seguono le proporzioni automatiche. */
 const reLong = /^longheroni\.(\d+)\.(\w+)$/;
@@ -2889,6 +3356,8 @@ const MODELLI = [
   ['Ala NACA 23012, monolongherone a C', { nome: 'Ala monolongherone NACA 23012', naca: '23012', b: 220, cr: 110, longheroni: [{ x: 28, forma: 'C', stampa: true }] }],
   ['Ala completa 280 x 110: centine, 2 longheroni, correnti e rivestimento', { nome: 'Ala completa NACA 2412', naca: '2412', livello: 'completa', b: 280, cr: 110, longheroni: [{ x: 25, forma: 'I', stampa: true }, { x: 62, forma: 'C', stampa: true }] }],
   ['Semiala rastremata completa 300, corda 120 - 84, con rivestimento', { nome: 'Semiala completa NACA 4412', naca: '4412', livello: 'completa', tipo: 'semiala', b: 300, cr: 120, tr: 0.7, longheroni: [{ x: 28, forma: 'I', stampa: true }] }],
+  ['Centina didattica NACA 4412 da 200 mm, con segni e basetta', { nome: 'Centine didattiche NACA 4412', naca: '4412', livello: 'profilo', dCorde: '200' }],
+  ['Centine didattiche NACA 0012, 2 corde (200 e 120 mm), due copie', { nome: 'Centine didattiche NACA 0012', naca: '0012', livello: 'profilo', dCorde: '200, 120', dCopie: 2 }],
   ['Semiala trapezia multilongherone, schema dell’F-104: bordo d’attacco 26°', { nome: 'Semiala multilongherone NACA 0012', naca: '0012', livello: 'correnti', tipo: 'semiala', b: 200, cr: 160, tr: 0.5, rifFr: 'le', fr1: 26, longheroni: [{ x: 15, forma: 'rett', stampa: true }, { x: 40, forma: 'I', stampa: true }, { x: 65, forma: 'rett', stampa: true }] }],
   ['Semiala a freccia 30° al 25 %, centine normali al longherone', { nome: 'Semiala a freccia NACA 2412', naca: '2412', centine: 'normali', tipo: 'semiala', b: 300, cr: 130, tr: 0.5, rifFr: 'c4', fr1: 30, longheroni: [{ x: 28, forma: 'I', stampa: true }] }],
   ['Ala intera a freccia 25° (bordo d’attacco), rastremata, con rivestimento', { nome: 'Ala a freccia NACA 2412', naca: '2412', livello: 'completa', tipo: 'intera', b: 560, cr: 140, tr: 0.5, rifFr: 'le', fr1: 25, longheroni: [{ x: 28, forma: 'I', stampa: true }] }],
@@ -2902,7 +3371,7 @@ function daModello(i) {
 }
 
 // ---------------------------------------------------------------- modulo dei parametri
-const LIVELLI_UI = [['struttura', 'Struttura', 'Centine e longheroni: lo scheletro dell’ala, da montare e studiare.'], ['correnti', 'Con correnti', 'Centine, longheroni e correnti negli intagli: la struttura è pronta per una copertura leggera (carta o film).'], ['completa', 'Ala completa', 'Centine, longheroni, correnti e rivestimento a gusci: l’ala intera, stampabile e montabile.']];
+const LIVELLI_UI = [['struttura', 'Struttura', 'Centine e longheroni: lo scheletro dell’ala, da montare e studiare.'], ['correnti', 'Con correnti', 'Centine, longheroni e correnti negli intagli: la struttura è pronta per una copertura leggera (carta o film).'], ['completa', 'Ala completa', 'Centine, longheroni, correnti e rivestimento a gusci: l’ala intera, stampabile e montabile.'], ['profilo', 'Centine didattiche', 'Una o più centine piene del profilo scelto, con corda, linea media, spessore e freccia massimi segnati: per spiegare com’è fatto un profilo alare.']];
 const ET_DIM = { B: ['Larghezza', 'B'], H: ['Altezza', 'H'], tf: ['Spessore solette', 't<sub>f</sub>'], tw: ['Spessore anima', 't<sub>w</sub>'], s: ['Spessore parete', 's'] };
 const idDi = k => 'f-' + k.replace(/\./g, '-');
 function campo(c) {
@@ -2981,7 +3450,10 @@ function costruisciModulo() {
   if (!e) {
     const semi = P.tipo !== 'completa', intera = P.tipo === 'intera', pi = M && M.pianta, doppia = semi && P.doppia, gr = v => num(v, 2) + '°';
     h += gruppo('livello', 'Cosa costruire', '<div class="terna livelli">' + LIVELLI_UI.map(q => '<button type="button" class="btn" data-az="livello" data-l="' + q[0] + '" aria-pressed="' + (P.livello === q[0]) + '">' + q[1] + '</button>').join('') + '</div>' +
-      '<p class="nota">' + LIVELLI_UI.find(q => q[0] === P.livello)[2] + '</p><button type="button" class="btn largo-btn" data-az="vedi-misure">Tabella delle misure e degli accoppiamenti</button>');
+      '<p class="nota">' + LIVELLI_UI.find(q => q[0] === P.livello)[2] + '</p><button type="button" class="btn largo-btn" data-az="vedi-misure">Tabella delle misure e degli accoppiamenti</button>' +
+      campo({ k: 'soloLiberi', et: 'Stampa solo i pezzi liberi', tipo: 'spunta', nota: P.soloLiberi ? 'Il kit contiene solo i pezzi della scheda «Schizzo libero»' + (stato.M && stato.M.soloLiberi ? ' (' + stato.M.parti.length + ' pz)' : '') + '; il resto del progetto non si stampa.' : 'Per stampare soltanto ciò che si disegna nella scheda «Schizzo libero».' }));
+    if (P.livello === 'profilo') h += pannelloDidattico();
+    else {
     h += gruppo('pianta', 'Profilo e pianta', [
       selettoreProfilo(),
       campo({ k: 'tipo', et: 'Modello', tipo: 'scelta', opz: [['completa', 'Ala rettangolare in un pezzo'], ['semiala', 'Semiala destra (anche a freccia e rastremata)'], ['intera', 'Ala intera: due semiali speculari']] }),
@@ -3047,6 +3519,7 @@ function costruisciModulo() {
       '<p class="nota">Un guscio per campata, stampato in piedi senza supporti. Le centine sono rientrate di t<sub>s</sub> + g per entrare nel guscio.</p>',
       campo({ k: 'ts', et: 'Spessore', sim: 't<sub>s</sub>', um: 'mm', min: 0.4, max: 5, passo: 0.05, auto: true })
     ].join(''), M ? M.gusci.reduce((s, q) => s + q.pezzi.length, 0) + ' pz' : '');
+    }
   }
   const pers = P.stampante.id !== 'mk3s';
   h += gruppo('stampa', 'Stampa', [
@@ -3095,6 +3568,7 @@ function aggiornaValori() {
     const nc = $('#n-centine'); if (nc) nc.innerHTML = notaDinamica('centine');
     M.longheroni.forEach(l => { const s = $('#sk-' + l.i); if (s) s.innerHTML = schizzo(l.sez); });
     const c = $('.gruppo[data-g="centine"] .conta'); if (c) c.textContent = M.n + ' pz';
+    const cd = $('.gruppo[data-g="didattica"] .conta'); if (cd && M.didattico) cd.textContent = M.corde.length * M.copie + ' pz';
   }
   $('#nome-progetto').value = stato.est ? stato.est.nome : P.nome;
   $('#nome-progetto').readOnly = !!stato.est;
@@ -3151,8 +3625,9 @@ function confrontaMisure(prima, dopo, chiave) {
   if (!righe.length) return null;
   return { causa: causa ? causa.nome : (ETICHETTE_CHIAVE[chiave] || ''), righe, quando: Date.now() };
 }
-const ETICHETTE_CHIAVE = { centine: 'Disposizione delle centine', rifFr: 'Linea di riferimento della freccia', doppia: 'Doppia freccia', livello: 'Cosa costruire', long: 'Longheroni', profilo: 'Profilo', naca: 'Profilo', tipo: 'Modello di ala', arLock: 'Vincolo dell’allungamento', schizzo: 'Schizzo libero', spCentina: 'Spessore della centina', auto: 'Proporzioni automatiche', adatta: 'Adattamento automatico' };
+const ETICHETTE_CHIAVE = { soloLiberi: 'Stampa solo i pezzi liberi', dCorde: 'Corde delle centine', dSp: 'Spessore della centina', dCopie: 'Copie', dModo: 'Segni incisi o in rilievo', dH: 'Profondità dei segni', dBase: 'Basetta', dTesto: 'Scritta', centine: 'Disposizione delle centine', rifFr: 'Linea di riferimento della freccia', doppia: 'Doppia freccia', livello: 'Cosa costruire', long: 'Longheroni', profilo: 'Profilo', naca: 'Profilo', tipo: 'Modello di ala', arLock: 'Vincolo dell’allungamento', schizzo: 'Schizzo libero', spCentina: 'Spessore della centina', auto: 'Proporzioni automatiche', adatta: 'Adattamento automatico' };
 function aggiorna(chiave, strutturale) {
+  segnaStoria(); // annulla e ripeti dei pezzi liberi
   const P = stato.P, prima = stato.tab;
   try {
     const note = A.ricalcola(P, chiave).join(' ');
@@ -3160,7 +3635,9 @@ function aggiorna(chiave, strutturale) {
     stato.ultimaNota = note;
     stato.M = A.costruisci(P); stato.errore = null;
     // un nome del tipo «Ala bilongherone NACA 4412» segue schema e profilo; un nome personale resta invariato
-    if (!stato.est && /^Ala (mono|bi|tri|quadri|penta)longherone /.test(P.nome)) P.nome = 'Ala ' + ['mono', 'bi', 'tri', 'quadri', 'penta'][Math.min(4, P.longheroni.length - 1)] + 'longherone ' + stato.M.def.nome;
+    if (!stato.est && P.livello === 'profilo' && /^(Ala (mono|bi|tri|quadri|penta)longherone |Centine didattiche )/.test(P.nome)) P.nome = 'Centine didattiche ' + stato.M.def.nome;
+    else if (!stato.est && /^Centine didattiche /.test(P.nome)) P.nome = 'Ala ' + ['mono', 'bi', 'tri', 'quadri', 'penta'][Math.min(4, P.longheroni.length - 1)] + 'longherone ' + stato.M.def.nome;
+    else if (!stato.est && /^Ala (mono|bi|tri|quadri|penta)longherone /.test(P.nome)) P.nome = 'Ala ' + ['mono', 'bi', 'tri', 'quadri', 'penta'][Math.min(4, P.longheroni.length - 1)] + 'longherone ' + stato.M.def.nome;
   } catch (err) { stato.errore = err.message; }
   try { if (!stato.errore) { stato.tab = A.tabellaMisure(P, stato.M); const ef = confrontaMisure(prima, stato.tab, chiave); if (ef) stato.effetti = ef; else if (chiave === 'nessuna') stato.effetti = null; } } catch (err) { stato.tab = null; }
   stato.disposizione = null; stato.valido = false; stato.riparaPiano = true;
@@ -3270,7 +3747,8 @@ function disposizione() {
   if (stato.piatto >= stato.disposizione.piatti.length) stato.piatto = 0;
   return stato.disposizione;
 }
-const nomeBase = () => ((stato.est ? stato.est.nome.replace(/\.[^.]+$/, '') : stato.P.nome).normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^A-Za-z0-9]+/g, '_').replace(/^_+|_+$/g, '') || 'Ala');
+const titoloKit = () => (stato.M && stato.M.soloLiberi && !stato.est ? (stato.M.nomiLiberi.length === 1 ? stato.M.nomiLiberi[0] : stato.P.nome + ' - pezzi liberi') : stato.P.nome);
+const nomeBase = () => ((stato.est ? stato.est.nome.replace(/\.[^.]+$/, '') : titoloKit()).normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^A-Za-z0-9]+/g, '_').replace(/^_+|_+$/g, '') || 'Ala');
 const suffisso = k => (disposizione().piatti.length > 1 ? '_piatto' + (k + 1) : '');
 function avanzamento(f) {
   const b = $('.avanzamento'); b.style.display = f == null ? 'none' : 'block';
@@ -3289,7 +3767,7 @@ async function generaTutto() {
     await avanzamento(0);
     for (let k = 0; k < D.piatti.length; k++) {
       const r = await A.generaGcode(D.piatti[k], P.stampante, P.stampa, {
-        progetto: stato.est ? null : P, autore: P.autore, titolo: stato.est ? stato.est.nome : P.nome, sottotitolo: 'piatto ' + (k + 1) + ' di ' + D.piatti.length,
+        progetto: stato.est ? null : P, autore: P.autore, titolo: stato.est ? stato.est.nome : titoloKit(), sottotitolo: 'piatto ' + (k + 1) + ' di ' + D.piatti.length,
         avanza: f => avanzamento((k + 0.95 * f) / D.piatti.length)
       });
       r.analisi = A.analizzaGcode(r.testo); stato.gcode[k] = r;
@@ -3325,7 +3803,7 @@ async function salva(nome, dati) {
   a.href = URL.createObjectURL(blob); a.download = nome; document.body.appendChild(a); a.click(); a.remove();
   setTimeout(() => URL.revokeObjectURL(a.href), 5000); toast('Scaricato: ' + nome); return true;
 }
-const opz3mf = () => ({ progetto: stato.est ? null : stato.P, autore: stato.P.autore, titolo: stato.est ? stato.est.nome : stato.P.nome, descrizione: stato.est ? '' : stato.M.def.nome + ', b ' + stato.M.b + ' mm, c ' + stato.M.cr + ' mm' });
+const opz3mf = () => ({ progetto: stato.est ? null : stato.P, autore: stato.P.autore, titolo: stato.est ? stato.est.nome : titoloKit(), descrizione: stato.est ? '' : stato.M.soloLiberi ? 'Pezzi liberi: ' + stato.M.nomiLiberi.join(', ') : stato.M.didattico ? 'Centine didattiche ' + stato.M.def.nome + ', corde ' + stato.M.corde.join(', ') + ' mm' : stato.M.def.nome + ', b ' + stato.M.b + ' mm, c ' + stato.M.cr + ' mm' });
 async function scaricaKit() {
   if (stato.est && stato.est.tipo === 'gcode') return salvaModificato();
   if (!stato.valido && !(await generaTutto())) return;
@@ -3388,7 +3866,7 @@ function toast(testo, tipo) {
 }
 
 // ---------------------------------------------------------------- riepilogo
-const COL_PARTE = { giunto: '--bene', centina: '--accento', longherone: '--acciaio', manicotto: '--bene', dima: '--tenue', esterno: '--acciaio', libero: '--libero', corrente: '--corrente', guscio: '--guscio' };
+const COL_PARTE = { basetta: '--tenue', giunto: '--bene', centina: '--accento', longherone: '--acciaio', manicotto: '--bene', dima: '--tenue', esterno: '--acciaio', libero: '--libero', corrente: '--corrente', guscio: '--guscio' };
 function blocchettoGcode() {
   const D = disposizione(), np = D.piatti.length, v = stato.valido;
   let h = '<section><h3>G-code</h3>';
@@ -3440,8 +3918,10 @@ function disegnaRiepilogo() {
     h += '<section><h3>Avvisi</h3><ul class="avvisi">' + av.map(a => '<li class="' + a[0] + '"><b>' + a[0] + '</b>' + esc(a[1]) + '</li>').join('') + '</ul></section>' + blocchettoGcode();
     box.innerHTML = h; return;
   }
+  if (M && M.didattico) { box.innerHTML = riepilogoDidattico(); return; }
   if (!M) { box.innerHTML = '<section><h3>Avvisi</h3><ul class="avvisi"><li class="errore"><b>errore</b>' + esc(stato.errore || 'Progetto non valido.') + '</li></ul></section>'; return; }
   const D = disposizione(), semi = P.tipo === 'semiala', pi = M.pianta, ef = stato.effetti;
+  h += bandaLiberi();
   if (ef && Date.now() - ef.quando < 600000) h += '<section class="ef-breve"><h3>Ultima modifica</h3><p>' + (ef.causa ? '«' + ef.causa + '»: ' : '') + (ef.righe.length === 1 ? 'è cambiata una misura' : 'si sono adeguate ' + ef.righe.length + ' misure') +
     '.</p><ul>' + ef.righe.filter(q => !q.diretta).slice(0, 4).map(q => '<li>' + q.nome + ': <b>' + esc(q.prima) + ' → ' + esc(q.dopo) + '</b> ' + q.um + '</li>').join('') + '</ul><button class="btn piccolo" data-az="vedi-misure">Vedi tutte nella scheda Misure</button></section>';
   h += '<section><h3>Geometria <small>' + esc(M.def.nome) + '</small></h3><div class="tessere">' +
@@ -3460,13 +3940,159 @@ function disegnaRiepilogo() {
   if (D.urti) av.push({ liv: 'errore', testo: D.urti + (D.urti === 1 ? ' pezzo è' : ' pezzi sono') + ' sovrapposti o fuori dal bordo utile del piano: correggere nella scheda «Piano di stampa».' });
   if (D.manuale) av.push({ liv: 'info', testo: 'Disposizione sul piano scelta a mano: resta memorizzata nel progetto.' });
   if (D.piatti.length > 1) av.push({ liv: 'info', testo: 'Le parti occupano ' + D.piatti.length + ' piatti: per ciascuno viene prodotto un G-code separato.' });
-  if (!av.some(a => a.liv !== 'info')) av.unshift({ liv: 'bene', testo: 'Tutte le sedi rientrano nel profilo e ogni parte entra nel piano di stampa.' });
+  if (!av.some(a => a.liv !== 'info')) av.unshift({ liv: 'bene', testo: M.soloLiberi ? 'Ogni pezzo libero entra nel piano di stampa.' : 'Tutte le sedi rientrano nel profilo e ogni parte entra nel piano di stampa.' });
   h += '<section><h3>Verifiche</h3><ul class="avvisi">' + av.map(a => '<li class="' + a.liv + '"><b>' + (a.liv === 'bene' ? 'in ordine' : a.liv) + '</b>' + esc(a.testo) + '</li>').join('') + '</ul></section>';
   h += '<section><h3>Sezioni dei longheroni <small>momenti d’inerzia del second’ordine</small></h3><table class="dati"><tr><th>n</th><th>Sezione</th><th class="n">A mm²</th><th class="n">J<sub>x</sub> mm⁴</th><th class="n">J<sub>y</sub> mm⁴</th></tr>' +
     M.longheroni.map(l => '<tr><td>' + (l.i + 1) + '</td><td>' + esc(A.FORME[l.sp.forma].nome) + (l.sp.stampa ? '' : ' (commerciale)') + '</td><td class="n">' + num(l.sez.prop.A, 1) + '</td><td class="n">' + num(l.sez.prop.Jx, 1) + '</td><td class="n">' + num(l.sez.prop.Jy, 1) + '</td></tr>').join('') +
     '</table><p class="stato-g" style="margin:6px 0 0">J<sub>x</sub> governa la flessione nel piano di portanza, J<sub>y</sub> quella nel piano della corda.</p></section>';
   h += '<section><h3>Parti da stampare <small>' + D.piatti.length + (D.piatti.length === 1 ? ' piatto' : ' piatti') + '</small></h3>' + tabellaParti(M.parti) + '</section>' + blocchettoGcode();
   box.innerHTML = h;
+}
+
+// ---------------------------------------------------------------- centine didattiche
+function pannelloDidattico() {
+  const P = stato.P, M = stato.M && stato.M.didattico ? stato.M : null, def = (() => { try { return A.profiloDef(P); } catch (err) { return { nome: 'profilo' }; } })();
+  const Lmax = P.stampante.lx - 2 * (4 + (P.stampa.skirt > 0 ? P.stampa.skirtDist : 0)), ril = P.dModo === 'rilievo';
+  return gruppo('didattica', 'Centine didattiche', [
+    '<p class="nota">Centine piene del profilo scelto, con i segni che lo definiscono: per mostrare in classe com’è fatto un profilo alare.</p>',
+    selettoreProfilo(),
+    campo({ k: 'dCorde', et: 'Corde', tipo: 'testo', libero: true, nota: 'In millimetri, separate da virgole (es. 200, 150, 100): una centina per ogni corda. Al massimo ' + num(Lmax, 0) + ' mm sul piano di questa stampante.' }),
+    campo({ k: 'dCopie', et: 'Copie di ciascuna', um: 'pz', min: 1, max: 20, passo: 1 }),
+    campo({ k: 'dSp', et: 'Spessore', um: 'mm', min: 1.2, max: 80, passo: 0.5, nota: '4–6 mm per una centina; oltre 20 mm diventa un tronco d’ala da tenere in mano.' }),
+    '<p class="nota" style="margin-top:10px"><b>Segni</b> sulla faccia superiore</p>',
+    campo({ k: 'dCorda', et: 'Corda', tipo: 'spunta', nota: 'Dal bordo d’attacco al bordo d’uscita.' }),
+    campo({ k: 'dMedia', et: 'Linea media', tipo: 'spunta', nota: 'A metà fra dorso e ventre; nei profili simmetrici coincide con la corda.' }),
+    campo({ k: 'dSpessore', et: 'Spessore massimo', tipo: 'spunta' }),
+    campo({ k: 'dFreccia', et: 'Freccia massima', tipo: 'spunta', nota: 'Dalla corda alla linea media, nel punto più alto.' }),
+    campo({ k: 'dStazioni', et: 'Stazioni lungo la corda', tipo: 'spunta', nota: 'Ogni 10 %, più lunghe al 25 % e al 50 %.' }),
+    campo({ k: 'dScritta', et: 'Scritta', tipo: 'spunta' }),
+    P.dScritta ? campo({ k: 'dTesto', et: 'Testo', tipo: 'testo', libero: true, nota: 'Vuoto: la sigla del profilo (' + esc(def.nome) + ').' }) : '',
+    campo({ k: 'dModo', et: 'I segni sono', tipo: 'scelta', opz: [['incavo', 'incisi'], ['rilievo', 'in rilievo']] }),
+    campo({ k: 'dH', et: ril ? 'Altezza dei segni' : 'Profondità dei segni', um: 'mm', min: 0.2, max: 3, passo: 0.2, nota: 'Tre strati da 0,2 mm (0,6 mm) si leggono bene.' }),
+    campo({ k: 'dBase', et: 'Basetta per esporla in piedi', tipo: 'spunta', nota: 'Una cava con il fondo a forma di ventre: la centina sta in piedi sul banco.' }),
+    P.dBase ? campo({ k: 'gioco', et: 'Gioco nella cava', um: 'mm', min: 0, max: 1, passo: 0.05, nota: 'Per lato.' }) : '',
+    campo({ k: 'autore', et: 'Progettista', tipo: 'testo', libero: true, nota: 'Compare nella tavola, nel G-code, nel 3MF e nelle istruzioni.' })
+  ].join(''), M ? M.corde.length * M.copie + ' pz' : '');
+}
+/* Il significato della sigla, riga per riga, con i numeri della centina mostrata. */
+function righeSigla(def, C) {
+  const n = (v, d) => num(v, d === undefined ? 1 : d), r = [], k = def.codice || '';
+  if (def.serie === 4 && !def.dir && /^\d{4}$/.test(k)) {
+    r.push('<tspan font-weight="600">' + esc(def.nome) + '</tspan>: profilo NACA a 4 cifre, tutte le misure in percentuale della corda c');
+    r.push('«' + k[0] + '» → freccia massima della linea media ' + k[0] + ' % di c = ' + n(def.m * C) + ' mm' + (def.m === 0 ? ' (profilo simmetrico)' : ''));
+    if (def.m > 0) r.push('«' + k[1] + '» → posizione della freccia massima ' + k[1] + '0 % di c = ' + n(def.p * C) + ' mm dal bordo d’attacco');
+    r.push('«' + k.slice(2) + '» → spessore massimo ' + Number(k.slice(2)) + ' % di c = ' + n(def.t * C) + ' mm, a circa il 30 % di c (' + n(0.3 * C) + ' mm)');
+  } else if (def.serie === 5) {
+    r.push('<tspan font-weight="600">' + esc(def.nome) + '</tspan>: profilo NACA a 5 cifre');
+    r.push('«' + k[0] + '» → coefficiente di portanza di progetto C_L = 0,15 · ' + k[0] + ' = ' + num(def.cl, 2));
+    r.push('«' + k[1] + '» → freccia massima a ' + k[1] + '/20 = ' + n(100 * def.p) + ' % di c = ' + n(def.p * C) + ' mm dal bordo d’attacco');
+    r.push('«' + k[2] + '» → linea media ' + (def.reflex ? 'reflex: risale verso il bordo d’uscita' : 'normale'));
+    r.push('«' + k.slice(3) + '» → spessore massimo ' + Number(k.slice(3)) + ' % di c = ' + n(def.t * C) + ' mm');
+  } else {
+    r.push('<tspan font-weight="600">' + esc(def.nome) + '</tspan>: spessore massimo ' + n(def.t * 100) + ' % di c = ' + n(def.t * C) + ' mm');
+    if (def.m) r.push('freccia massima ' + n(def.m * 100) + ' % di c = ' + n(def.m * C) + ' mm, a ' + n(def.p * 100, 0) + ' % di c');
+  }
+  if (A.nacaSpessori(def)) {
+    r.push('raggio del bordo d’attacco r = 1,1019 · (t/c)² · c = ' + num(1.1019 * def.t * def.t * C, 2) + ' mm (cerchio tratteggiato)');
+    r.push('linee verdi sottili: costruzione NACA, lo spessore si riporta perpendicolare alla linea media');
+  }
+  return r;
+}
+function svgDidattico() {
+  const P = stato.P, M = stato.M, cs = M.centine, c = cs[stato.centina] || cs[0], D = c.didattica, def = M.def, pr = c.prof, C = c.c, B = c.base;
+  const u = C / 58, m = 4.5 * u, bb = A.ingombro(c.profC), yTop = -bb.y1, yGiu = Math.max(-bb.y0, B ? -B.zBot : -bb.y0), curvo = D.curvo;
+  const leg = righeSigla(def, C), yC = yGiu + 2.6 * u, yR = yC + 3 * u, yL0 = yR + 4.2 * u, yPar = yL0 + leg.length * 1.55 * u + 0.6 * u, basso = yPar + 6.8 * u, alto = yTop - (curvo ? 9.4 * u : 7 * u);
+  const pt = (x, y) => x.toFixed(3) + ' ' + (-y).toFixed(3);
+  let s = '<svg data-nome="didattica" viewBox="' + vbFisso('didattica', [-m, alto, C + 2 * m, basso - alto].join(' ')) + '" role="img" aria-label="Centina didattica quotata">';
+  s += '<text class="titolo" x="' + (-m + u) + '" y="' + (alto + 1.7 * u) + '" font-size="' + 1.25 * u + '">Centina didattica ' + (c.j + 1) + ' di ' + cs.length + ' · ' + esc(def.nome) + ' · c = ' + num(C, 1) + ' mm · spessore ' + num(M.t, 1) + ' mm</text>';
+  if (B) s += '<path class="base-vista" d="M' + pt(B.xa, B.zTop) + 'L' + pt(B.xa, B.zBot) + 'L' + pt(B.xb, B.zBot) + 'L' + pt(B.xb, B.zTop) + '"><title>Basetta (vista di fianco)</title></path>';
+  s += '<path class="contorno" d="' + percorsoD(c.profC) + '"/>';
+  if (A.nacaSpessori(def)) { // costruzione: lo spessore y_t si riporta perpendicolare alla linea media
+    const lm = A.lineaMedia(def);
+    [0.0125, 0.025, 0.05, 0.1, 0.15, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9].forEach(x => {
+      const th = Math.atan(lm.dy(x)), h = A.spNACA(x, def.t) * C, xc = x * C, yc = lm.y(x) * C;
+      s += '<path class="costr" d="M' + pt(xc - h * Math.sin(th), yc + h * Math.cos(th)) + 'L' + pt(xc + h * Math.sin(th), yc - h * Math.cos(th)) + '"/>';
+    });
+    const r = D.rLE, a0 = Math.atan(lm.dy(1e-4));
+    s += '<circle class="costr cerchio" cx="' + (r * Math.cos(a0)).toFixed(3) + '" cy="' + (-r * Math.sin(a0)).toFixed(3) + '" r="' + r.toFixed(3) + '"><title>Raggio del bordo d’attacco: ' + num(r, 2) + ' mm</title></circle>';
+  }
+  s += '<path class="segno" d="' + percorsoD(D.segni) + '"><title>Segni ' + (D.ril ? 'in rilievo' : 'incisi') + '</title></path>';
+  if (D.scritta) s += '<path class="segno" d="' + percorsoD(D.scritta.reg) + '"/>';
+  s += '<path class="asse" d="M' + (-1.5 * u) + ' 0H' + (C + 1.5 * u) + '"/>';
+  // quote: spessore massimo e sua posizione, freccia massima e sua posizione, corda
+  const xT = D.xt * C, yU = pr.yU(D.xt) * C, yL = pr.yL(D.xt) * C;
+  s += quotaV(-yU, -yL, xT - 2.4 * u, 't = ' + num(D.tm * C, 1), u, xT);
+  s += quotaH(0, xT, yTop - 2.2 * u, pedice('x', 't') + num(xT, 1) + ' (' + num(100 * D.xt, 0) + ' %)', u, -yU - 0.3 * u);
+  if (curvo) {
+    const xF = D.xf * C, f = D.fm * C;
+    s += quotaV(-f, 0, xF + 2.4 * u, 'f = ' + num(f, 1), 0.85 * u, xF);
+    s += quotaH(0, xF, yTop - 4.8 * u, pedice('x', 'f') + num(xF, 1) + ' (' + num(100 * D.xf, 0) + ' %)', u, -pr.yU(D.xf) * C - 0.3 * u);
+  }
+  s += quotaH(0, C, yC, 'c = ' + num(C, 1), u, 0.4 * u, 'dc.' + c.j);
+  // righello delle stazioni: ogni 10 % della corda
+  s += '<path class="quota" d="M0 ' + yR + 'H' + C + '"/>';
+  for (let i = 0; i <= 10; i++) { const x = i / 10 * C, l = i % 5 ? 0.7 * u : 1.2 * u; s += '<path class="quota" d="M' + x + ' ' + (yR - l) + 'V' + yR + '"/><text x="' + x + '" y="' + (yR + 1.35 * u) + '" font-size="' + 0.8 * u + '" text-anchor="middle">' + i * 10 + (i === 10 ? ' %' : '') + '</text>'; }
+  s += '<path class="quota" d="M' + 0.25 * C + ' ' + (yR - 1.6 * u) + 'V' + yR + '"/><text x="' + 0.25 * C + '" y="' + (yR - 1.9 * u) + '" font-size="' + 0.75 * u + '" text-anchor="middle" class="tenue">c/4</text>';
+  leg.forEach((t, i) => { s += '<text x="' + (-m + u) + '" y="' + (yL0 + i * 1.55 * u) + '" font-size="' + 1.02 * u + '">' + t + '</text>'; });
+  // parametri modificabili della forma
+  const riga = yPar + 1.2 * u, tx = (x, t, q) => '<text x="' + x + '" y="' + riga + '" font-size="' + u + '"' + attrQ(q) + '>' + t + '</text>';
+  if (def.serie === 5) s += tx(-m + u, 'Profilo a 5 cifre: la forma è fissata dal codice NACA ' + esc(def.codice) + '.');
+  else {
+    const par = parametriSicuri(), conCurv = ['naca', 'simm', 'libero', 'lamina'].includes(def.fam);
+    s += maniglia('sp', 0.3 * C, -pr.yU(0.3) * C, u, 'Trascina in verticale per cambiare lo spessore del profilo');
+    s += tx(-m + u, 'Forma:') + tx(-m + 5.6 * u, 't/c = ' + num(par.t, 1) + ' %', 'sp');
+    if (conCurv) {
+      const xp = par.f > 0 ? par.p / 100 : 0.4;
+      s += maniglia('curv', xp * C, -pr.medio(xp) * C, u, 'Trascina per cambiare la curvatura: in verticale la freccia, in orizzontale la sua posizione');
+      s += tx(-m + 15 * u, 'freccia f/c = ' + num(par.f, 1) + ' %', 'f') + tx(-m + 30 * u, 'a x/c = ' + num(par.p, 0) + ' %', 'p');
+    }
+  }
+  s += maniglia('dcorda', C, -pr.medio(0.999) * C, u, 'Trascina per allungare o accorciare la corda di questa centina');
+  s += cartiglio(C + m - 0.3 * u, basso - 0.3 * u, u);
+  return s + '</svg>';
+}
+function gruppoDidattico() {
+  const g = new T3.Group(), M = stato.M, passo = Math.max(...M.centine.map(c => (c.base ? c.base.W : M.t))) + 22;
+  M.centine.forEach((c, i) => {
+    const y0 = i * passo, D = c.didattica, zOff = c.base ? -c.base.zBot : -c.oy, m0 = A.meshParte(c.parte), v = new Float32Array(m0.v.length);
+    for (let k = 0; k < v.length; k += 3) { v[k] = m0.v[k] + c.ox; v[k + 1] = y0 + D.hR / 2 - (m0.v[k + 2] - M.t / 2); v[k + 2] = m0.v[k + 1] + c.oy + zOff; } // in piedi, faccia con i segni verso chi guarda (−y): rotazione
+    g.add(solido(geometria({ v, t: m0.t }), css('--accento'), 1));
+    if (c.base) {
+      const b = A.meshParte(c.base.parte), w = new Float32Array(b.v.length);
+      for (let k = 0; k < w.length; k += 3) { w[k] = b.v[k] + c.base.xa; w[k + 1] = b.v[k + 1] + y0 - c.base.W / 2; w[k + 2] = b.v[k + 2]; }
+      const sb = solido(geometria({ v: w, t: b.t }), css('--tenue'), 1); sb.children[1].visible = false; g.add(sb); // senza gli spigoli fra i gradini
+    }
+  });
+  return g;
+}
+/* Avviso in testa al riepilogo quando il kit contiene solo i pezzi liberi. */
+function bandaLiberi() {
+  const M = stato.M;
+  if (!M || !M.soloLiberi) return '';
+  return '<section class="ef-breve banda-liberi"><h3>Kit: solo pezzi liberi</h3><p>' + (M.parti.length ? 'Si stampano ' + M.parti.length + (M.parti.length === 1 ? ' pezzo' : ' pezzi') + ' dello schizzo libero (' + esc(M.nomiLiberi.join(', ')) + '); ' + M.esclusi + ' pezzi ' + (M.didattico ? 'delle centine didattiche' : 'dell’ala') + ' restano fuori dal kit.' : 'Non ci sono pezzi liberi da stampare.') + '</p>' +
+    '<span class="pulsanti"><button class="btn piccolo" data-az="vai-schizzo">Apri lo schizzo libero</button><button class="btn piccolo" data-az="kit-tutto">' + (M.didattico ? 'Stampa anche le centine' : 'Stampa anche l’ala') + '</button></span></section>';
+}
+function riepilogoDidattico() {
+  const P = stato.P, M = stato.M, D0 = disposizione(), c = M.centine[0], D = c.didattica, C = c.c, def = M.def, ef = stato.effetti;
+  let h = bandaLiberi();
+  if (ef && Date.now() - ef.quando < 600000) h += '<section class="ef-breve"><h3>Ultima modifica</h3><p>' + (ef.causa ? '«' + ef.causa + '»: ' : '') + (ef.righe.length === 1 ? 'è cambiata una misura' : 'si sono adeguate ' + ef.righe.length + ' misure') +
+    '.</p><ul>' + ef.righe.filter(q => !q.diretta).slice(0, 4).map(q => '<li>' + q.nome + ': <b>' + esc(q.prima) + ' → ' + esc(q.dopo) + '</b> ' + q.um + '</li>').join('') + '</ul><button class="btn piccolo" data-az="vedi-misure">Vedi tutte nella scheda Misure</button></section>';
+  h += '<section><h3>Profilo <small>' + esc(def.nome) + '</small></h3><div class="tessere">' +
+    '<div><span>Corde</span><b>' + M.corde.map(x => num(x, 0)).join(' · ') + ' <small>mm</small></b></div>' +
+    '<div><span>Pezzi</span><b>' + M.corde.length * M.copie + (P.dBase ? ' + ' + M.corde.length * M.copie : '') + ' <small>' + (P.dBase ? 'centine + basette' : 'centine') + '</small></b></div>' +
+    '<div><span>Spessore massimo</span><b>' + num(D.tm * C, 1) + ' <small>mm a ' + num(100 * D.xt, 0) + ' %</small></b></div>' +
+    '<div><span>Freccia massima</span><b>' + (D.curvo ? num(D.fm * C, 1) + ' <small>mm a ' + num(100 * D.xf, 0) + ' %</small>' : '0 <small>simmetrico</small>') + '</b></div>' +
+    '<div><span>Raggio del bordo d’attacco</span><b>' + (D.rLE ? num(D.rLE, 2) + ' <small>mm</small>' : '—') + '</b></div>' +
+    '<div><span>Area della sezione</span><b>' + num(c.area / 100, 2) + ' <small>cm²</small></b></div></div>' +
+    '<p class="stato-g" style="margin:6px 0 0">Valori misurati sulla centina da ' + num(C, 1) + ' mm.</p></section>';
+  const av = M.avvisi.slice();
+  if (stato.errore) av.unshift({ liv: 'errore', testo: stato.errore + ' Il disegno mostra l’ultima configurazione valida.' });
+  D0.fuori.forEach(p => av.push({ liv: 'errore', testo: p.nome + ' non entra nel piano di stampa (' + num(p.lx, 0) + ' × ' + num(p.ly, 0) + ' × ' + num(p.lz, 0) + ' mm).' }));
+  if (D0.piatti.length > 1) av.push({ liv: 'info', testo: 'Le parti occupano ' + D0.piatti.length + ' piatti: per ciascuno viene prodotto un G-code separato.' });
+  if (!av.some(a => a.liv !== 'info')) av.unshift({ liv: 'bene', testo: M.soloLiberi ? 'Ogni pezzo libero entra nel piano di stampa.' : 'Ogni centina entra nel piano di stampa.' });
+  h += '<section><h3>Verifiche</h3><ul class="avvisi">' + av.map(a => '<li class="' + a.liv + '"><b>' + (a.liv === 'bene' ? 'in ordine' : a.liv) + '</b>' + esc(a.testo) + '</li>').join('') + '</ul></section>';
+  h += '<section><h3>Parti da stampare <small>' + D0.piatti.length + (D0.piatti.length === 1 ? ' piatto' : ' piatti') + '</small></h3>' + tabellaParti(M.parti) + '</section>' + blocchettoGcode();
+  return h;
 }
 
 // ---------------------------------------------------------------- grafica 3D
@@ -3907,7 +4533,7 @@ function svgSezioni() {
   });
   return s + '</svg>';
 }
-function disegnaTavola() { $('#tavola').innerHTML = stato.M ? svgPianta() + svgCentina() + svgSezioni() : ''; }
+function disegnaTavola() { $('#tavola').innerHTML = stato.M ? (stato.M.didattico ? svgDidattico() : svgPianta() + svgCentina() + svgSezioni()) : ''; }
 
 /* Quote guida: lettura del valore mostrato e scrittura nel progetto. La
    funzione scrivi restituisce la chiave da passare al ricalcolo. */
@@ -3932,13 +4558,15 @@ function quotaDef(q) {
       return 'profilo';
     } };
   }
+  const md = /^dc\.(\d+)$/.exec(q);
+  if (md && M && M.didattico) { const i = +md[1]; return { leggi: () => M.corde[i], scrivi: v => { const cs = M.corde.slice(); cs[i] = L(A.arr(v, 10), 20, 1000); P.dCorde = cs.join(', '); return 'dCorde'; } }; }
   let m = /^x\.(\d+)$/.exec(q);
   if (m && M) { const i = +m[1], c = M.centine[stato.centina] || M.centine[0]; return { leggi: () => A.arr(c.posLon[i].u, 10), scrivi: v => { spostaLongherone(i, c.j, A.arr(100 * c.prof.xi(v), 10)); return 'long'; } }; }
   m = /^L\.(\d+)\.(\w+)$/.exec(q);
   if (m) { const sp = P.longheroni[+m[1]], k = m[2]; return { leggi: () => sp[k], scrivi: v => { sp[k] = L(v, 0.4, 120); fissa('longheroni.' + m[1] + '.' + k, true); return 'long'; } }; }
   m = /^sk\.(\w)$/.exec(q);
   const f = m && skCorrente() && skCorrente().forme[stato.sk.sel];
-  if (f) return { leggi: () => f[m[1]], scrivi: v => { f[m[1]] = m[1] === 'a' ? L(v, 1, 300) : L(v, 0.5, 1000); return 'schizzo'; } };
+  if (f) return { leggi: () => f[m[1]], scrivi: v => { f[m[1]] = m[1] === 'a' ? L(v, 1, 300) : m[1] === 'c' ? L(v, 20, 1000) : L(v, 0.5, 1000); return 'schizzo'; } };
   return null;
 }
 /* Spostamento di un longherone misurato sulla centina j (f in % della corda di quella centina):
@@ -3995,6 +4623,7 @@ function iniziaManiglia(ev, h) {
         if (!tonda) { sp.B = B; fissa('longheroni.' + i + '.B', true); }
         k = 'long';
       } else if (tipo === 'corda') { P.cr = L(Math.round(u), 30, 600); k = 'cr'; }
+      else if (tipo === 'dcorda') { const cs = M.corde.slice(); cs[c.j] = L(Math.round(u), 20, 1000); P.dCorde = cs.join(', '); k = 'dCorde'; }
       mosso = true;
       if (!raf) raf = requestAnimationFrame(() => { raf = 0; if (trascina === t) aggiornaRapido(k); });
     },
@@ -4115,18 +4744,48 @@ function azionePiano(az, valore) {
 // ---------------------------------------------------------------- schizzo libero: forme 2D da estrudere
 const skCorrente = () => (stato.P.schizzi && stato.P.schizzi[stato.sk.i]) || null;
 const copia = o => JSON.parse(JSON.stringify(o));
-function azzeraCad() { trascina = null; stato.pezzo = null; stato.sk = { i: 0, sel: -1, str: 'sel', modo: 'pieno', hr: 0.6, poli: null, vb: null, prev: null }; }
+function azzeraCad() { trascina = null; stato.pezzo = null; const v = stato.sk || {}; stato.sk = { i: 0, sel: -1, str: 'sel', modo: 'pieno', hr: 0.6, pc: 0, lati: v.lati || 6, passo: v.passo || 1, agg: v.agg !== false, poli: null, vb: null, prev: null, ag: null }; }
 const ETICHETTE_MODO = { pieno: 'Pieno', foro: 'Foro', rilievo: 'Rilievo', incavo: 'Incavo' };
-const conModo = (f, m, hr) => { f.m = m; if (m === 'rilievo' || m === 'incavo') f.hr = f.hr || hr || 0.6; else delete f.hr; return f; };
-const nuovaForma = f => conModo(f, stato.sk.modo, stato.sk.hr);
+const conModo = (f, m, hr) => { f.m = m; if (m === 'rilievo' || m === 'incavo') f.hr = f.hr || hr || 0.6; else delete f.hr; if (m === 'foro') delete f.pc; return f; };
+const nuovaForma = f => { conModo(f, stato.sk.modo, stato.sk.hr); if (stato.sk.pc > 0 && f.m !== 'foro' && f.t !== 't') f.pc = stato.sk.pc; return f; };
 const percorsoD = reg => reg.map(p => 'M' + A.fromC(p).map(q => q[0].toFixed(3) + ' ' + (-q[1]).toFixed(3)).join('L') + 'Z').join('');
-/* Esempi pronti per lo schizzo: targhetta, chiave del kit ITIS, lettere singole. */
+const GEOM_SK = new Set(['cen', 'lon', 'cor', 'g']);
+const disegnoGeometrico = f => GEOM_SK.has(f.t) || f.pc > 0 || (f.t === 'r' && (f.r > 0 || f.ang));
+const profiloNome = f => { try { return A.profiloDef(f).nome; } catch (err) { return 'profilo non valido'; } };
+/* Componenti pronti: centina (profilo del progetto), sezione di longherone, sezione di corrente. */
+function nuovoComponente(tipo, x, y) {
+  const P = stato.P, g = P.gioco;
+  if (tipo === 'cen') return { t: 'cen', x, y, ang: 0, g, profilo: P.profilo, naca: P.naca, spProf: P.spProf, fProf: P.fProf, pProf: P.pProf, c: Math.round(A.limita(P.cr, 40, 220)), te: 0,
+    sf: 'I', sx: 30, sH: 0, cd: 0, cv: 0, cb: P.cB, ch: P.cH, all: true, pm: 0, ra: 0 };
+  if (tipo === 'lon') return Object.assign({ t: 'lon', x, y, ang: 0, g }, A.proporzioniSezione('I', 8));
+  return { t: 'cor', forma: 'rett', b: 4, h: 3, s: 1, x, y, ang: 0, g };
+}
+const nomeSez = s => s.replace(/\s*\(.*\)$/, '').replace(/^./, c => c.toLowerCase()); // «A Z» → «a Z», «Doppio T» → «doppio T»
+function nomeForma(f) {
+  const n = v => num(v, 1);
+  switch (f.t) {
+    case 'r': return 'Rettangolo ' + n(f.w) + ' × ' + n(f.h) + (f.r > 0 ? ', raccordo ' + n(f.r) : '');
+    case 'c': return 'Cerchio Ø ' + n(f.d);
+    case 'g': return 'Poligono regolare a ' + f.n + ' lati, Ø ' + n(f.d);
+    case 'p': return 'Poligono di ' + f.pts.length + ' vertici';
+    case 't': return 'Scritta «' + f.testo + '»';
+    case 'cen': return 'Centina ' + profiloNome(f) + ', c ' + n(f.c);
+    case 'lon': return 'Longherone, sezione ' + nomeSez(A.FORME[f.forma].nome) + (f.forma === 'tondo' || f.forma === 'tubo' ? ' Ø ' + n(f.H) : ' ' + n(f.H) + ' × ' + n(f.B));
+    case 'cor': return 'Corrente, sezione ' + nomeSez(A.FORME_COR[f.forma].nome) + ' ' + n(f.b) + ' × ' + n(f.h);
+  }
+  return 'Forma';
+}
 const CHIAVE_EST = [[-52.01,3.45],[-51.7,4.6],[-51.23,5.89],[-50.65,7.14],[-49.96,8.33],[-49.16,9.45],[-48.27,10.49],[-47.49,11.27],[-46.45,12.16],[-45.33,12.96],[-44.14,13.65],[-43.15,14.12],[-41.86,14.61],[-40.54,14.99],[-39.19,15.24],[-37.82,15.38],[-36.45,15.39],[-35.63,15.34],[-34.81,15.24],[-34.0,15.1],[-32.93,14.85],[-32.14,14.61],[-31.36,14.33],[-30.6,14.01],[-29.86,13.65],[-28.91,13.1],[-27.99,12.49],[-27.12,11.82],[-26.31,11.08],[-25.54,10.29],[-24.84,9.45],[-24.2,8.56],[-23.52,7.46],[-19.5,6.51],[41.24,6.5],[41.94,6.88],[42.63,7.18],[43.17,7.37],[43.9,7.55],[44.64,7.66],[45.4,7.7],[46.15,7.66],[46.72,7.59],[47.45,7.42],[47.99,7.25],[48.69,6.96],[49.36,6.6],[49.99,6.19],[50.43,5.83],[50.98,5.31],[51.35,4.88],[51.8,4.28],[52.1,3.79],[52.44,3.12],[52.71,2.42],[52.87,1.87],[53.02,1.13],[53.09,0.38],[53.1,-0.19],[53.04,-0.94],[52.95,-1.5],[52.77,-2.23],[52.58,-2.77],[52.28,-3.46],[52.0,-3.96],[51.59,-4.59],[51.23,-5.03],[50.71,-5.58],[50.28,-5.95],[49.68,-6.4],[49.19,-6.7],[48.52,-7.04],[47.99,-7.25],[47.27,-7.47],[46.72,-7.59],[45.97,-7.68],[45.21,-7.7],[44.64,-7.66],[43.9,-7.55],[43.17,-7.37],[42.63,-7.18],[41.94,-6.88],[41.24,-6.5],[-19.5,-6.51],[-23.52,-7.46],[-24.2,-8.56],[-24.84,-9.45],[-25.54,-10.29],[-26.31,-11.08],[-27.12,-11.82],[-28.22,-12.65],[-29.14,-13.24],[-30.11,-13.77],[-31.11,-14.23],[-31.88,-14.52],[-32.66,-14.78],[-33.73,-15.05],[-34.54,-15.2],[-35.63,-15.34],[-36.45,-15.39],[-37.55,-15.39],[-38.37,-15.34],[-39.46,-15.2],[-40.27,-15.05],[-41.07,-14.85],[-42.12,-14.52],[-42.89,-14.23],[-43.65,-13.89],[-44.62,-13.38],[-45.33,-12.96],[-46.01,-12.49],[-46.88,-11.82],[-47.49,-11.27],[-48.27,-10.49],[-48.82,-9.88],[-49.33,-9.23],[-49.92,-8.37],[-46.89,-7.84],[-43.83,-8.51],[-38.23,-7.53],[-32.78,-3.55],[-32.74,-3.45],[-34.2,4.75],[-40.74,6.65],[-46.33,5.66],[-48.97,3.98]]; // sagoma della chiave del kit (Chiave_Forchetta_ITIS_E_Majorana.scad)
 const CHIAVE_FORO = [[47.5,0.05],[47.45,0.44],[47.32,0.85],[47.13,1.19],[46.85,1.52],[46.54,1.76],[46.15,1.96],[45.78,2.07],[45.35,2.1],[44.96,2.05],[44.55,1.92],[44.21,1.73],[43.88,1.45],[43.64,1.14],[43.44,0.75],[43.33,0.38],[43.3,-0.05],[43.35,-0.44],[43.48,-0.85],[43.67,-1.19],[43.95,-1.52],[44.26,-1.76],[44.65,-1.96],[45.02,-2.07],[45.45,-2.1],[45.84,-2.05],[46.25,-1.92],[46.59,-1.73],[46.92,-1.45],[47.16,-1.14],[47.36,-0.75],[47.47,-0.38]];
+/* Esempi pronti per lo schizzo. */
 function esempioSchizzo(tipo) {
   const T = (testo, x, y, a, font, m, hr) => conModo({ t: 't', testo, x, y, a, font, sp: 0, ang: 0, al: 'c', gr: 0 }, m, hr);
   if (tipo === 'chiave') return { nome: 'Chiave ITIS E. Majorana', h: 2.85, n: 1, forme: [{ t: 'p', pts: copia(CHIAVE_EST), m: 'pieno' }, { t: 'p', pts: copia(CHIAVE_FORO), m: 'foro' }, T('ITIS E. Majorana', 6, 0.4, 7.1, 'lato-black', 'rilievo', 0.6)] };
   if (tipo === 'lettere') return { nome: 'Lettere ALA', h: 4, n: 1, forme: [T('ALA', 0, 0, 25, 'saira', 'pieno')] };
+  if (tipo === 'centina') return { nome: 'Centina NACA 4412 con sede e correnti', h: 5, n: 1, forme: [{ t: 'cen', m: 'pieno', x: -60, y: 0, ang: 0, g: 0.25, profilo: 'naca', naca: '4412', spProf: 12, fProf: 4, pProf: 40, c: 120, te: 0, sf: 'I', sx: 30, sH: 0, cd: 2, cv: 1, cb: 3, ch: 2, all: true, pm: 0, ra: 0 }] };
+  if (tipo === 'longherone') return { nome: 'Spezzone di longherone a doppio T', h: 150, n: 1, or: 'coricato', forme: [Object.assign({ t: 'lon', m: 'pieno', x: 0, y: 0, ang: 0, g: 0 }, A.proporzioniSezione('I', 8))] };
+  if (tipo === 'omega') return { nome: 'Corrente a omega', h: 120, n: 2, or: 'coricato', forme: [{ t: 'cor', m: 'pieno', forma: 'omega', b: 12, h: 5, s: 1, x: 0, y: 0, ang: 0, g: 0 }] };
+  if (tipo === 'anello') return { nome: 'Anello (contorno di un cerchio)', h: 3, n: 1, forme: [{ t: 'c', m: 'pieno', x: 0, y: 0, d: 30, pc: 3 }, { t: 'g', m: 'foro', x: 0, y: 0, d: 8, n: 6, ang: 0 }] };
   return { nome: 'Targhetta', h: 2.5, n: 1, forme: [{ t: 'r', x: -35, y: -10, w: 70, h: 20, m: 'pieno' }, { t: 'c', x: -35, y: 0, d: 20, m: 'pieno' }, { t: 'c', x: 35, y: 0, d: 20, m: 'pieno' },
     { t: 'c', x: -38, y: 0, d: 5, m: 'foro' }, T('ITIS E. Majorana', 5, 0, 6, 'lato-black', 'rilievo', 0.6)] };
 }
@@ -4135,27 +4794,32 @@ function ingombroForme(sk) {
   const p = (x, y) => { if (x < x0) x0 = x; if (x > x1) x1 = x; if (y < y0) y0 = y; if (y > y1) y1 = y; };
   for (const f of sk.forme) {
     if (f.t === 'p') f.pts.forEach(q => p(q[0], q[1]));
-    else if (f.t === 't') { const r = A.testoRegione(f); if (r.length) { const b = A.ingombro(r); p(b.x0, b.y0); p(b.x1, b.y1); } else p(f.x, f.y); }
     else if (f.t === 'c') { p(f.x - f.d / 2, f.y - f.d / 2); p(f.x + f.d / 2, f.y + f.d / 2); }
-    else { p(f.x, f.y); p(f.x + f.w, f.y + f.h); }
+    else if (f.t === 'r' && !f.ang) { p(f.x, f.y); p(f.x + f.w, f.y + f.h); }
+    else { const r = A.percorsoForma(f); if (r.length) { const b = A.ingombro(r); p(b.x0, b.y0); p(b.x1, b.y1); } else p(f.x, f.y); }
   }
   return isFinite(x0) ? [x0, y0, x1, y1] : null;
 }
 function vistaSchizzo(sk) {
   if (stato.sk.vb) return stato.sk.vb;
-  const b = ingombroForme(sk) || [0, 0, 80, 50], w = Math.max(120, (b[2] - b[0]) * 1.6), h = Math.max(80, (b[3] - b[1]) * 1.6);
-  return (stato.sk.vb = { x: (b[0] + b[2]) / 2 - w / 2, y: -(b[1] + b[3]) / 2 - h / 2, w, h });
+  // la vista ha le proporzioni della tela; il disegno sta nella parte libera: a destra c'è il pannello delle forme, in basso la legenda
+  const W = $('.tela').clientWidth || 1000, H = $('.tela').clientHeight || 600, Wv = W > 700 ? W - 300 : W, Hv = Math.max(150, H - 80);
+  const b = ingombroForme(sk) || [0, 0, 80, 50], k = Math.max(Math.max(36, (b[2] - b[0]) * 1.4) / Wv, Math.max(24, (b[3] - b[1]) * 1.4 + 0.12 * (b[2] - b[0]) + 4) / Hv);
+  return (stato.sk.vb = { x: (b[0] + b[2]) / 2 - Wv / 2 * k, y: -(b[1] + b[3]) / 2 - Hv / 2 * k, w: W * k, h: H * k });
 }
 function formaSvg(f, classe, attr) {
   const a = ' class="' + classe + '"' + (attr || '');
-  if (f.t === 't') { // la scritta si sceglie anche cliccando tra le lettere: riquadro trasparente
-    const r = A.testoRegione(f), b = r.length ? A.ingombro(r) : { x0: f.x, y0: f.y, x1: f.x, y1: f.y };
+  if (f.t === 't' || disegnoGeometrico(f)) { // si sceglie anche cliccando nei vuoti: riquadro trasparente
+    const r = f.t === 't' ? A.testoRegione(f) : A.percorsoForma(f), b = r.length ? A.ingombro(r) : { x0: f.x, y0: f.y, x1: f.x, y1: f.y };
     return '<g' + a + '><rect class="sk-hit" x="' + b.x0 + '" y="' + (-b.y1) + '" width="' + (b.x1 - b.x0) + '" height="' + (b.y1 - b.y0) + '"/><path fill-rule="evenodd" d="' + percorsoD(r) + '"/></g>';
   }
   if (f.t === 'c') return '<circle' + a + ' cx="' + f.x + '" cy="' + (-f.y) + '" r="' + f.d / 2 + '"/>';
   if (f.t === 'p') return '<polygon' + a + ' points="' + f.pts.map(q => q[0] + ',' + (-q[1])).join(' ') + '"/>';
   return '<rect' + a + ' x="' + f.x + '" y="' + (-f.y - f.h) + '" width="' + f.w + '" height="' + f.h + '"/>';
 }
+/* Punto nel riferimento della forma (centro, ruotato di ang) e viceversa. */
+const daLocale = (f, u, v) => { const a = (f.ang || 0) * Math.PI / 180; return [f.x + u * Math.cos(a) - v * Math.sin(a), f.y + u * Math.sin(a) + v * Math.cos(a)]; };
+const aLocale = (f, q) => { const a = (f.ang || 0) * Math.PI / 180, dx = q[0] - f.x, dy = q[1] - f.y; return [dx * Math.cos(a) + dy * Math.sin(a), -dx * Math.sin(a) + dy * Math.cos(a)]; };
 function svgSchizzo() {
   const sk = skCorrente(), K = stato.sk;
   if (!sk) return '';
@@ -4167,132 +4831,244 @@ function svgSchizzo() {
     for (let y = Math.ceil(y0 / passo) * passo; y <= y1; y += passo) d += 'M' + x0 + ' ' + y + 'H' + x1;
     return '<path class="' + classe + '" d="' + d + '"/>';
   };
-  const grande = vb.w > 700 ? 50 : 10;
-  if (vb.w < 90) s += griglia(1, 'griglia'); else if (vb.w < 320) s += griglia(5, 'griglia');
+  const grande = vb.w > 700 ? 50 : 10, fine = Math.max(K.passo || 1, vb.w < 90 ? 1 : vb.w < 320 ? 5 : 10);
+  if (fine < grande && vb.w / fine < 400) s += griglia(fine, 'griglia');
   s += griglia(grande, 'griglia forte') + '<path class="asse-sk" d="M' + x0 + ' 0H' + x1 + 'M0 ' + y0 + 'V' + y1 + '"/>';
-  const prova = K.prev ? { forme: sk.forme.concat([K.prev]), h: sk.h } : sk, so = A.solidoSchizzo(prova), reg = so.base;
+  const prova = K.prev ? { forme: sk.forme.concat([K.prev]), h: sk.h } : sk, so = A.solidoSchizzo(prova), reg = so.base, cor = sk.or === 'coricato';
   s += '<path class="contorno" d="' + percorsoD(reg) + '"/>';
-  so.incavi.forEach(q => { s += '<path class="sk-inc" fill-rule="evenodd" d="' + percorsoD(q.regione) + '"/>'; });
-  so.rilievi.forEach(q => { s += '<path class="sk-ril" fill-rule="evenodd" d="' + percorsoD(q.regione) + '"/>'; });
-  sk.forme.forEach((f, k) => { s += formaSvg(f, 'sk-f m-' + f.m + (k === K.sel ? ' sel' : ''), ' data-f="' + k + '"'); });
+  if (!cor) {
+    so.incavi.forEach(q => { s += '<path class="sk-inc" fill-rule="evenodd" d="' + percorsoD(q.regione) + '"/>'; });
+    so.rilievi.forEach(q => { s += '<path class="sk-ril" fill-rule="evenodd" d="' + percorsoD(q.regione) + '"/>'; });
+  }
+  sk.forme.forEach((f, k) => { s += formaSvg(f, 'sk-f m-' + f.m + (f.pc > 0 ? ' cav' : '') + (k === K.sel ? ' sel' : ''), ' data-f="' + k + '"'); });
   if (K.prev) s += formaSvg(K.prev, 'sk-f prev m-' + K.prev.m);
   if (K.poli && K.poli.length) {
     const pt = K.poli.concat(K.cursore ? [K.cursore] : []);
     s += '<polyline class="sk-poli" points="' + pt.map(q => q[0] + ',' + (-q[1])).join(' ') + '"/><circle class="sk-primo" cx="' + K.poli[0][0] + '" cy="' + (-K.poli[0][1]) + '" r="' + 0.7 * u + '"/>';
   }
-  const tutto = [].concat(...so.gradini.map(g => g.regione));
+  const tutto = cor ? reg : [].concat(...so.gradini.map(g => g.regione));
   if (tutto.length) { // ingombro del pezzo risultante
     const bb = A.ingombro(tutto);
     s += quotaH(bb.x0, bb.x1, -bb.y1 - 5 * u, num(bb.x1 - bb.x0, 2), u, -bb.y1 - 0.4 * u) + quotaV(-bb.y1, -bb.y0, bb.x0 - 5 * u, num(bb.y1 - bb.y0, 2), u, bb.x0 - 0.4 * u);
+    if (cor) { // barra coricata: il basso del disegno appoggia sul piano
+      const B = A.barraSchizzo(reg, stato.P.stampa), yl = -B.zLetto;
+      if (B.taglio > 0) s += '<path class="sk-taglio" d="' + percorsoD(A.interseca(reg, [A.rettangolo(bb.x0 - 1, bb.y0 - 1, bb.x1 + 1, B.zLetto)])) + '"/>';
+      s += '<path class="sk-letto" d="M' + (bb.x0 - 12 * u) + ' ' + yl + 'H' + (bb.x1 + 12 * u) + '"/><text class="sk-letto-t" x="' + (bb.x0 + bb.x1) / 2 + '" y="' + (yl + 4.4 * u) + '" font-size="' + 0.9 * u + '" text-anchor="middle">piano di stampa · barra coricata lunga ' + num(sk.h, 1) + ' mm' + (B.taglio > 0 ? ' · spianata di ' + num(B.taglio, 2) + ' mm' : '') + '</text>';
+    }
   }
-  const f = sk.forme[K.sel];
+  const f = sk.forme[K.sel], man = (i, x, y, tit, tondo) => (tondo ? '<circle class="man" data-m="' + i + '" cx="' + x + '" cy="' + (-y) + '" r="' + 0.6 * u + '">' : '<rect class="man" data-m="' + i + '" x="' + (x - 0.55 * u) + '" y="' + (-y - 0.55 * u) + '" width="' + 1.1 * u + '" height="' + 1.1 * u + '">') + (tit ? '<title>' + tit + '</title>' : '') + (tondo ? '</circle>' : '</rect>');
   if (f) { // quote guida e maniglie della forma scelta
-    if (f.t === 'r') {
+    if (f.t === 'r' && !f.ang) {
       s += quotaH(f.x, f.x + f.w, -f.y + 2.4 * u, 'L = ' + num(f.w, 2), u, -f.y + 0.3 * u, 'sk.w') + quotaV(-f.y - f.h, -f.y, f.x + f.w + 2.6 * u, 'H = ' + num(f.h, 2), u, f.x + f.w + 0.3 * u, 'sk.h');
-      [[f.x, f.y], [f.x + f.w, f.y], [f.x + f.w, f.y + f.h], [f.x, f.y + f.h]].forEach((q, i) => { s += '<rect class="man" data-m="' + i + '" x="' + (q[0] - 0.55 * u) + '" y="' + (-q[1] - 0.55 * u) + '" width="' + 1.1 * u + '" height="' + 1.1 * u + '"/>'; });
+      [[f.x, f.y], [f.x + f.w, f.y], [f.x + f.w, f.y + f.h], [f.x, f.y + f.h]].forEach((q, i) => { s += man(i, q[0], q[1]); });
     } else if (f.t === 't') {
       const r = A.testoRegione(f), b = r.length ? A.ingombro(r) : { x0: f.x, y0: f.y, x1: f.x, y1: f.y };
       s += '<rect class="sk-box" x="' + b.x0 + '" y="' + (-b.y1) + '" width="' + (b.x1 - b.x0) + '" height="' + (b.y1 - b.y0) + '"/>';
       s += '<text x="' + (b.x0 + b.x1) / 2 + '" y="' + (-b.y0 + 1.5 * u) + '" font-size="' + u + '" text-anchor="middle"><tspan' + attrQ('sk.a') + '>h = ' + num(f.a, 2) + '</tspan> · L = ' + num(A.larghezzaTesto(f), 1) + ' mm</text>';
-      s += '<circle class="sk-anc" cx="' + f.x + '" cy="' + (-f.y) + '" r="' + 0.35 * u + '"/>';
-      s += '<rect class="man" data-m="0" x="' + (b.x1 - 0.55 * u) + '" y="' + (-b.y1 - 0.55 * u) + '" width="' + 1.1 * u + '" height="' + 1.1 * u + '"><title>Trascina per cambiare l’altezza delle lettere</title></rect>';
-    } else if (f.t === 'c') {
+      s += '<circle class="sk-anc" cx="' + f.x + '" cy="' + (-f.y) + '" r="' + 0.35 * u + '"/>' + man(0, b.x1, b.y1, 'Trascina per cambiare l’altezza delle lettere');
+    } else if (f.t === 'c' || f.t === 'g') {
       s += '<text x="' + f.x + '" y="' + (-f.y - f.d / 2 - 0.8 * u) + '" font-size="' + u + '" text-anchor="middle"' + attrQ('sk.d') + '>Ø ' + num(f.d, 2) + '</text>';
-      s += '<circle class="man" data-m="0" cx="' + (f.x + f.d / 2) + '" cy="' + (-f.y) + '" r="' + 0.6 * u + '"/>';
-    } else { const rv = (f.pts.length > 40 ? 0.2 : 0.5) * u; f.pts.forEach((q, i) => { s += '<circle class="man" data-m="' + i + '" cx="' + q[0] + '" cy="' + (-q[1]) + '" r="' + rv + '"/>'; }); }
+      const v = f.t === 'g' ? daLocale(f, 0, f.d / 2) : [f.x + f.d / 2, f.y];
+      s += man(0, v[0], v[1], 'Trascina per cambiare il diametro', true);
+    } else if (f.t === 'cen') {
+      const te = daLocale(f, f.c, 0), mid = daLocale(f, f.c / 2, 0);
+      s += '<circle class="sk-anc" cx="' + f.x + '" cy="' + (-f.y) + '" r="' + 0.4 * u + '"><title>Bordo d’attacco</title></circle>';
+      s += '<text x="' + mid[0] + '" y="' + (-mid[1] + 2.2 * u) + '" font-size="' + u + '" text-anchor="middle"' + attrQ('sk.c') + '>c = ' + num(f.c, 1) + '</text>';
+      s += man(0, te[0], te[1], 'Trascina per allungare la corda; con Maiusc la ruoti', true);
+    } else if (f.t === 'lon' || f.t === 'cor') {
+      const W = f.t === 'lon' ? (f.forma === 'tondo' || f.forma === 'tubo' ? f.H : f.B) : f.b, H = f.t === 'lon' ? f.H : f.h, q = daLocale(f, W / 2, H / 2);
+      s += '<text x="' + f.x + '" y="' + (-f.y + Math.max(W, H) / 2 + 2 * u) + '" font-size="' + u + '" text-anchor="middle">' + num(H, 2) + ' × ' + num(W, 2) + '</text>';
+      s += man(0, q[0], q[1], 'Trascina per ridimensionare la sezione');
+    } else if (f.t === 'p') { const rv = (f.pts.length > 40 ? 0.2 : 0.5) * u; f.pts.forEach((q, i) => { s += '<circle class="man" data-m="' + i + '" cx="' + q[0] + '" cy="' + (-q[1]) + '" r="' + rv + '"/>'; }); }
   }
-  return s + '</svg>';
+  if (K.ag) s += '<circle class="sk-ag" cx="' + K.ag[0] + '" cy="' + (-K.ag[1]) + '" r="' + 0.9 * u + '"/>';
+  return s + '</svg><div class="sk-xy cifre" id="sk-xy"></div>';
 }
-const STRUMENTI_SK = [['sel', 'Seleziona'], ['r', 'Rettangolo'], ['c', 'Cerchio'], ['p', 'Poligono'], ['t', 'Testo']];
+const STRUMENTI_SK = [['sel', 'Seleziona'], ['r', 'Rettangolo'], ['c', 'Cerchio'], ['g', 'Poligono regolare'], ['p', 'Poligono'], ['t', 'Testo']];
+const COMPONENTI_SK = [['cen', 'Centina'], ['lon', 'Longherone'], ['cor', 'Corrente']];
 const AIUTO_SK = {
-  sel: 'Clic su una forma per sceglierla, trascina per spostarla; le maniglie la ridimensionano. Trascina lo sfondo per spostare la vista, rotellina per lo zoom.',
-  r: 'Rettangolo: premi in un vertice e trascina fino a quello opposto.',
+  sel: 'Seleziona: clic su una forma o nell’elenco per sceglierla, trascina per spostarla. Frecce: un passo di griglia; Ctrl+Z annulla, Ctrl+D duplica, R ruota, Canc elimina.',
+  r: 'Rettangolo: premi in un vertice e trascina fino a quello opposto. Raccordo e angolo si regolano dopo, nella riga della forma.',
   c: 'Cerchio: premi nel centro e trascina fino al raggio voluto.',
+  g: 'Poligono regolare: premi nel centro e trascina fino al vertice (esagono per dadi e bulloni; il numero di lati si cambia dopo).',
   p: 'Poligono: un clic per ogni vertice; per chiudere, clic sul primo vertice, doppio clic oppure Invio. Esc annulla.',
-  t: 'Testo: clic nel punto in cui ancorare la scritta, poi scrivi nella casella «Testo». Pieno: lettere a sé stanti; Foro: lettere passanti; Rilievo: lettere che sporgono dal pezzo; Incavo: lettere incise.'
+  t: 'Testo: clic nel punto in cui ancorare la scritta, poi scrivi nella casella «Testo». Pieno: lettere a sé stanti; Foro: lettere passanti; Rilievo: lettere che sporgono dal pezzo; Incavo: lettere incise.',
+  cen: 'Centina: clic nel punto del bordo d’attacco. Profilo, corda, sede del longherone, intagli dei correnti e finestre si regolano nella riga della forma.',
+  lon: 'Longherone: clic nel centro della sezione. Per stampare uno spezzone di longherone scegliere «Stampa: coricata» e la lunghezza; in modo «Foro» la sezione diventa la sede, con il gioco.',
+  cor: 'Corrente: clic nel centro della sezione (rettangolare, a L, a Z, a omega, a T). In modo «Foro» diventa l’intaglio per il corrente; «coricata» lo stampa come barra.'
 };
-const ESEMPI_SK = [['targhetta', 'Targhetta con scritta in rilievo'], ['chiave', 'Chiave ITIS E. Majorana (dal kit)'], ['lettere', 'Lettere singole «ALA»']];
+const ESEMPI_SK = [['targhetta', 'Targhetta con scritta in rilievo'], ['chiave', 'Chiave ITIS E. Majorana (dal kit)'], ['lettere', 'Lettere singole «ALA»'], ['centina', 'Centina NACA 4412 con sede e correnti'],
+  ['longherone', 'Spezzone di longherone a doppio T (barra coricata)'], ['omega', 'Corrente a omega (barra coricata)'], ['anello', 'Anello: contorno di un cerchio con foro esagonale']];
+/* Pannello laterale dello schizzo: elenco delle forme e proprietà della forma scelta. */
+function ispettoreForma(f) {
+  const n = (k, et, v, passo) => '<label><span>' + et + '</span><input type="number" data-b="f-' + k + '" value="' + A.arr(v || 0, 100) + '" step="' + (passo || 0.5) + '"></label>';
+  const sc = (k, et, v, opz) => '<label><span>' + et + '</span><select data-b="f-' + k + '">' + opz.map(o => '<option value="' + o[0] + '"' + (String(o[0]) === String(v) ? ' selected' : '') + '>' + esc(o[1]) + '</option>').join('') + '</select></label>';
+  const ck = (k, et, v, tit) => '<label class="ck"' + (tit ? ' title="' + tit + '"' : '') + '><input type="checkbox" data-b="f-' + k + '"' + (v ? ' checked' : '') + '> ' + et + '</label>';
+  const gr = t => '<h5>' + t + '</h5>';
+  const pos = ex => n('x', (ex || '') + ' X', f.x) + n('y', (ex || '') + ' Y', f.y), giro = n('ang', 'Angolo °', f.ang || 0, 5);
+  let s = '<h4>' + esc(nomeForma(f)) + '</h4>';
+  if (f.t === 't') s += '<label class="tx"><span>Testo</span><input type="text" data-b="f-txt" value="' + esc(f.testo) + '" maxlength="80" spellcheck="false"></label>' +
+    sc('font', 'Carattere', f.font, Object.keys(A.caratteri()).map(k => [k, A.caratteri()[k].nome])) + n('a', 'Altezza lettere', f.a) + n('sp', 'Spaziatura', f.sp, 0.1) + n('gr', 'Ingrossa', f.gr, 0.05) +
+    gr('Posizione') + sc('al', 'Ancoraggio', f.al, [['sx', 'a sinistra'], ['c', 'al centro'], ['dx', 'a destra']]) + pos('Ancora') + giro;
+  else if (f.t === 'r') s += n('w', 'Lunghezza L', f.w) + n('h', 'Altezza H', f.h) + n('r', 'Raccordo degli spigoli', f.r || 0) + gr('Posizione') + pos('Vertice') + giro;
+  else if (f.t === 'c') s += n('d', 'Diametro', f.d) + gr('Posizione') + pos('Centro');
+  else if (f.t === 'g') s += n('d', 'Ø circoscritto', f.d) + n('n', 'Numero di lati', f.n, 1) + '<p class="nota">Esagono: apertura chiave = ' + num(f.d * Math.cos(Math.PI / f.n), 2) + ' mm tra i lati opposti' + (f.n % 2 ? ' (lati dispari: misura vertice–lato)' : '') + '.</p>' + gr('Posizione') + pos('Centro') + giro;
+  else if (f.t === 'p') s += '<p class="nota">' + f.pts.length + ' vertici: trascinali nel disegno. Per spostare tutto il poligono trascinalo dall’interno.</p>';
+  else if (f.t === 'cen') {
+    const fam = f.profilo, par = fam === 'lamina' || fam === 'libero';
+    s += gr('Profilo') + sc('profilo', 'Famiglia', fam, Object.keys(A.FAMIGLIE).map(k => [k, A.FAMIGLIE[k].nome])) +
+      (fam === 'naca' ? '<label><span>Codice NACA</span><input type="text" data-b="f-naca" value="' + esc(f.naca) + '" maxlength="5" inputmode="numeric"></label>' : n('spProf', 'Spessore t/c %', f.spProf) + (par ? n('fProf', 'Curvatura f/c %', f.fProf) + n('pProf', 'Posizione x<sub>f</sub> %', f.pProf, 5) : '')) +
+      '<button class="btn piccolo largo" data-az="sk-prof" title="Copia il profilo scelto per l’ala">Usa il profilo del progetto</button>' +
+      n('c', 'Corda c', f.c, 1) + n('te', 'Bordo d’uscita (0 = auto)', f.te, 0.1) +
+      gr('Sede del longherone') + sc('sf', 'Sezione', f.sf, [['', 'nessuna']].concat(Object.keys(A.FORME).map(k => [k, A.FORME[k].nome]))) + (f.sf ? n('sx', 'Posizione % corda', f.sx, 1) + n('sH', 'Altezza (0 = massima)', f.sH) : '') +
+      gr('Intagli per i correnti') + n('cd', 'Sul dorso', f.cd, 1) + n('cv', 'Sul ventre', f.cv, 1) + (f.cd + f.cv ? n('cb', 'Larghezza b<sub>c</sub>', f.cb, 0.1) + n('ch', 'Altezza h<sub>c</sub>', f.ch, 0.1) : '') +
+      (f.sf || f.cd + f.cv ? n('g', 'Gioco di montaggio', f.g, 0.05) : '') +
+      gr('Alleggerimento') + ck('all', 'Finestre di alleggerimento', f.all) + (f.all || f.sf ? n('pm', 'Parete (0 = auto)', f.pm, 0.1) : '') + (f.all ? n('ra', 'Raccordo finestre (0 = auto)', f.ra, 0.1) : '') +
+      gr('Posizione') + pos('Bordo d’attacco') + n('ang', 'Angolo °', f.ang || 0, 1);
+    const C = A.centinaSchizzo(f); s += '<p class="nota">Spessore massimo ' + num(C.sp, 2) + ' mm · parete ' + num(C.pm, 2) + ' mm' + (f.all ? ' · ' + C.nFin + (C.nFin === 1 ? ' finestra' : ' finestre') : '') + '.</p>';
+  } else if (f.t === 'lon') {
+    const tonda = f.forma === 'tondo' || f.forma === 'tubo';
+    s += sc('forma', 'Sezione', f.forma, Object.keys(A.FORME).map(k => [k, A.FORME[k].nome])) +
+      A.FORME[f.forma].campi.map(d => n(d, d === 'H' && tonda ? 'Diametro' : ET_DIM[d][0] + ' ' + ET_DIM[d][1], f[d], 0.1)).join('') +
+      '<button class="btn piccolo largo" data-az="sk-prop" title="Ricava le altre misure dall’altezza con le proporzioni della struttura">Proporziona dall’altezza</button>' +
+      (f.m === 'foro' ? n('g', 'Gioco della sede', f.g, 0.05) : '') + gr('Posizione') + pos('Centro') + giro;
+    const reg = A.sezioneLongherone(f); if (reg.length) s += '<p class="nota">Area della sezione ' + num(A.area(reg), 2) + ' mm².</p>';
+  } else if (f.t === 'cor') {
+    s += sc('forma', 'Sezione', f.forma, Object.keys(A.FORME_COR).map(k => [k, A.FORME_COR[k].nome])) + n('b', 'Larghezza b', f.b, 0.1) + n('h', 'Altezza h', f.h, 0.1) +
+      (A.FORME_COR[f.forma].campi.includes('s') ? n('s', 'Spessore s', f.s, 0.1) : '') + (f.m === 'foro' ? n('g', 'Gioco dell’intaglio', f.g, 0.05) : '') + gr('Posizione') + pos('Centro') + giro;
+    const reg = A.sezioneCorrente(f); if (reg.length) s += '<p class="nota">Area della sezione ' + num(A.area(reg), 2) + ' mm².</p>';
+  }
+  s += gr('Modo nel pezzo') + sc('m', 'Modo', f.m, A.MODI.map(m => [m, ETICHETTE_MODO[m]])) + (f.m === 'rilievo' || f.m === 'incavo' ? n('hr', f.m === 'rilievo' ? 'Altezza del rilievo' : 'Profondità', f.hr, 0.1) : '');
+  if (f.m !== 'foro' && f.t !== 't') s += ck('cav', 'Solo contorno (forma cava)', f.pc > 0, 'La forma diventa il contorno bucato di un pieno, con la parete indicata') + (f.pc > 0 ? n('pc', 'Spessore della parete', f.pc, 0.1) : '');
+  return s + '<div class="isp-az"><button class="btn piccolo" data-az="sk-dup" title="Ctrl+D">Duplica</button><button class="btn piccolo" data-az="sk-rot" title="R">Ruota 90°</button>' +
+    '<button class="btn piccolo" data-az="sk-spec" data-d="h" title="Specchia destra/sinistra">Specchia ↔</button><button class="btn piccolo" data-az="sk-spec" data-d="v" title="Specchia alto/basso">Specchia ↕</button>' +
+    '<button class="btn piccolo" data-az="sk-centra" title="Porta il centro della forma nell’origine">Centra</button><button class="btn piccolo pericolo" data-az="sk-del" title="Canc">Elimina</button></div>';
+}
+function ispettoreSchizzo() {
+  const sk = skCorrente(), K = stato.sk;
+  if (!sk) return '';
+  let s = '<section class="isp-lista"><h4>Forme del pezzo · ' + sk.forme.length + '</h4>';
+  s += sk.forme.length ? sk.forme.map((q, k) => '<button type="button" data-skf="' + k + '"' + (k === K.sel ? ' class="sel"' : '') + '><i class="m-' + q.m + (q.pc > 0 ? ' cav' : '') + '"></i>' + esc(nomeForma(q)) +
+    '<small>' + ETICHETTE_MODO[q.m].toLowerCase() + (q.pc > 0 ? ', solo contorno ' + num(q.pc, 1) + ' mm' : '') + '</small></button>').join('') : '<p class="nota">Ancora nessuna forma: scegli uno strumento nella barra e disegna, oppure inserisci una centina, un longherone o un corrente.</p>';
+  s += '</section>';
+  const f = sk.forme[K.sel];
+  s += '<section class="isp-forma">' + (f ? ispettoreForma(f) : '<p class="nota">Scegli una forma, nel disegno o nell’elenco, per modificarne misure, modo e posizione.</p>') + '</section>';
+  return s;
+}
+const ICONE_SK = {
+  sel: '<path d="M4 2v13l3.4-3.3L10 17l2.1-1-2.6-5.4H14z"/>', r: '<rect x="2.5" y="4.5" width="13" height="9"/>', c: '<circle cx="9" cy="9" r="6.3"/>', g: '<path d="M5.5 3h7l3.5 6-3.5 6h-7L2 9z"/>',
+  p: '<path d="M2.5 14.5 6 3.5l6.5 2.5 3.5 7.5-6.5-2z"/>', t: '<path d="M3.5 3.5h11M9 3.5v11.5" class="tratto"/>',
+  cen: '<path d="M1.5 10.2C3.5 5 10 4.8 16.5 9.6 10.5 11.4 5 12.4 1.5 10.2z"/><rect x="5.6" y="7.6" width="1.6" height="2.8" class="vuoto-ico"/>',
+  lon: '<path d="M3.5 2.5h11v2.3h-4.3v8.4h4.3v2.3h-11v-2.3h4.3V4.8H3.5z"/>', cor: '<path d="M1.5 14.5h3.2v-9h8.6v9h3.2" class="tratto"/>'
+};
+const icona = k => '<svg viewBox="0 0 18 18" aria-hidden="true">' + ICONE_SK[k] + '</svg>';
 function barraSchizzo() {
-  const P = stato.P, K = stato.sk, sk = skCorrente();
-  let s = '';
+  const P = stato.P, K = stato.sk, sk = skCorrente(), H = stato.storia, pronto = H.P === P;
+  let s = '<label class="evid" title="Il kit di stampa contiene soltanto i pezzi liberi: niente ala né centine"><input type="checkbox" data-b="sk-solo"' + (P.soloLiberi ? ' checked' : '') + '> Stampa solo i pezzi liberi</label>';
   if (P.schizzi.length) s += '<label>Pezzo <select data-b="sk-sel">' + P.schizzi.map((q, i) => '<option value="' + i + '"' + (i === K.i ? ' selected' : '') + '>' + (i + 1) + ' · ' + esc(q.nome) + '</option>').join('') + '</select></label>';
   s += '<button class="btn piccolo" data-az="sk-nuovo">Nuovo pezzo</button><label><select data-b="sk-esempio" aria-label="Esempi pronti"><option value="">Esempi…</option>' +
     ESEMPI_SK.map(q => '<option value="' + q[0] + '">' + q[1] + '</option>').join('') + '</select></label>';
+  s += '<span class="segm"><button class="btn piccolo" data-az="sk-annulla" title="Ctrl+Z"' + (pronto && H.pass.length ? '' : ' disabled') + '>↶ Annulla</button><button class="btn piccolo" data-az="sk-ripeti" title="Ctrl+Y"' + (pronto && H.fut.length ? '' : ' disabled') + '>↷ Ripeti</button></span>';
   if (!sk) return s;
-  s += '<button class="btn piccolo" data-az="sk-elimina">Elimina pezzo</button><label>Nome <input type="text" data-b="sk-nome" value="' + esc(sk.nome) + '" maxlength="40"></label>' +
-    '<label>Estrusione <input type="number" class="corto" data-b="sk-h" value="' + sk.h + '" min="0.4" max="200" step="0.5"> mm</label><label>Copie <input type="number" class="corto" data-b="sk-n" value="' + sk.n + '" min="1" max="20" step="1"></label>' +
-    '<span class="segm">' + STRUMENTI_SK.map(q => '<button class="btn piccolo" data-az="sk-str" data-s="' + q[0] + '" aria-pressed="' + (K.str === q[0]) + '">' + q[1] + '</button>').join('') + '</span>' +
+  const cor = sk.or === 'coricato';
+  s += '<span class="a-capo"></span><button class="btn piccolo" data-az="sk-elimina">Elimina pezzo</button><label>Nome <input type="text" data-b="sk-nome" value="' + esc(sk.nome) + '" maxlength="40"></label>' +
+    '<label title="In piedi: il disegno è la pianta del pezzo, estruso in altezza. Coricata: il disegno è la sezione di una barra lunga quanto indicato, stampata sdraiata (longheroni, correnti)">Stampa <select data-b="sk-or"><option value="piedi"' + (cor ? '' : ' selected') + '>in piedi</option><option value="coricato"' + (cor ? ' selected' : '') + '>coricata (barra)</option></select></label>' +
+    '<label>' + (cor ? 'Lunghezza' : 'Estrusione') + ' <input type="number" class="corto" data-b="sk-h" value="' + sk.h + '" min="0.4" max="1000" step="0.5"> mm</label><label>Copie <input type="number" class="corto" data-b="sk-n" value="' + sk.n + '" min="1" max="20" step="1"></label>' +
+    '<label title="Togliere la spunta per lasciare questo pezzo nel progetto senza stamparlo"><input type="checkbox" data-b="sk-st"' + (sk.st !== false ? ' checked' : '') + '> Nel kit</label>';
+  const bi = q => '<button class="btn piccolo ico" data-az="sk-str" data-s="' + q[0] + '" aria-pressed="' + (K.str === q[0]) + '" title="' + q[1] + '" aria-label="' + q[1] + '">' + icona(q[0]) + '</button>';
+  s += '<span class="a-capo"></span><span class="segm">' + STRUMENTI_SK.map(bi).join('') + '</span><span class="segm componenti">' + COMPONENTI_SK.map(q => bi(q).replace('</svg>', '</svg>' + q[1])).join('') + '</span>' +
     '<span class="segm" title="Modo delle forme nuove: pieno, foro passante, rilievo sopra il pezzo, incavo nel pezzo">' + A.MODI.map(m => '<button class="btn piccolo" data-az="sk-modo" data-m="' + m + '" aria-pressed="' + (K.modo === m) + '">' + ETICHETTE_MODO[m] + '</button>').join('') + '</span>' +
     (K.modo === 'rilievo' || K.modo === 'incavo' ? '<label>' + (K.modo === 'rilievo' ? 'Rilievo' : 'Profondità') + ' <input type="number" class="corto" data-b="sk-hr" value="' + K.hr + '" min="0.2" max="50" step="0.1"> mm</label>' : '') +
-    '<button class="btn piccolo" data-az="sk-centina" title="Aggiunge come poligono il contorno della centina scelta nel disegno 2D">Contorno centina</button>' +
-    '<button class="btn piccolo" data-az="sk-inquadra">Inquadra</button><button class="btn piccolo" data-az="sk-3d">Vedi il solido 3D</button>';
-  const f = sk.forme[K.sel];
-  if (f) {
-    const n = (k, et, v, min, passo) => '<label>' + et + ' <input type="number" class="corto" data-b="f-' + k + '" value="' + A.arr(v, 100) + '"' + (min ? ' min="0.5"' : '') + ' step="' + (passo || 0.5) + '"></label>';
-    const sc = (k, et, v, opz) => '<label>' + et + ' <select data-b="f-' + k + '">' + opz.map(o => '<option value="' + o[0] + '"' + (o[0] === v ? ' selected' : '') + '>' + esc(o[1]) + '</option>').join('') + '</select></label>';
-    const tit = f.t === 'r' ? 'Rettangolo' : f.t === 'c' ? 'Cerchio' : f.t === 't' ? 'Scritta' : 'Poligono di ' + f.pts.length + ' vertici';
-    s += '<span class="riga-forma"><b>' + tit + '</b>' +
-      (f.t === 't' ? '<label class="largo">Testo <input type="text" data-b="f-txt" value="' + esc(f.testo) + '" maxlength="80" spellcheck="false"></label>' +
-        sc('font', 'Carattere', f.font, Object.keys(A.caratteri()).map(k => [k, A.caratteri()[k].nome])) + n('a', 'Altezza', f.a, 1) + n('sp', 'Spaziatura', f.sp, 0, 0.1) + n('ang', 'Angolo °', f.ang, 0, 5) +
-        sc('al', 'Ancoraggio', f.al, [['sx', 'a sinistra'], ['c', 'al centro'], ['dx', 'a destra']]) + n('gr', 'Ingrossa', f.gr, 0, 0.05) : '') +
-      (f.t === 'p' ? '' : n('x', f.t === 'c' ? 'Centro X' : f.t === 't' ? 'Ancora X' : 'X', f.x) + n('y', 'Y', f.y)) + (f.t === 'r' ? n('w', 'L', f.w, 1) + n('h', 'H', f.h, 1) : '') + (f.t === 'c' ? n('d', 'Ø', f.d, 1) : '') +
-      sc('m', 'Modo', f.m, A.MODI.map(m => [m, ETICHETTE_MODO[m]])) + (f.m === 'rilievo' || f.m === 'incavo' ? n('hr', f.m === 'rilievo' ? 'Rilievo' : 'Profondità', f.hr, 0, 0.1) : '') +
-      '<button class="btn piccolo" data-az="sk-del">Elimina forma</button></span>';
-  }
+    (K.modo !== 'foro' ? '<span class="coppia"><label title="Le forme nuove saranno il contorno bucato di un pieno, con questa parete"><input type="checkbox" data-b="sk-cav"' + (K.pc > 0 ? ' checked' : '') + '> Solo contorno</label>' + (K.pc > 0 ? '<label>parete <input type="number" class="corto" data-b="sk-pc" value="' + K.pc + '" min="0.3" max="50" step="0.1"> mm</label>' : '') + '</span>' : '');
+  s += '<label>Griglia <select data-b="sk-passo">' + [0.1, 0.5, 1, 2, 5, 10].map(v => '<option value="' + v + '"' + (v === K.passo ? ' selected' : '') + '>' + num(v, 1) + '</option>').join('') + '</select> mm</label>' +
+    '<label title="Il puntatore si aggancia a vertici, centri e bordi d’attacco vicini (Alt per lavorare a mano libera)"><input type="checkbox" data-b="sk-agg"' + (K.agg ? ' checked' : '') + '> Aggancio</label>' +
+    '<button class="btn piccolo" data-az="sk-centina" title="Inserisce una centina dell’ala del progetto, con la sua sede e i suoi intagli, modificabile">Centina del progetto</button>' +
+    '<button class="btn piccolo" data-az="sk-inquadra">Inquadra</button><button class="btn piccolo" data-az="sk-3d" title="Mostra il pezzo sul piano di stampa, in 3D">Solido 3D</button>';
   return s;
 }
 function titoloSchizzo() {
   const sk = skCorrente(); if (!sk) return '';
   const so = A.solidoSchizzo(sk), a = so.base.length ? A.area(so.base) : 0, V = so.gradini.reduce((t, g) => t + A.area(g.regione) * (g.z1 - g.z0), 0);
+  if (sk.or === 'coricato') return esc(sk.nome) + ' · barra coricata lunga ' + num(sk.h, 1) + ' mm · ' + sk.n + (sk.n === 1 ? ' copia' : ' copie') + (a ? ' · sezione ' + num(a, 1) + ' mm² · volume ' + num(a * sk.h / 1000, 2) + ' cm³' : ' · ancora vuoto');
   return esc(sk.nome) + ' · estrusione ' + num(sk.h, 2) + ' mm' + (so.lz > sk.h + 1e-9 ? ' · altezza con i rilievi ' + num(so.lz, 2) + ' mm' : '') + ' · ' + sk.n + (sk.n === 1 ? ' copia' : ' copie') +
     (V ? ' · area di base ' + num(a, 1) + ' mm² · volume ' + num(V / 1000, 2) + ' cm³' : ' · ancora vuoto');
 }
 function ridisegnaSchizzo() { $('#tavola').innerHTML = svgSchizzo(); }
-function mmSchizzo(ev) {
-  const svg = $('#tavola svg[data-nome="schizzo"]'), p = puntoSvg(ev, svg.getScreenCTM().inverse()), g = ev.altKey ? 10 : 1;
-  return [Math.round(p.x * g) / g, Math.round(-p.y * g) / g];
+/* Punti a cui si aggancia il puntatore: vertici, centri, bordi d'attacco e d'uscita, origine. */
+function puntiAggancio(sk, escludi) {
+  const out = [[0, 0]];
+  sk.forme.forEach((f, k) => {
+    if (k === escludi) return;
+    if (f.t === 'r') { if (f.ang) out.push([f.x + f.w / 2, f.y + f.h / 2]); else out.push([f.x, f.y], [f.x + f.w, f.y], [f.x + f.w, f.y + f.h], [f.x, f.y + f.h], [f.x + f.w / 2, f.y + f.h / 2]); }
+    else if (f.t === 'p') { if (f.pts.length <= 60) f.pts.forEach(q => out.push(q)); }
+    else if (f.t === 'cen') out.push([f.x, f.y], daLocale(f, f.c, 0));
+    else if (f.t === 'c') out.push([f.x, f.y], [f.x + f.d / 2, f.y], [f.x - f.d / 2, f.y], [f.x, f.y + f.d / 2], [f.x, f.y - f.d / 2]);
+    else out.push([f.x, f.y]);
+  });
+  return out;
 }
+const svgPunto = ev => { const svg = $('#tavola svg[data-nome="schizzo"]'), p = puntoSvg(ev, svg.getScreenCTM().inverse()); return [p.x, -p.y]; };
+function agganciaPunto(q, escludi, libero) {
+  const K = stato.sk, sk = skCorrente();
+  K.ag = null;
+  if (libero) return [A.arr(q[0], 100), A.arr(q[1], 100)];
+  if (K.agg && sk && K.vb) {
+    const tol = K.vb.w / 78 * 0.9; let best = null, dm = tol;
+    puntiAggancio(sk, escludi).forEach(p => { const d = Math.hypot(p[0] - q[0], p[1] - q[1]); if (d < dm) { dm = d; best = p; } });
+    if (best) { K.ag = best; return [A.arr(best[0], 1000), A.arr(best[1], 1000)]; }
+  }
+  const g = K.passo || 1;
+  return [A.arr(Math.round(q[0] / g) * g, 1000), A.arr(Math.round(q[1] / g) * g, 1000)];
+}
+const mmSchizzo = (ev, escludi) => agganciaPunto(svgPunto(ev), escludi, ev.altKey);
 function chiudiPoligono() {
   const sk = skCorrente(), K = stato.sk;
   if (!sk || !K.poli) return;
   const pts = K.poli.filter((q, i, a) => !i || q[0] !== a[i - 1][0] || q[1] !== a[i - 1][1]);
-  K.poli = null; K.cursore = null;
+  K.poli = null; K.cursore = null; K.ag = null;
   if (pts.length >= 3 && sk.forme.length < 60) { sk.forme.push(nuovaForma({ t: 'p', pts })); K.sel = sk.forme.length - 1; K.str = 'sel'; aggiorna('schizzo', false); } else disegnaVista();
+}
+/* Punto di riferimento della forma: quello che si aggancia quando la forma si sposta. */
+const rifForma = f => (f.t === 'p' ? f.pts[0] : [f.x, f.y]);
+function spostaForma(f, f0, dx, dy) {
+  if (f.t === 'p') f.pts = f0.pts.map(w => [A.arr(w[0] + dx, 1000), A.arr(w[1] + dy, 1000)]); else { f.x = A.arr(f0.x + dx, 1000); f.y = A.arr(f0.y + dy, 1000); }
 }
 function pdSchizzo(ev) {
   const sk = skCorrente(), K = stato.sk, svg = ev.target.closest('svg');
   if (!sk || !svg) return;
   ev.preventDefault(); chiudiQuota();
-  const pt = mmSchizzo(ev), u = K.vb.w / 78;
+  const u = K.vb.w / 78;
   const vistaDrag = () => { // sposta la vista
     const k = 1 / svg.getScreenCTM().a, cx = ev.clientX, cy = ev.clientY, v0 = Object.assign({}, K.vb);
     let mosso = false;
     ascoltaTrascina({ muovi(e) { mosso = true; K.vb = { x: v0.x - (e.clientX - cx) * k, y: v0.y - (e.clientY - cy) * k, w: v0.w, h: v0.h }; ridisegnaSchizzo(); }, fine() { if (!mosso) disegnaVista(); } });
   };
   if (ev.button !== 0) { vistaDrag(); return; }
+  const pt = mmSchizzo(ev), pieno = () => { if (sk.forme.length >= 60) { toast('Uno schizzo può contenere al massimo 60 forme.', 'errore'); return true; } return false; };
   if (K.str === 'p') {
     if (K.poli && K.poli.length >= 3 && Math.hypot(pt[0] - K.poli[0][0], pt[1] - K.poli[0][1]) < 1.2 * u) { chiudiPoligono(); return; }
     K.poli = (K.poli || []).concat([pt]); ridisegnaSchizzo(); return;
   }
-  if (K.str === 't') { // scritta ancorata nel punto cliccato
-    if (sk.forme.length >= 60) { toast('Uno schizzo può contenere al massimo 60 forme.', 'errore'); return; }
-    const ult = sk.forme.slice().reverse().find(q => q.t === 't');
-    sk.forme.push(nuovaForma({ t: 't', testo: 'Testo', font: ult ? ult.font : A.CAR_PREDEFINITO, a: ult ? ult.a : 8, sp: 0, ang: 0, al: 'c', gr: 0, x: pt[0], y: pt[1] }));
-    K.sel = sk.forme.length - 1; K.str = 'sel'; aggiorna('schizzo', false);
-    setTimeout(() => { const t = $('[data-b="f-txt"]'); if (t) { t.focus(); t.select(); } }, 0);
+  if (K.str === 't' || COMPONENTI_SK.some(q => q[0] === K.str)) { // si inserisce nel punto cliccato
+    if (pieno()) return;
+    let f;
+    if (K.str === 't') { const ult = sk.forme.slice().reverse().find(q => q.t === 't'); f = nuovaForma({ t: 't', testo: 'Testo', font: ult ? ult.font : A.CAR_PREDEFINITO, a: ult ? ult.a : 8, sp: 0, ang: 0, al: 'c', gr: 0, x: pt[0], y: pt[1] }); }
+    else f = nuovaForma(nuovoComponente(K.str, pt[0], pt[1]));
+    sk.forme.push(f); K.sel = sk.forme.length - 1; K.str = 'sel'; K.ag = null; aggiorna('schizzo', false);
+    if (f.t === 't') setTimeout(() => { const t = $('[data-b="f-txt"]'); if (t) { t.focus(); t.select(); } }, 0);
     return;
   }
-  if (K.str === 'r' || K.str === 'c') {
-    if (sk.forme.length >= 60) { toast('Uno schizzo può contenere al massimo 60 forme.', 'errore'); return; }
+  if (K.str === 'r' || K.str === 'c' || K.str === 'g') {
+    if (pieno()) return;
     ascoltaTrascina({
       muovi(e) {
-        const q = mmSchizzo(e);
-        K.prev = nuovaForma(K.str === 'r' ? { t: 'r', x: Math.min(pt[0], q[0]), y: Math.min(pt[1], q[1]), w: Math.abs(q[0] - pt[0]), h: Math.abs(q[1] - pt[1]) }
-          : { t: 'c', x: pt[0], y: pt[1], d: Math.round(2 * Math.hypot(q[0] - pt[0], q[1] - pt[1])) });
+        const q = mmSchizzo(e), d = A.arr(2 * Math.hypot(q[0] - pt[0], q[1] - pt[1]), 100);
+        K.prev = nuovaForma(K.str === 'r' ? { t: 'r', x: Math.min(pt[0], q[0]), y: Math.min(pt[1], q[1]), w: A.arr(Math.abs(q[0] - pt[0]), 1000), h: A.arr(Math.abs(q[1] - pt[1]), 1000) }
+          : K.str === 'c' ? { t: 'c', x: pt[0], y: pt[1], d } : { t: 'g', x: pt[0], y: pt[1], d, n: K.lati || 6, ang: A.arr(Math.atan2(q[1] - pt[1], q[0] - pt[0]) * 180 / Math.PI - 90, 10) });
         ridisegnaSchizzo();
       },
       fine() {
-        const f = K.prev; K.prev = null;
+        const f = K.prev; K.prev = null; K.ag = null;
         if (f && (f.t === 'r' ? f.w >= 0.5 && f.h >= 0.5 : f.d >= 0.5)) { sk.forme.push(f); K.sel = sk.forme.length - 1; K.str = 'sel'; aggiorna('schizzo', false); } else disegnaVista();
       }
     });
@@ -4303,85 +5079,157 @@ function pdSchizzo(ev) {
     const f = sk.forme[K.sel], i = +man.dataset.m, f0 = copia(f);
     ascoltaTrascina({
       muovi(e) {
-        const q = mmSchizzo(e);
+        const q = mmSchizzo(e, K.sel);
         if (f.t === 'r') { // il vertice opposto resta fermo
           const ox = i === 0 || i === 3 ? f0.x + f0.w : f0.x, oy = i < 2 ? f0.y + f0.h : f0.y;
-          f.x = Math.min(ox, q[0]); f.y = Math.min(oy, q[1]); f.w = Math.max(0.5, Math.abs(q[0] - ox)); f.h = Math.max(0.5, Math.abs(q[1] - oy));
-        } else if (f.t === 'c') f.d = Math.max(0.5, A.arr(2 * Math.hypot(q[0] - f.x, q[1] - f.y), 10));
+          f.x = Math.min(ox, q[0]); f.y = Math.min(oy, q[1]); f.w = Math.max(0.5, A.arr(Math.abs(q[0] - ox), 1000)); f.h = Math.max(0.5, A.arr(Math.abs(q[1] - oy), 1000));
+        } else if (f.t === 'c' || f.t === 'g') f.d = Math.max(0.5, A.arr(2 * Math.hypot(q[0] - f.x, q[1] - f.y), 100));
         else if (f.t === 't') { // altezza proporzionale alla distanza della maniglia dall'ancoraggio
           if (!f0.d0) { const b = A.ingombro(A.testoRegione(f0)); f0.d0 = Math.max(0.1, Math.hypot(b.x1 - f0.x, b.y1 - f0.y)); }
           f.a = A.limita(A.arr(f0.a * Math.hypot(q[0] - f0.x, q[1] - f0.y) / f0.d0, 10), 1, 300);
-        } else f.pts[i] = q;
+        } else if (f.t === 'cen') { // la corda si allunga lungo la sua direzione; con Maiusc ruota anche
+          const v = [q[0] - f.x, q[1] - f.y];
+          if (e.shiftKey) { f.c = A.limita(A.arr(Math.hypot(v[0], v[1]), 10), 20, 1000); f.ang = A.arr(Math.atan2(v[1], v[0]) * 180 / Math.PI, 2); }
+          else f.c = A.limita(A.arr(aLocale(f, q)[0], 10), 20, 1000);
+        } else if (f.t === 'lon') { // le altre quote seguono l'altezza in proporzione
+          const l = aLocale(f, q), H = A.limita(A.arr(2 * Math.abs(l[1]), 10), 1.5, 120), k = H / f0.H, tonda = f.forma === 'tondo' || f.forma === 'tubo';
+          f.H = tonda ? Math.max(H, A.arr(2 * Math.abs(l[0]), 10)) : H; f.B = tonda ? f.H : A.limita(A.arr(2 * Math.abs(l[0]), 10), 1, 120);
+          f.tf = A.arr(f0.tf * k, 100); f.tw = A.arr(f0.tw * k, 100); f.s = A.arr(f0.s * k, 100); A.limitiSezione(f);
+        } else if (f.t === 'cor') { const l = aLocale(f, q); f.b = A.limita(A.arr(2 * Math.abs(l[0]), 10), 0.8, 100); f.h = A.limita(A.arr(2 * Math.abs(l[1]), 10), 0.8, 100); }
+        else f.pts[i] = q;
         ridisegnaSchizzo();
       },
-      fine() { aggiorna('schizzo', false); }
+      fine() { K.ag = null; aggiorna('schizzo', false); }
     });
     return;
   }
   if (fo) {
     K.sel = +fo.dataset.f;
-    const f = sk.forme[K.sel], f0 = copia(f);
+    const f = sk.forme[K.sel], f0 = copia(f), r0 = rifForma(f0), p0 = svgPunto(ev);
     let mosso = false;
     ascoltaTrascina({
-      muovi(e) {
-        const q = mmSchizzo(e), dx = q[0] - pt[0], dy = q[1] - pt[1];
-        if (!mosso && !dx && !dy) return;
+      muovi(e) { // si aggancia il punto di riferimento della forma, non il punto preso col mouse
+        const p = svgPunto(e), raw = [r0[0] + p[0] - p0[0], r0[1] + p[1] - p0[1]];
+        if (!mosso && Math.hypot(p[0] - p0[0], p[1] - p0[1]) < 0.2 * u) return;
         mosso = true;
-        if (f.t === 'p') f.pts = f0.pts.map(w => [A.arr(w[0] + dx, 100), A.arr(w[1] + dy, 100)]); else { f.x = A.arr(f0.x + dx, 100); f.y = A.arr(f0.y + dy, 100); }
+        const q = agganciaPunto(raw, K.sel, e.altKey);
+        spostaForma(f, f0, q[0] - r0[0], q[1] - r0[1]);
         ridisegnaSchizzo();
       },
-      fine() { if (mosso) aggiorna('schizzo', false); else disegnaVista(); }
+      fine() { K.ag = null; if (mosso) aggiorna('schizzo', false); else disegnaVista(); }
     });
     return;
   }
   K.sel = -1; vistaDrag();
 }
+/* Annulla e ripeti: la storia registra lo stato dei pezzi liberi a ogni ricalcolo. */
+function segnaStoria() {
+  const H = stato.storia, s = JSON.stringify(stato.P.schizzi);
+  if (H.P !== stato.P) { H.P = stato.P; H.pass = []; H.fut = []; H.ult = s; return; }
+  if (s !== H.ult) { H.pass.push(H.ult); if (H.pass.length > 80) H.pass.shift(); H.ult = s; H.fut = []; }
+}
+function storiaSchizzo(verso) {
+  const H = stato.storia, da = verso < 0 ? H.pass : H.fut, a = verso < 0 ? H.fut : H.pass;
+  if (H.P !== stato.P || !da.length) return false;
+  a.push(H.ult); H.ult = da.pop(); stato.P.schizzi = JSON.parse(H.ult);
+  const K = stato.sk; K.i = A.limita(K.i, 0, Math.max(0, stato.P.schizzi.length - 1)); const sk = skCorrente();
+  if (!sk || K.sel >= sk.forme.length) K.sel = -1;
+  K.prev = null; K.poli = null; K.ag = null;
+  aggiorna('schizzo', false); return true;
+}
+/* Rotazione di 90° in senso antiorario e specchiature attorno al centro della forma. */
+function ruotaForma(f) {
+  const b = ingombroForme({ forme: [f] }), cx = (b[0] + b[2]) / 2, cy = (b[1] + b[3]) / 2, ang = v => { const a = ((v || 0) + 90) % 360; return a > 180 ? a - 360 : a; };
+  if (f.t === 'p') f.pts = f.pts.map(q => [A.arr(cx - (q[1] - cy), 1000), A.arr(cy + (q[0] - cx), 1000)]);
+  else if (f.t === 'r' && !(f.r > 0 || f.ang)) { const w = f.w; f.w = f.h; f.h = w; f.x = A.arr(cx - f.w / 2, 1000); f.y = A.arr(cy - f.h / 2, 1000); }
+  else if (f.t !== 'c') f.ang = ang(f.ang);
+}
+function specchiaForma(f, d) {
+  if (f.t === 't') { toast('Una scritta non si specchia: si può ruotare con il suo angolo.', 'errore'); return false; }
+  const b = ingombroForme({ forme: [f] }), cx = (b[0] + b[2]) / 2, cy = (b[1] + b[3]) / 2;
+  if (f.t === 'p') f.pts = f.pts.map(q => (d === 'h' ? [A.arr(2 * cx - q[0], 1000), q[1]] : [q[0], A.arr(2 * cy - q[1], 1000)])).reverse();
+  else if (f.t === 'g') f.ang = d === 'h' ? -(f.ang || 0) : 180 - (f.ang || 0);
+  else if (f.t === 'r') { if (f.ang) f.ang = -f.ang; }
+  else if (GEOM_SK.has(f.t)) { if (d === 'h') f.mh = !f.mh; else f.mv = !f.mv; if (!f.mh) delete f.mh; if (!f.mv) delete f.mv; f.ang = -(f.ang || 0); }
+  return true;
+}
 function azioneSchizzo(az, b) {
   const P = stato.P, K = stato.sk, sk = skCorrente();
+  if (az === 'sk-annulla' || az === 'sk-ripeti') { if (!storiaSchizzo(az === 'sk-annulla' ? -1 : 1)) toast(az === 'sk-annulla' ? 'Niente da annullare.' : 'Niente da ripetere.'); return; }
   if (az === 'sk-nuovo') {
     if (P.schizzi.length >= 12) { toast('Il progetto può contenere al massimo 12 pezzi liberi.', 'errore'); return; }
-    P.schizzi.push({ nome: 'Pezzo libero ' + (P.schizzi.length + 1), h: 3, n: 1, forme: [] });
+    P.schizzi.push({ nome: 'Pezzo libero ' + (P.schizzi.length + 1), h: 3, n: 1, st: true, or: 'piedi', forme: [] });
     Object.assign(K, { i: P.schizzi.length - 1, sel: -1, str: 'r', poli: null, vb: null, prev: null }); aggiorna('schizzo', false); return;
   }
-  if (az === 'sk-centina') {
+  if (az === 'sk-centina') { // una centina dell'ala del progetto, come componente modificabile
     if (!stato.M) return;
-    if (!sk) { azioneSchizzo('sk-nuovo'); stato.P.schizzi[K.i].nome = 'Centina piena'; }
-    const c = stato.M.centine[stato.centina] || stato.M.centine[0], q = skCorrente();
-    q.forme.push({ t: 'p', pts: c.pts.map(w => [A.arr(w[0] * c.c, 100), A.arr(w[1] * c.c, 100)]), m: 'pieno' });
-    Object.assign(K, { sel: q.forme.length - 1, str: 'sel', vb: null }); aggiorna('schizzo', false); return;
+    if (!sk) { azioneSchizzo('sk-nuovo'); stato.P.schizzi[K.i].nome = 'Centina del progetto'; stato.P.schizzi[K.i].h = stato.M.t || P.spCentina; }
+    const M = stato.M, c = M.centine[stato.centina] || M.centine[0], q = skCorrente(), l = !M.didattico && M.longheroni[0], cor = !M.didattico && P.livello !== 'struttura';
+    const f = nuovoComponente('cen', 0, 0);
+    Object.assign(f, { c: A.arr(c.c, 10), te: P.te, sf: l ? l.sp.forma : '', sx: l ? A.arr(100 * (l.pos[c.j] ? l.pos[c.j].f : l.xi), 10) : 30, sH: l ? l.sez.H : 0, cd: cor ? P.cNd : 0, cv: cor ? P.cNv : 0, all: !!P.alleggerimenti, pm: P.parete, ra: P.rAll });
+    q.forme.push(conModo(f, 'pieno')); Object.assign(K, { sel: q.forme.length - 1, str: 'sel', vb: null }); aggiorna('schizzo', false); return;
   }
   if (az === 'sk-esempio') {
     if (P.schizzi.length >= 12) { toast('Il progetto può contenere al massimo 12 pezzi liberi.', 'errore'); return; }
-    P.schizzi.push(esempioSchizzo(b)); Object.assign(K, { i: P.schizzi.length - 1, sel: -1, str: 'sel', poli: null, vb: null, prev: null }); aggiorna('schizzo', false); return;
+    P.schizzi.push(Object.assign({ st: true, or: 'piedi' }, esempioSchizzo(b))); Object.assign(K, { i: P.schizzi.length - 1, sel: -1, str: 'sel', poli: null, vb: null, prev: null }); aggiorna('schizzo', false); return;
   }
   if (!sk) return;
+  const f = sk.forme[K.sel];
   if (az === 'sk-elimina') { P.schizzi.splice(K.i, 1); Object.assign(K, { i: Math.max(0, K.i - 1), sel: -1, str: 'sel', poli: null, vb: null }); aggiorna('schizzo', false); }
   else if (az === 'sk-str') { K.str = b.dataset.s; K.poli = null; K.cursore = null; if (K.str !== 'sel') K.sel = -1; disegnaVista(); }
   else if (az === 'sk-modo') { K.modo = b.dataset.m; disegnaVista(); }
   else if (az === 'sk-inquadra') { K.vb = null; disegnaVista(); }
-  else if (az === 'sk-del' && sk.forme[K.sel]) { sk.forme.splice(K.sel, 1); K.sel = -1; aggiorna('schizzo', false); }
+  else if (az === 'sk-del' && f) { sk.forme.splice(K.sel, 1); K.sel = -1; aggiorna('schizzo', false); }
+  else if (az === 'sk-dup' && f) {
+    if (sk.forme.length >= 60) { toast('Uno schizzo può contenere al massimo 60 forme.', 'errore'); return; }
+    const d = copia(f), p = Math.max(5, (K.passo || 1) * 5); spostaForma(d, copia(d), p, -p); sk.forme.push(d); K.sel = sk.forme.length - 1; aggiorna('schizzo', false);
+  }
+  else if (az === 'sk-rot' && f) { ruotaForma(f); aggiorna('schizzo', false); }
+  else if (az === 'sk-spec' && f) { if (specchiaForma(f, b.dataset ? b.dataset.d : b)) aggiorna('schizzo', false); }
+  else if (az === 'sk-centra' && f) { const bb = ingombroForme({ forme: [f] }); spostaForma(f, copia(f), -A.arr((bb[0] + bb[2]) / 2, 1000), -A.arr((bb[1] + bb[3]) / 2, 1000)); K.vb = null; aggiorna('schizzo', false); }
+  else if (az === 'sk-muovi' && f) { spostaForma(f, copia(f), b[0], b[1]); aggiorna('schizzo', false); }
+  else if (az === 'sk-prof' && f && f.t === 'cen') { Object.assign(f, { profilo: P.profilo, naca: P.naca, spProf: P.spProf, fProf: P.fProf, pProf: P.pProf }); aggiorna('schizzo', false); }
+  else if (az === 'sk-prop' && f && f.t === 'lon') { Object.assign(f, A.proporzioniSezione(f.forma, f.H)); aggiorna('schizzo', false); }
   else if (az === 'sk-3d') {
     const D = disposizione(), k = D.piatti.findIndex(pl => pl.items.some(it => it.parte.rif && it.parte.rif.schizzo === K.i));
-    if (k < 0) { toast('Lo schizzo è vuoto: disegnare almeno una forma piena.', 'errore'); return; }
+    if (k < 0) { toast(sk.st === false ? 'Questo pezzo è escluso dal kit: spuntare «Nel kit» per vederlo sul piano.' : 'Lo schizzo è vuoto: disegnare almeno una forma piena.', 'errore'); return; }
     stato.piatto = k; stato.opz.piano2d = false; stato.vista = 'piatto'; disegnaVista(); disegnaRiepilogo();
   }
 }
+const LIMITI_F = { x: [-2000, 2000], y: [-2000, 2000], w: [0.5, 1000], h: [0.5, 1000], d: [0.5, 1000], r: [0, 500], ang: [-360, 360], n: [3, 24], a: [1, 300], sp: [-5, 20], gr: [-1, 2], hr: [0.2, 50],
+  c: [20, 1000], te: [0, 10], sx: [3, 90], sH: [0, 120], g: [0, 2], cd: [0, 8], cv: [0, 8], cb: [0.8, 20], ch: [0.8, 20], pm: [0, 20], ra: [0, 20], H: [1.5, 120], B: [1, 120], tf: [0.4, 60], tw: [0.4, 60], s: [0.4, 60], b: [0.8, 100], pc: [0.3, 50],
+  spProf: [3, 30], fProf: [0, 12], pProf: [10, 90] };
+const INTERI_F = new Set(['n', 'cd', 'cv']);
 function campoSchizzo(k, el) {
-  const P = stato.P, K = stato.sk, sk = skCorrente(), v = parseFloat(el.value);
+  const P = stato.P, K = stato.sk, sk = skCorrente(), v = parseFloat(String(el.value).replace(',', '.'));
   if (k === 'sk-sel') { Object.assign(K, { i: +el.value, sel: -1, str: 'sel', poli: null, vb: null }); disegnaVista(); return; }
   if (k === 'sk-esempio') { if (el.value) azioneSchizzo('sk-esempio', el.value); return; }
   if (k === 'sk-hr') { if (isFinite(v)) K.hr = A.limita(v, 0.2, 50); return; }
+  if (k === 'sk-cav') { K.pc = el.checked ? K.pc || 1.2 : 0; disegnaVista(); return; }
+  if (k === 'sk-pc') { if (isFinite(v)) K.pc = A.limita(v, 0.3, 50); return; }
+  if (k === 'sk-passo') { if (isFinite(v)) K.passo = v; disegnaVista(); return; }
+  if (k === 'sk-agg') { K.agg = el.checked; return; }
+  if (k === 'sk-solo') { P.soloLiberi = el.checked; stato.disposizione = null; aggiorna('soloLiberi', true); return; }
   if (!sk) return;
-  const f = sk.forme[K.sel];
+  const f = sk.forme[K.sel], c = k.slice(2);
   if (k === 'sk-nome') sk.nome = el.value.replace(/[<>]/g, ' ').trim().slice(0, 40) || 'Pezzo libero ' + (K.i + 1);
-  else if (k === 'sk-h' && isFinite(v)) sk.h = A.limita(v, 0.4, 200);
+  else if (k === 'sk-h' && isFinite(v)) sk.h = A.limita(v, 0.4, 1000);
   else if (k === 'sk-n' && isFinite(v)) sk.n = A.limita(Math.round(v), 1, 20);
-  else if (k === 'f-txt' && f) f.testo = el.value.replace(/[\u0000-\u001f\u007f]/g, ' ').slice(0, 80) || 'Testo';
-  else if (k === 'f-font' && f) f.font = A.carattereValido(el.value);
-  else if (k === 'f-al' && f) f.al = ['sx', 'c', 'dx'].includes(el.value) ? el.value : 'c';
-  else if (k === 'f-m' && f && A.MODI.includes(el.value)) conModo(f, el.value, K.hr);
-  else if (f && isFinite(v) && /^f-(a|sp|ang|gr|hr)$/.test(k)) { const c = k.slice(2), L = { a: [1, 300], sp: [-5, 20], ang: [-360, 360], gr: [-1, 2], hr: [0.2, 50] }[c]; f[c] = A.limita(v, L[0], L[1]); }
-  else if (f && isFinite(v) && /^f-[xywhd]$/.test(k)) { const c = k.slice(2); f[c] = c === 'x' || c === 'y' ? A.limita(v, -2000, 2000) : A.limita(v, 0.5, 1000); }
+  else if (k === 'sk-st') sk.st = el.checked;
+  else if (k === 'sk-or') { sk.or = el.value === 'coricato' ? 'coricato' : 'piedi'; if (sk.or === 'coricato' && sk.h < 20) sk.h = 100; }
+  else if (!f) return;
+  else if (k === 'f-txt') f.testo = el.value.replace(/[\u0000-\u001f\u007f]/g, ' ').slice(0, 80) || 'Testo';
+  else if (k === 'f-font') f.font = A.carattereValido(el.value);
+  else if (k === 'f-al') f.al = ['sx', 'c', 'dx'].includes(el.value) ? el.value : 'c';
+  else if (k === 'f-m' && A.MODI.includes(el.value)) conModo(f, el.value, K.hr);
+  else if (k === 'f-cav') { if (el.checked) f.pc = f.pc || 1.2; else delete f.pc; }
+  else if (k === 'f-all') f.all = el.checked;
+  else if (k === 'f-sf') { f.sf = A.FORME[el.value] ? el.value : ''; f.sH = 0; }
+  else if (k === 'f-forma' && f.t === 'lon' && A.FORME[el.value]) Object.assign(f, A.proporzioniSezione(el.value, f.H));
+  else if (k === 'f-forma' && f.t === 'cor' && A.FORME_COR[el.value]) f.forma = el.value;
+  else if (k === 'f-profilo' && A.FAMIGLIE[el.value]) { const prima = f.profilo; f.profilo = el.value; if (el.value === 'lamina') f.spProf = Math.min(f.spProf, 8); else if (prima === 'lamina') f.spProf = 12; }
+  else if (k === 'f-naca') { const s = el.value.replace(/[^0-9]/g, '').slice(0, 5); try { A.nacaDef(s); f.naca = s; } catch (err) { toast(err.message, 'errore'); return; } }
+  else if (LIMITI_F[c] && isFinite(v)) { const L = LIMITI_F[c]; f[c] = INTERI_F.has(c) ? A.limita(Math.round(v), L[0], L[1]) : A.limita(v, L[0], L[1]); if (f.t === 'lon') A.limitiSezione(f); }
   else return;
   aggiorna('schizzo', false);
 }
@@ -4395,10 +5243,20 @@ function eventiCad() {
     else if (v === 'schizzo') pdSchizzo(ev);
     else if (v === 'piatto') pdPiano(ev);
   });
-  tav.addEventListener('click', ev => { const q = ev.target.closest('.qm'); if (q) apriQuota(q); });
+  tav.addEventListener('click', ev => {
+    const q = ev.target.closest('.qm'); if (q) { apriQuota(q); return; }
+    const b = ev.target.closest('[data-skf]'); // elenco delle forme dello schizzo
+    if (b && stato.vista === 'schizzo') { Object.assign(stato.sk, { sel: +b.dataset.skf, str: 'sel', poli: null }); disegnaVista(); }
+  });
   tav.addEventListener('dblclick', () => { if (stato.vista === 'schizzo' && stato.sk.poli) chiudiPoligono(); });
   tav.addEventListener('contextmenu', ev => { if (stato.vista === 'schizzo') ev.preventDefault(); });
-  tav.addEventListener('pointermove', ev => { const K = stato.sk; if (stato.vista === 'schizzo' && K.poli && !trascina && $('#tavola svg[data-nome="schizzo"]')) { K.cursore = mmSchizzo(ev); ridisegnaSchizzo(); } });
+  tav.addEventListener('pointermove', ev => {
+    const K = stato.sk;
+    if (stato.vista !== 'schizzo' || !$('#tavola svg[data-nome="schizzo"]')) return;
+    const q = mmSchizzo(ev), xy = $('#sk-xy');
+    if (xy) xy.textContent = 'x ' + num(q[0], 2) + '  ·  y ' + num(q[1], 2) + ' mm' + (K.ag ? '  · agganciato' : '');
+    if (K.poli && !trascina) { K.cursore = q; ridisegnaSchizzo(); } else if (!trascina) K.ag = null;
+  });
   tav.addEventListener('wheel', ev => {
     const K = stato.sk, svg = $('#tavola svg[data-nome="schizzo"]');
     if (stato.vista !== 'schizzo' || !svg || !K.vb) return;
@@ -4414,6 +5272,15 @@ function eventiCad() {
       if (ev.key === 'Escape') { K.poli = null; K.cursore = null; K.prev = null; K.str = 'sel'; disegnaVista(); }
       else if (ev.key === 'Enter' && K.poli) chiudiPoligono();
       else if ((ev.key === 'Delete' || ev.key === 'Backspace') && skCorrente().forme[K.sel]) { ev.preventDefault(); azioneSchizzo('sk-del'); }
+      else if ((ev.ctrlKey || ev.metaKey) && (ev.key === 'z' || ev.key === 'Z')) { ev.preventDefault(); azioneSchizzo(ev.shiftKey ? 'sk-ripeti' : 'sk-annulla'); }
+      else if ((ev.ctrlKey || ev.metaKey) && (ev.key === 'y' || ev.key === 'Y')) { ev.preventDefault(); azioneSchizzo('sk-ripeti'); }
+      else if ((ev.ctrlKey || ev.metaKey) && (ev.key === 'd' || ev.key === 'D')) { ev.preventDefault(); azioneSchizzo('sk-dup'); }
+      else if (!ev.ctrlKey && !ev.metaKey && (ev.key === 'r' || ev.key === 'R') && skCorrente().forme[K.sel]) azioneSchizzo('sk-rot');
+      else if (/^Arrow/.test(ev.key) && skCorrente().forme[K.sel]) {
+        ev.preventDefault();
+        const d = (K.passo || 1) * (ev.shiftKey ? 10 : 1);
+        azioneSchizzo('sk-muovi', ev.key === 'ArrowLeft' ? [-d, 0] : ev.key === 'ArrowRight' ? [d, 0] : ev.key === 'ArrowUp' ? [0, d] : [0, -d]);
+      }
     } else if (stato.vista === 'piatto' && stato.opz.piano2d && stato.pezzo && /^Arrow/.test(ev.key)) {
       ev.preventDefault();
       const d = ev.shiftKey ? 10 : 1;
@@ -4425,7 +5292,7 @@ function eventiCad() {
 // ---------------------------------------------------------------- viste
 const SCHEDE = [['assieme', 'Assieme 3D'], ['misure', 'Misure'], ['tavola', 'Disegno 2D'], ['schizzo', 'Schizzo libero'], ['piatto', 'Piano di stampa'], ['gcode', 'G-code']];
 function legendaParti(M) {
-  const tipi = new Set(M ? M.parti.map(p => p.tipo) : []), voci = [['centina', 'Centine'], ['longherone', 'Longheroni'], ['corrente', 'Correnti'], ['guscio', 'Gusci'], ['manicotto', 'Manicotti'], ['giunto', 'Giunti angolati'], ['dima', 'Dime'], ['libero', 'Pezzi liberi']];
+  const tipi = new Set(M ? M.parti.map(p => p.tipo) : []), voci = [['centina', 'Centine'], ['longherone', 'Longheroni'], ['corrente', 'Correnti'], ['guscio', 'Gusci'], ['manicotto', 'Manicotti'], ['giunto', 'Giunti angolati'], ['dima', 'Dime'], ['basetta', 'Basette'], ['libero', 'Pezzi liberi']];
   return voci.filter(q => tipi.has(q[0])).map(q => '<span><i style="background:var(' + COL_PARTE[q[0]] + ')"></i>' + q[1] + '</span>').join('');
 }
 function disegnaSchede() {
@@ -4435,6 +5302,7 @@ function disegnaSchede() {
   $('.schede').innerHTML = SCHEDE.map(s => '<button type="button" role="tab" data-v="' + s[0] + '" aria-selected="' + (stato.vista === s[0] ? 'true' : 'false') + '"' + (attiva(s[0]) ? '' : ' disabled') + '>' + s[1] + '</button>').join('');
 }
 function disegnaVista() {
+  $('.tela').classList.remove('con-isp');
   disegnaSchede();
   const v = stato.vista, M = stato.M, D = disposizione(), str = $('.strumenti'), leg = $('.legenda'), vuoto = $('.vuoto'), tav = $('#tavola'), cv = $('#gl');
   const selPiatto = D.piatti.length > 1 ? '<label>Piatto <select id="sel-piatto">' + D.piatti.map((p, k) => '<option value="' + k + '"' + (k === stato.piatto ? ' selected' : '') + '>' + (k + 1) + ' di ' + D.piatti.length + '</option>').join('') + '</select></label>' : '';
@@ -4453,12 +5321,14 @@ function disegnaVista() {
   } else if (v === 'tavola') {
     if (M) {
       s = '<label>Centina <select id="sel-centina">' + M.centine.map(c => '<option value="' + c.j + '"' + (c.j === stato.centina ? ' selected' : '') + '>' + (c.j + 1) + ' · corda ' + num(c.c, 1) + ' mm</option>').join('') + '</select></label>' +
-        '<label>Estrusione <input type="number" class="corto" data-b="t-centina" value="' + M.t + '" min="1.5" max="20" step="0.5"> mm</label><button class="btn piccolo" data-az="vedi3d">Vedi il solido 3D</button>' +
+        '<label>Estrusione <input type="number" class="corto" data-b="t-centina" value="' + M.t + '" min="' + (M.didattico ? 1.2 : 1.5) + '" max="' + (M.didattico ? 80 : 20) + '" step="0.5"> mm</label><button class="btn piccolo" data-az="vedi3d">Vedi il solido 3D</button>' +
         '<span class="spazio"></span><span class="suggerimento">Trascina le maniglie o fai clic su una quota colorata per cambiarla: il resto dell’ala si adegua.</span>';
       disegnaTavola();
     }
   } else if (v === 'schizzo') {
     s = barraSchizzo(); tav.innerHTML = svgSchizzo();
+    if (skCorrente()) { const isp = $('.ispettore'), sc = isp.querySelector('.isp-lista') ? isp.querySelector('.isp-lista').scrollTop : 0, sf = isp.querySelector('.isp-forma') ? isp.querySelector('.isp-forma').scrollTop : 0;
+      isp.innerHTML = ispettoreSchizzo(); isp.querySelector('.isp-lista').scrollTop = sc; isp.querySelector('.isp-forma').scrollTop = sf; $('.tela').classList.add('con-isp'); }
     if (skCorrente()) l = '<span><b>' + titoloSchizzo() + '</b></span><span>' + AIUTO_SK[stato.sk.str] + '</span>';
     else msg = 'Qui si disegna in 2D un pezzo libero (una staffa, una targhetta, delle lettere, una centina piena): la webapp lo estrude e lo aggiunge al kit di stampa. Le scritte possono stare da sole, bucare il pezzo, sporgere in rilievo o essere incise.';
   } else if (v === 'piatto' && due) {
@@ -4467,7 +5337,12 @@ function disegnaVista() {
     l = legendaParti(M) + '<span>tratteggio: bordo utile e ingombri</span>';
     if (!pl) msg = 'Nessuna parte da disporre sul piano.';
   } else if (!tre.ok) msg = 'La grafica 3D non è disponibile in questo browser. Restano utilizzabili la tavola quotata e il salvataggio dei file.';
-  else if (v === 'assieme' && M) {
+  else if (v === 'assieme' && M && M.didattico) {
+    tre.gruppo = gruppoDidattico(); tre.scena.add(tre.gruppo);
+    inquadra(tre.gruppo, -1.38, 0.2, 'did_' + M.corde.join('_') + '_' + M.t + (stato.P.dBase ? 'b' : ''), 'didattico');
+    s = '<button class="btn piccolo" data-az="inquadra">Inquadra</button><span class="spazio"></span><span>' + esc(M.def.nome) + ' · corde ' + M.corde.map(x => num(x, 0)).join(', ') + ' mm · spessore ' + num(M.t, 1) + ' mm</span>';
+    l = '<span><i style="background:var(--accento)"></i>Centine</span>' + (stato.P.dBase ? '<span><i style="background:var(--tenue)"></i>Basette</span>' : '');
+  } else if (v === 'assieme' && M) {
     tre.gruppo = gruppoAssieme(); tre.scena.add(tre.gruppo);
     const vistaAla = M.intera ? [0.55, 0.82] : [-1.05, 0.42]; // ala intera: da dietro e dall'alto, si legge la pianta
     inquadra(tre.gruppo, vistaAla[0], vistaAla[1], [M.b, M.cr, M.ct, M.pianta.xLE(M.bh)].map(x => Math.round(x / 15)).join('_'), M.intera ? 'intera' : 'semiala');
@@ -4522,12 +5397,18 @@ function avvia() {
     else if (az === 'inquadra') { delete tre.cam[stato.vista]; tre.inq[stato.vista] = null; disegnaVista(); }
     else if (az === 'vedi3d') { stato.vista = 'assieme'; disegnaVista(); }
     else if (az === 'vedi-misure') { stato.vista = 'misure'; disegnaVista(); }
+    else if (az === 'kit-tutto') { stato.P.soloLiberi = false; aggiorna('soloLiberi', true); }
+    else if (az === 'vai-schizzo') { stato.vista = 'schizzo'; disegnaVista(); }
     else if (az === 'm-sblocca') { const P = stato.P; P.man = {}; P.longheroni.forEach(sp => { sp.man = {}; }); stato.scrollMisure = $('#tavola').scrollTop; aggiorna('auto', true); }
     else if (/^p-/.test(az)) azionePiano(az);
     else if (az === 'sk-esempio') azioneSchizzo(az, b.dataset.e);
     else if (/^sk-/.test(az)) azioneSchizzo(az, b);
     else if (az === 's-gcode') salvaSingolo('gcode'); else if (az === 's-3mf') salvaSingolo('3mf'); else if (az === 's-json') salvaSingolo('json');
   });
+  const isp = $('.ispettore'); // pannello delle forme dello schizzo
+  isp.addEventListener('change', ev => { const kb = ev.target.dataset.b; if (kb) campoSchizzo(kb, ev.target); });
+  isp.addEventListener('input', ev => { const el = ev.target; if (el.dataset.b === 'f-txt') { const f = skCorrente() && skCorrente().forme[stato.sk.sel]; if (f) { f.testo = el.value.replace(/[\u0000-\u001f\u007f]/g, ' ').slice(0, 80) || 'Testo'; ridisegnaSchizzo(); } } });
+  isp.addEventListener('click', ev => { const b = ev.target.closest('[data-skf]'); if (b) { Object.assign(stato.sk, { sel: +b.dataset.skf, str: 'sel', poli: null }); disegnaVista(); } });
   $('.strumenti').addEventListener('input', ev => {
     const el = ev.target;
     if (el.dataset.b === 'f-txt') { const f = skCorrente() && skCorrente().forme[stato.sk.sel]; if (f) { f.testo = el.value.replace(/[\u0000-\u001f\u007f]/g, ' ').slice(0, 80) || 'Testo'; ridisegnaSchizzo(); } return; }
@@ -4538,7 +5419,8 @@ function avvia() {
   $('.strumenti').addEventListener('change', ev => {
     const el = ev.target;
     const kb = el.dataset.b;
-    if (kb === 't-centina') { const v = parseFloat(el.value); if (isFinite(v)) { stato.P.spCentina = A.limita(v, 1.5, 20); fissa('spCentina', true); aggiorna('spCentina', true); } }
+    if (kb === 't-centina' && stato.P.livello === 'profilo') { const v = parseFloat(el.value); if (isFinite(v)) { stato.P.dSp = A.limita(v, 1.2, 80); aggiorna('dSp', true); } }
+    else if (kb === 't-centina') { const v = parseFloat(el.value); if (isFinite(v)) { stato.P.spCentina = A.limita(v, 1.5, 20); fissa('spCentina', true); aggiorna('spCentina', true); } }
     else if (kb && /^pz-/.test(kb)) azionePiano(kb, el.value);
     else if (kb) campoSchizzo(kb, el);
     else if (el.id === 'sel-centina') { stato.centina = +el.value; disegnaVista(); }
