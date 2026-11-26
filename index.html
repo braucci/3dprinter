@@ -441,6 +441,13 @@ button.bd { cursor: pointer; }
 .strumenti [data-b="sk-h"], .strumenti [data-b="sk-pc"] { width: 58px; }
 .strumenti input[data-b="sk-n"] { width: 46px; }
 .strumenti .coppia { display: inline-flex; align-items: center; gap: 8px; }
+/* piano di stampa: tutta la stampa come un blocco */
+#tavola .gruppo-tutto rect { fill: var(--acciaio); fill-opacity: .06; stroke: var(--acciaio); stroke-width: 1.6; stroke-dasharray: 7 4; vector-effect: non-scaling-stroke; pointer-events: none; }
+#tavola .gruppo-tutto text { fill: var(--acciaio); font-weight: 600; pointer-events: none; }
+.strumenti .ancore { display: inline-grid; grid-template-columns: repeat(3, 13px); grid-auto-rows: 11px; gap: 2px; padding: 3px; border: 1px solid var(--linea); border-radius: 3px; background: var(--foglio); vertical-align: middle; }
+.strumenti .ancore button { padding: 0; border: 0; border-radius: 2px; background: var(--linea); cursor: pointer; }
+.strumenti .ancore button:hover, .strumenti .ancore button:focus-visible { background: var(--acciaio); }
+.sorgente .sotto-titolo { margin: 6px 0 0; padding-top: 8px; border-top: 1px solid var(--linea); font-size: 11px; letter-spacing: .06em; text-transform: uppercase; color: var(--tenue); font-weight: 600; }
 
 </style>
 </head>
@@ -812,8 +819,25 @@ const START_GENERICA = [
   'G92 E0'
 ].join('\n');
 const END_GENERICA = ['M104 S0', 'M140 S0', 'M107', 'G1 Z{z_fine} F720', 'G1 X0 Y{y_fine} F3000', 'M84'].join('\n');
+/* Piano grande, non sempre caldo in modo uniforme: la linea di spurgo si deposita accanto ai pezzi,
+   nella stessa zona scelta per la stampa ({spurgo_x0} ... calcolati dalla disposizione). */
+const START_PLATINUM = [
+  'G90 ; coordinate assolute',
+  'M83 ; estrusore in relativo',
+  'M140 S{t_piano} ; temperatura piano',
+  'M104 S{t_ugello} ; temperatura ugello',
+  'M190 S{t_piano} ; attesa piano',
+  'M109 S{t_ugello} ; attesa ugello',
+  'G28 ; azzeramento assi',
+  'G92 E0',
+  'G1 Z0.3 F720',
+  'G1 X{spurgo_x0} Y{spurgo_y0} F3000 ; accanto ai pezzi',
+  'G1 X{spurgo_x1} Y{spurgo_y1} E10 F900 ; linea di spurgo',
+  'G92 E0'
+].join('\n');
 const STAMPANTI = {
   mk3s: { id: 'mk3s', nome: 'Original Prusa i3 MK3S / MK3S+', lx: 250, ly: 210, lz: 210, ugello: 0.4, filamento: 1.75, start: START_MK3S, end: END_MK3S },
+  platinum: { id: 'platinum', nome: 'Morphica by Protys Platinum M1', lx: 320, ly: 220, lz: 200, ugello: 0.4, filamento: 1.75, start: START_PLATINUM, end: END_GENERICA },
   generica: { id: 'generica', nome: 'Personalizzata (Marlin)', lx: 220, ly: 220, lz: 250, ugello: 0.4, filamento: 1.75, start: START_GENERICA, end: END_GENERICA }
 };
 function stampaPredefinita() {
@@ -833,7 +857,7 @@ function progettoPredefinito() {
     livello: 'struttura', soloLiberi: false, dCorde: '200', dCopie: 1, dSp: 5, dCorda: true, dMedia: true, dSpessore: true, dFreccia: true, dStazioni: true, dScritta: true, dModo: 'incavo', dH: 0.6, dTesto: '', dBase: true,
     cNd: 2, cNv: 2, cB: 2.5, cH: 2.1, cX0: 12, cX1: 60, ts: 0.9,
     longheroni: [{ x: 30, xt: 30, via: 'retto', forma: 'I', stampa: true, H: 7.2, B: 6, tf: 1.45, tw: 1.8, s: 1.2 }],
-    piano: { manuale: false, pos: {} }, schizzi: [],
+    piano: { manuale: false, pos: {} }, copie: {}, schizzi: [],
     stampante: Object.assign({}, STAMPANTI.mk3s), stampa: stampaPredefinita()
   };
 }
@@ -908,7 +932,15 @@ function normalizzaProgetto(p) {
   o.piano = { manuale: !!(p && p.piano && p.piano.manuale === true), pos: {} };
   if (o.piano.manuale && p.piano.pos && typeof p.piano.pos === 'object') Object.keys(p.piano.pos).slice(0, 300).forEach(id => {
     const v = p.piano.pos[id];
-    if (/^[A-Za-z0-9.]{1,12}$/.test(id) && v && typeof v === 'object') o.piano.pos[id] = { k: Math.round(finito(v.k, 0, 0, 40)), x: finito(v.x, 10, -50, 2000), y: finito(v.y, 10, -50, 2000), r: ((Math.round(finito(v.r, 0, -8, 8)) % 4) + 4) % 4 };
+    if (/^[A-Za-z0-9.+]{1,16}$/.test(id) && v && typeof v === 'object') {
+      const a = angoloPos({ a: typeof v.a === 'number' ? v.a : NaN, r: finito(v.r, 0, -8, 8) });
+      o.piano.pos[id] = { k: Math.round(finito(v.k, 0, 0, 40)), x: finito(v.x, 10, -50, 2000), y: finito(v.y, 10, -50, 2000), r: a % 90 === 0 ? a / 90 : 0, a };
+    }
+  });
+  o.copie = {}; // copie in piu' di singole parti, chieste sul piano di stampa: { id: quante }
+  if (p && p.copie && typeof p.copie === 'object') Object.keys(p.copie).slice(0, 60).forEach(id => {
+    const n = Math.round(finito(p.copie[id], 0, 0, 20));
+    if (/^[A-Za-z0-9.]{1,12}$/.test(id) && n > 0) o.copie[id] = n;
   });
   o.schizzi = (p && Array.isArray(p.schizzi) ? p.schizzi : []).slice(0, 12).map(sanaSchizzo);
   o.app = NOME_APP; o.v = 1;
@@ -1886,7 +1918,20 @@ function leggimiDidattico(P, M, piatti, stat) {
 
 /* Costruzione del progetto. Con «solo pezzi liberi» l'ala resta calcolata (si vede nel disegno e
    nell'assieme) ma il kit contiene soltanto i pezzi disegnati nello schizzo libero. */
-function costruisci(P) {
+/* Copie in piu' chieste sul piano: stessa parte, nuovo identificativo «id+k». */
+function aggiungiCopie(P, M) {
+  let n = 0;
+  const C = P.copie || {};
+  for (const p of M.parti.slice()) {
+    const q = Math.min(20, Math.round(C[p.id] || 0));
+    for (let k = 1; k <= q && n < 60; k++, n++) M.parti.push(Object.assign({}, p, { id: p.id + '+' + k, copiaDi: p.id, _rot: undefined, _rotA: undefined }));
+  }
+  M.copie = n;
+  if (n) M.avvisi.push({ liv: 'info', testo: (n === 1 ? 'Una copia in più' : n + ' copie in più') + ' aggiunt' + (n === 1 ? 'a' : 'e') + ' sul piano di stampa (identificativo con «+»): si tolgono selezionandole e premendo «Elimina copia».' });
+  return M;
+}
+function costruisci(P) { return aggiungiCopie(P, costruisciBase(P)); }
+function costruisciBase(P) {
   const M = P.livello === 'profilo' ? costruisciDidattico(P) : costruisciAla(P);
   if (!P.soloLiberi) return M;
   const lib = M.parti.filter(p => p.tipo === 'libero'), av = (M.schizzi.avvisi || []).slice(), nomi = [...new Set(lib.map(p => p.nome))];
@@ -2457,13 +2502,68 @@ function ruotaParte(p, q) {
   p._rot = p._rot || {};
   if (p._rot[q]) return p._rot[q];
   const mappa = q === 1 ? (x, y) => [p.ly - y, x] : q === 2 ? (x, y) => [p.lx - x, p.ly - y] : (x, y) => [y, p.lx - x];
-  return (p._rot[q] = { id: p.id, tipo: p.tipo, nome: p.nome, chiave: p.chiave + '|r' + q, lx: q % 2 ? p.ly : p.lx, ly: q % 2 ? p.lx : p.ly, lz: p.lz, rif: p.rif, brim: p.brim, base: p, rot: q, mappa });
+  return (p._rot[q] = { id: p.id, tipo: p.tipo, nome: p.nome, chiave: p.chiave + '|r' + q, lx: q % 2 ? p.ly : p.lx, ly: q % 2 ? p.lx : p.ly, lz: p.lz, rif: p.rif, brim: p.brim, copiaDi: p.copiaDi, base: p, rot: q, ang: 90 * q, mappa });
+}
+/* Angolo sul piano in gradi, in [0, 360) al decimo; i dati vecchi hanno solo r (quarti di giro). */
+const angoloNorm = a => { a = Math.round((((+a || 0) % 360) + 360) % 360 * 10) / 10; return a >= 360 ? 0 : a; };
+const angoloPos = o => (o && isFinite(o.a) ? angoloNorm(o.a) : 90 * ((((Math.round((o && o.r) || 0)) % 4) + 4) % 4));
+/* Parte ruotata di un angolo qualsiasi (gradi, antiorario) attorno a z e riportata nel primo quadrante.
+   I multipli di 90° usano la mappa esatta; per gli altri l'ingombro e' quello vero della sagoma ruotata. */
+function ruotaParteGradi(p, gradi, S) {
+  const a = angoloNorm(gradi);
+  if (a % 90 === 0) return ruotaParte(p, a / 90);
+  const k = a + '|' + S.h1 + '|' + S.h;
+  p._rotA = p._rotA || {};
+  if (p._rotA[k]) return p._rotA[k];
+  const t = a * Math.PI / 180, c = Math.cos(t), s = Math.sin(t), visti = new Set();
+  let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
+  const punto = (X, Y) => { const u = X * c - Y * s, v = X * s + Y * c; if (u < x0) x0 = u; if (u > x1) x1 = u; if (v < y0) y0 = v; if (v > y1) y1 = v; };
+  for (const r of regioniStrati(p, S)) if (!visti.has(r)) { visti.add(r); for (const path of r) for (const q of path) punto(q.X / SC, q.Y / SC); }
+  if (!isFinite(x0)) [[0, 0], [p.lx, 0], [p.lx, p.ly], [0, p.ly]].forEach(q => punto(q[0], q[1]));
+  const ox = x0, oy = y0, mappa = (x, y) => [x * c - y * s - ox, x * s + y * c - oy];
+  return (p._rotA[k] = { id: p.id, tipo: p.tipo, nome: p.nome, chiave: p.chiave + '|a' + a, lx: x1 - x0, ly: y1 - y0, lz: p.lz, rif: p.rif, brim: p.brim, copiaDi: p.copiaDi, base: p, ang: a, mappa });
 }
 const bordoPiano = S => 1 + (S.skirt > 0 ? S.skirtDist + S.skirt * S.w : 0);
 const alone = (p, S) => (p.tipo === 'longherone' || p.brim ? Math.max(0, S.brim) : 0);
 /* Ingombro in pianta di una parte posta in (x, y), compreso il brim. */
 function improntaPezzo(parte, x, y, S) { const a = alone(parte, S); return [x - a, y - a, x + parte.lx + a, y + parte.ly + a]; }
 const siToccano = (a, b) => a[0] < b[2] - 1e-6 && b[0] < a[2] - 1e-6 && a[1] < b[3] - 1e-6 && b[1] < a[3] - 1e-6;
+/* Sagoma in pianta di una parte: unione di tutti gli strati, allargata del brim. */
+function sagomaParte(parte, S) {
+  const a = alone(parte, S), k = S.h1 + '|' + S.h + '|' + a;
+  if (parte._sag && parte._sag.k === k) return parte._sag.v;
+  const visti = new Set(); let tutte = [];
+  for (const r of regioniStrati(parte, S)) if (!visti.has(r)) { visti.add(r); tutte = tutte.concat(poligoniConFori(r).map(e => e.outer)); } // i fori non contano: dentro un pezzo non si stampa
+  let v = unisci(tutte); if (a > 0) v = offset(v, a, JT.jtRound);
+  parte._sag = { k, v }; return v;
+}
+/* Due pezzi si urtano se i rettangoli d'ingombro si sovrappongono e le sagome vere distano meno di 0,6 mm:
+   cosi' i pezzi ruotati di un angolo qualsiasi si possono accostare senza falsi allarmi. */
+function pezziSiUrtano(pa, xa, ya, pb, xb, yb, S) {
+  if (!siToccano(improntaPezzo(pa, xa, ya, S), improntaPezzo(pb, xb, yb, S))) return false;
+  const A1 = sposta(offset(sagomaParte(pa, S), 0.6, JT.jtRound), xa, ya), B1 = sposta(sagomaParte(pb, S), xb, yb);
+  return area(interseca(A1, B1)) > 1e-3;
+}
+/* Ingombro di tutti i pezzi di un piatto (brim compreso) e spostamenti rigidi ammessi perche' restino nel piano. */
+function limitiGruppo(items, st, S) {
+  const bo = bordoPiano(S); let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
+  for (const it of items) { const q = improntaPezzo(it.parte, it.x, it.y, S); x0 = Math.min(x0, q[0]); y0 = Math.min(y0, q[1]); x1 = Math.max(x1, q[2]); y1 = Math.max(y1, q[3]); }
+  if (!isFinite(x0)) return null;
+  const giro = (a, b) => { a = Math.ceil(a * 10 - 1e-6) / 10; b = Math.floor(b * 10 + 1e-6) / 10; return a > b ? [0, 0] : [a, b]; }; // al decimo, verso l'interno
+  const dx = giro(bo - x0, st.lx - bo - x1), dy = giro(bo - y0, st.ly - bo - y1);
+  return { x0, y0, x1, y1, lx: x1 - x0, ly: y1 - y0, dx0: dx[0], dx1: dx[1], dy0: dy[0], dy1: dy[1] };
+}
+/* Linea di spurgo accanto ai pezzi: 3 mm oltre lo skirt, davanti se c'e' posto, altrimenti dietro o di lato. */
+function lineaSpurgo(items, st, S) {
+  const G = limitiGruppo(items, st, S), sk = (S.skirt > 0 ? S.skirtDist + S.skirt * S.w : 0) + 3, m = 1;
+  if (!G) return { x0: 5, y0: 5, x1: 65, y1: 5, lato: 'davanti' };
+  const Lx = Math.min(60, st.lx - 2 * m), Ly = Math.min(60, st.ly - 2 * m), xa = limita(G.x0, m, st.lx - m - Lx), ya = limita(G.y0, m, st.ly - m - Ly);
+  if (G.y0 - sk >= m) return { x0: xa, y0: G.y0 - sk, x1: xa + Lx, y1: G.y0 - sk, lato: 'davanti' };
+  if (G.y1 + sk <= st.ly - m) return { x0: xa, y0: G.y1 + sk, x1: xa + Lx, y1: G.y1 + sk, lato: 'dietro' };
+  if (G.x0 - sk >= m) return { x0: G.x0 - sk, y0: ya, x1: G.x0 - sk, y1: ya + Ly, lato: 'a sinistra' };
+  if (G.x1 + sk <= st.lx - m) return { x0: G.x1 + sk, y0: ya, x1: G.x1 + sk, y1: ya + Ly, lato: 'a destra' };
+  return { x0: xa, y0: m, x1: xa + Lx, y1: m, lato: 'sul bordo anteriore' };
+}
 /* Disposizione scelta dall'utente. pos: { id: { k: piatto, x, y, r: quarti di giro } }.
    Le parti senza posizione vanno nel primo posto libero; con ripara = true vi
    tornano anche quelle che escono dal piano o si sovrappongono (succede quando
@@ -2475,24 +2575,25 @@ function disponiManuale(parti, st, S, pos, ripara) {
   for (const p of parti) {
     const o = pos && pos[p.id];
     if (p.lz > st.lz) { fuori.push(p); continue; }
-    if (!o || o.libero) { attesa.push({ p, k0: o ? o.k : 0 }); continue; } // libero: posto da cercare, di preferenza sul piatto k
-    const it = { parte: ruotaParte(p, o.r), x: o.x, y: o.y, id: p.id, r: ((o.r % 4) + 4) % 4 };
+    if (!o || o.libero) { attesa.push({ p, k0: o ? o.k : 0, a0: o ? angoloPos(o) : 0 }); continue; } // libero: posto da cercare, di preferenza sul piatto k e con l'angolo chiesto
+    const a = angoloPos(o), it = { parte: ruotaParteGradi(p, a, S), x: o.x, y: o.y, id: p.id, a, r: a % 90 === 0 ? a / 90 : 0 };
     it.q = improntaPezzo(it.parte, it.x, it.y, S); it.fuori = !dentro(it.q);
-    if (ripara && (it.fuori || piatto(o.k).items.some(w => siToccano(w.q, it.q)))) { attesa.push({ p, k0: o.k }); continue; }
+    if (ripara && (it.fuori || piatto(o.k).items.some(w => pezziSiUrtano(w.parte, w.x, w.y, it.parte, it.x, it.y, S)))) { attesa.push({ p, k0: o.k, a0: a }); continue; }
     piatto(o.k).items.push(it);
   }
   attesa.sort((a, b) => b.p.lx * b.p.ly - a.p.lx * a.p.ly);
-  for (const { p, k0 } of attesa) {
+  for (const { p, k0, a0 } of attesa) {
     let messo = false;
+    const angoli = [...new Set([a0 || 0, 0, 90])];
     const ordine = [k0]; for (let k = 0; k <= piatti.length; k++) if (k !== k0) ordine.push(k);
     for (const k of ordine) {
       if (messo) break;
       const occ = piatto(k).items.map(w => [w.q[0] - 3, w.q[1] - 3, w.q[2] + 3, w.q[3] + 3]);
-      for (const r of [0, 1]) {
-        const pr = ruotaParte(p, r), a = alone(pr, S);
+      for (const r of angoli) {
+        const pr = ruotaParteGradi(p, r, S), a = alone(pr, S);
         for (let y = bordo + a; y + pr.ly + a <= st.ly - bordo + 1e-6 && !messo; y += 2) for (let x = bordo + a; x + pr.lx + a <= st.lx - bordo + 1e-6; x += 2) {
           const q = improntaPezzo(pr, x, y, S);
-          if (!occ.some(w => siToccano(w, q))) { piatti[k].items.push({ parte: pr, x, y, id: p.id, r, q, fuori: false }); messo = true; break; }
+          if (!occ.some(w => siToccano(w, q))) { piatti[k].items.push({ parte: pr, x, y, id: p.id, a: r, r: r % 90 === 0 ? r / 90 : 0, q, fuori: false }); messo = true; break; }
         }
         if (messo) break;
       }
@@ -2502,17 +2603,19 @@ function disponiManuale(parti, st, S, pos, ripara) {
   const pieni = piatti.filter(pl => pl.items.length), nuove = {};
   let urti = 0;
   pieni.forEach((pl, k) => pl.items.forEach(it => {
-    it.urto = pl.items.some(w => w !== it && siToccano(w.q, it.q));
+    it.urto = pl.items.some(w => w !== it && pezziSiUrtano(w.parte, w.x, w.y, it.parte, it.x, it.y, S));
     if (it.urto || it.fuori) urti++;
-    nuove[it.id] = { k, x: it.x, y: it.y, r: it.r };
+    nuove[it.id] = { k, x: it.x, y: it.y, r: it.r, a: it.a };
   }));
   return { piatti: pieni, fuori, pos: nuove, urti, manuale: true };
 }
 /* Piano unico per oggetti importati: le posizioni relative sono conservate. */
-function disponiEsterni(parti, st) {
+function disponiEsterni(parti, st, sx, sy) {
   let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
   for (const p of parti) { x0 = Math.min(x0, p.pos.x); y0 = Math.min(y0, p.pos.y); x1 = Math.max(x1, p.pos.x + p.lx); y1 = Math.max(y1, p.pos.y + p.ly); }
-  const dx = st.lx / 2 - (x0 + x1) / 2, dy = st.ly / 2 - (y0 + y1) / 2;
+  // al centro del piano, piu' lo spostamento chiesto (limitato perche' tutto resti nel piano)
+  const gx = Math.max(0, (st.lx - (x1 - x0)) / 2 - 2), gy = Math.max(0, (st.ly - (y1 - y0)) / 2 - 2);
+  const dx = st.lx / 2 - (x0 + x1) / 2 + limita(sx || 0, -gx, gx), dy = st.ly / 2 - (y0 + y1) / 2 + limita(sy || 0, -gy, gy);
   const fuori = x1 - x0 > st.lx || y1 - y0 > st.ly || parti.some(p => p.lz > st.lz) ? parti : [];
   return { piatti: [{ items: parti.map(p => ({ parte: p, x: p.pos.x + dx, y: p.pos.y + dy })) }], fuori };
 }
@@ -2710,7 +2813,8 @@ async function generaGcode(piatto, st, S, opz) {
   out.push('; parti: ' + items.map(i => i.parte.nome).join(', '));
   if (opz.progetto) { const s = b64(JSON.stringify(opz.progetto)); for (let i = 0; i < s.length; i += 100) out.push(MARCA + s.slice(i, i + 100)); }
   const iStat = out.length; out.push('');
-  const vars = { t_ugello: S.tU1, t_piano: S.tP, ugello: st.ugello, z_fine: 0, y_fine: st.ly - 10 };
+  const sp = lineaSpurgo(items, st, S);
+  const vars = { t_ugello: S.tU1, t_piano: S.tP, ugello: st.ugello, z_fine: 0, y_fine: st.ly - 10, spurgo_x0: n3(sp.x0), spurgo_y0: n3(sp.y0), spurgo_x1: n3(sp.x1), spurgo_y1: n3(sp.y1) };
   out.push(modello(st.start, vars));
   out.push('G90', 'M83', 'G92 E0', 'M107');
   const segna = [];
@@ -2828,10 +2932,31 @@ function analizzaGcode(testo) {
   return { strati: lista, progetto, stat: { righe: nRighe, strati: lista.length, tempo: T * K_TEMPO, tempoDichiarato: tm ? tm[1].trim() : null, filamento: Etot,
     massaDichiarata: m ? +m[1] : null, tU, tP, generatore, bb, segmenti: lista.reduce((s, L) => s + L.tipi.length, 0) } };
 }
-/* Modifiche a un G-code esistente: temperature, velocita' e flusso. */
+/* Modifiche a un G-code esistente: temperature, velocita', flusso e posizione della stampa sul piano. */
+function corpoGcode(righe) { // dalla marca del primo strato all'ultima estrusione: script di avvio e di fine esclusi
+  const i0 = righe.findIndex(r => /^;\s*LAYER_CHANGE/i.test(r) || /^;\s*LAYER:\s*0\b/i.test(r) || /^;\s*layer 1\b/i.test(r));
+  let i1 = -1;
+  for (let i = righe.length - 1; i > i0 && i1 < 0; i--) if (/^\s*G[0-3]\b(?=[^;]*[XY])(?=[^;]*E\s*\.?\d)/i.test(righe[i])) i1 = i;
+  return i0 >= 0 && i1 > i0 ? [i0, i1] : null;
+}
 function modificaGcode(testo, m) {
   const righe = testo.split('\n'), note = [];
   let inserito = false;
+  if (m.dx || m.dy) { // traslazione della stampa sul piano
+    const c = corpoGcode(righe), n3 = v => (Math.round(v * 1000) / 1000).toString(), sg = v => (v > 0 ? '+' : '') + n3(v);
+    if (!c) note.push('spostamento non applicato (inizio della stampa non riconosciuto)');
+    else {
+      let ass = true;
+      for (let i = c[0]; i <= c[1]; i++) {
+        const r = righe[i], pc = r.indexOf(';'), cod = pc < 0 ? r : r.slice(0, pc), g = /^\s*G(\d+)\b/i.exec(cod);
+        if (!g) continue;
+        const n = +g[1];
+        if (n === 90) ass = true; else if (n === 91) ass = false;
+        else if (n <= 3 && ass) righe[i] = cod.replace(/([XY])\s*(-?\d*\.?\d+)/gi, (a, l, v) => l.toUpperCase() + n3(+v + (l.toUpperCase() === 'X' ? m.dx || 0 : m.dy || 0))) + (pc < 0 ? '' : r.slice(pc));
+      }
+      note.push('stampa spostata di X ' + sg(m.dx || 0) + ' mm, Y ' + sg(m.dy || 0) + ' mm');
+    }
+  }
   const extra = [];
   if (m.vel && m.vel !== 100) extra.push('M220 S' + Math.round(m.vel) + ' ; velocita\' ' + Math.round(m.vel) + '%');
   if (m.flusso && m.flusso !== 100) extra.push('M221 S' + Math.round(m.flusso) + ' ; flusso ' + Math.round(m.flusso) + '%');
@@ -3308,7 +3433,7 @@ G.Ala = {
   tabellaMisure, compatibilita, nf, posizioniCorrenti, puntoCorrente, riduzione, LIVELLI, anelloRicampionato, loftGuscio,
   regioneSchizzo, solidoSchizzo, testoRegione, larghezzaTesto, carattereValido, caratteri, MODI, CAR_PREDEFINITO, percorsoForma, ruotaParte, disponiManuale, improntaPezzo, bordoPiano, rettangolo, MAN_CAMPI, MAN_SEZ, sezioneLongherone, sezioneDiStampa, progettoPredefinito, stampaPredefinita, normalizzaProgetto,
   FORME_COR, proporzioniSezione, sezioneCorrente, centinaSchizzo, giraSposta, barraSchizzo, guscioInOpera, cordeDidattiche, costruisciDidattico, tabellaDidattica, nacaSpessori, spNACA, corde, applicaAR, pianta, stazioni, piantaEStazioni, convertiFreccia, RIF_FR, RIF_NOMI, assi, giuntiAngolati, sedeA, tagliaAla, incrocio, contornoCentina, pianiCentine,
-  autoProporzioni, autoSezione, costruisci, estrudi, meshParte, volumeMesh, tagliaMesh, parteDaMesh, disponi, disponiEsterni,
+  autoProporzioni, autoSezione, costruisci, estrudi, meshParte, volumeMesh, tagliaMesh, parteDaMesh, disponi, disponiEsterni, limitiGruppo, lineaSpurgo, ruotaParteGradi, pezziSiUrtano, sagomaParte, angoloPos, angoloNorm,
   numStrati, regioniStrati, percorsiParte, generaGcode, analizzaGcode, modificaGcode, scrivi3mf, leggi3mf, trasformaMesh, durata
 };
 })(typeof window !== 'undefined' ? window : globalThis);
@@ -3430,13 +3555,31 @@ function notaDinamica(k) {
   return '';
 }
 const NOTE_DINAMICHE = ['fr1', 'fr2', 'yk', 'trk', 'tr'];
+/* G-code esterno: ingombro della stampa dopo lo spostamento e spostamenti ammessi nel piano scelto. */
+function ingombroEst() {
+  const e = stato.est, bb = e.analisi.stat.bb, st = stato.P.stampante, m = 5, dx = e.mod.dx || 0, dy = e.mod.dy || 0;
+  const lim = (a, b) => (a <= b ? [Math.ceil(a), Math.floor(b)] : [0, 0]), X = lim(m - bb.x0, st.lx - m - bb.x1), Y = lim(m - bb.y0, st.ly - m - bb.y1);
+  return { x0: bb.x0 + dx, x1: bb.x1 + dx, y0: bb.y0 + dy, y1: bb.y1 + dy, dx0: X[0], dx1: X[1], dy0: Y[0], dy1: Y[1], fuori: bb.x0 + dx < 0 || bb.y0 + dy < 0 || bb.x1 + dx > st.lx || bb.y1 + dy > st.ly };
+}
+function notaIngombroEst() {
+  const I = ingombroEst(), st = stato.P.stampante;
+  return 'Ingombro della stampa: X ' + num(I.x0, 1) + ' – ' + num(I.x1, 1) + ' mm, Y ' + num(I.y0, 1) + ' – ' + num(I.y1, 1) + ' mm, su un piano di ' + st.lx + ' × ' + st.ly + ' mm.' + (I.fuori ? ' <b>Esce dal piano.</b>' : '');
+}
 function costruisciModulo() {
   const P = stato.P, M = stato.M, e = stato.est;
   let h = '';
   if (e && e.tipo === 'gcode') {
-    h += '<div class="sorgente"><span>File aperto</span><b>' + esc(e.nome) + '</b><p class="nota" style="margin:0">G-code prodotto da un altro programma: si esamina strato per strato e si possono correggere temperature, velocità e flusso. La geometria non è modificabile.</p>' +
+    const I = ingombroEst(), pers = P.stampante.id !== 'mk3s';
+    h += '<div class="sorgente"><span>File aperto</span><b>' + esc(e.nome) + '</b><p class="nota" style="margin:0">G-code prodotto da un altro programma: si esamina strato per strato, si possono correggere temperature, velocità e flusso e si può spostare l’intera stampa sul piano. La geometria non è modificabile.</p>' +
       [['tU', 'Temperatura ugello', '°C', 150, 300, 5], ['tP', 'Temperatura piano', '°C', 0, 120, 5], ['vel', 'Velocità', '%', 20, 200, 5], ['flusso', 'Flusso', '%', 50, 150, 1]].map(c =>
         '<div class="campo"><label for="g-' + c[0] + '">' + c[1] + '</label><span class="ingresso"><input type="number" id="g-' + c[0] + '" data-g="' + c[0] + '" value="' + e.mod[c[0]] + '" min="' + c[3] + '" max="' + c[4] + '" step="' + c[5] + '"><i>' + c[2] + '</i></span></div>').join('') +
+      '<h4 class="sotto-titolo">Posizione sul piano</h4>' +
+      '<div class="campo"><label for="g-st">Stampante</label><span class="ingresso"><select id="g-st" data-gs="id">' + Object.values(A.STAMPANTI).map(s => '<option value="' + s.id + '"' + (s.id === P.stampante.id ? ' selected' : '') + '>' + esc(s.nome) + '</option>').join('') + '</select></span></div>' +
+      (pers ? [['lx', 'Piano, lato X'], ['ly', 'Piano, lato Y']].map(c => '<div class="campo"><label for="g-' + c[0] + '">' + c[1] + '</label><span class="ingresso"><input type="number" id="g-' + c[0] + '" data-gs="' + c[0] + '" value="' + P.stampante[c[0]] + '" min="80" max="1000" step="5"><i>mm</i></span></div>').join('') : '') +
+      [['dx', 'Sposta in X', I.dx0, I.dx1], ['dy', 'Sposta in Y', I.dy0, I.dy1]].map(c =>
+        '<div class="campo"><label for="g-' + c[0] + '">' + c[1] + '</label><span class="ingresso"><input type="number" id="g-' + c[0] + '" data-g="' + c[0] + '" value="' + (e.mod[c[0]] || 0) + '" min="' + c[2] + '" max="' + c[3] + '" step="1"><i>mm</i></span></div>').join('') +
+      '<p class="nota" id="g-ing">' + notaIngombroEst() + '</p><p class="nota">Si spostano i percorsi di stampa; gli script di avvio e di fine (spurgo compreso) restano dove sono.</p>' +
+      '<div class="pulsanti"><button class="btn" data-az="g-centra">Centra sul piano</button><button class="btn" data-az="g-zero">Posizione originale</button></div>' +
       '<div class="pulsanti"><button class="btn primario" data-az="salva-mod">Scarica G-code modificato</button><button class="btn" data-az="torna">Torna al progetto</button></div></div>';
     $('#parametri').innerHTML = h; aggiornaValori(); return;
   }
@@ -3444,6 +3587,8 @@ function costruisciModulo() {
     h += '<div class="sorgente"><span>File aperto</span><b>' + esc(e.nome) + '</b><p class="nota" style="margin:0">3MF prodotto da un altro programma: ' + e.oggetti.length + (e.oggetti.length === 1 ? ' oggetto' : ' oggetti') +
       '. Si può scalare, ruotare e convertire in G-code con le impostazioni di stampa qui sotto. Lo slicer interno non genera supporti.</p>' +
       '<div class="campo"><label for="m-scala">Scala</label><span class="ingresso"><input type="number" id="m-scala" data-m="scala" value="' + e.scala + '" min="5" max="1000" step="5"><i>%</i></span></div>' +
+      '<div class="campo"><label for="m-dx">Sposta in X dal centro</label><span class="ingresso"><input type="number" id="m-dx" data-m="dx" value="' + (e.dx || 0) + '" min="-500" max="500" step="5"><i>mm</i></span></div>' +
+      '<div class="campo"><label for="m-dy">Sposta in Y dal centro</label><span class="ingresso"><input type="number" id="m-dy" data-m="dy" value="' + (e.dy || 0) + '" min="-500" max="500" step="5"><i>mm</i></span></div>' +
       '<label class="spunta"><input type="checkbox" id="m-brim" data-m="brim"' + (e.brim ? ' checked' : '') + '><span>Brim attorno ai pezzi<small>larghezza impostata nel gruppo Stampa</small></span></label>' +
       '<div class="pulsanti"><button class="btn" data-az="ruota">Ruota di 90°</button><button class="btn" data-az="torna">Torna al progetto</button></div></div>';
   }
@@ -3548,7 +3693,7 @@ function costruisciModulo() {
       campo({ k: 'stampa.zhop', et: 'Sollevamento in ritrazione', um: 'mm', min: 0, max: 2, passo: 0.1 })
     ].join('') + '</div></details>',
     '<details class="sotto" data-g="script"' + (stato.aperti.script ? ' open' : '') + '><summary>Script di avvio e di fine stampa</summary><div>' +
-      '<label for="f-start">Avvio <span class="sim">{t_ugello} {t_piano} {ugello}</span></label><textarea class="script" id="f-start" data-k="stampante.start" spellcheck="false">' + esc(P.stampante.start) + '</textarea>' +
+      '<label for="f-start">Avvio <span class="sim" title="{spurgo_x0} {spurgo_y0} {spurgo_x1} {spurgo_y1}: estremi di una linea di spurgo tracciata accanto ai pezzi, dovunque siano sul piano">{t_ugello} {t_piano} {ugello} {spurgo_x0} {spurgo_y0} {spurgo_x1} {spurgo_y1}</span></label><textarea class="script" id="f-start" data-k="stampante.start" spellcheck="false">' + esc(P.stampante.start) + '</textarea>' +
       '<label for="f-end">Fine <span class="sim">{z_fine} {y_fine}</span></label><textarea class="script" id="f-end" data-k="stampante.end" spellcheck="false">' + esc(P.stampante.end) + '</textarea></div></details>'
   ].join(''), P.stampante.lx + ' × ' + P.stampante.ly);
   $('#parametri').innerHTML = h;
@@ -3682,9 +3827,17 @@ function eventiModulo() {
   };
   box.addEventListener('input', ev => {
     const el = ev.target;
-    if (el.dataset.g && stato.est) { const v = parseFloat(el.value); if (isFinite(v)) stato.est.mod[el.dataset.g] = v; return; }
+    if (el.dataset.g && stato.est) {
+      const v = parseFloat(el.value), g = el.dataset.g; if (!isFinite(v)) return;
+      if (g === 'dx' || g === 'dy') { const I = ingombroEst(); stato.est.mod[g] = I[g + '0'] < I[g + '1'] ? A.limita(v, I[g + '0'], I[g + '1']) : v; spostaAnteprimaEst(); }
+      else stato.est.mod[g] = v;
+      return;
+    }
+    if (el.dataset.gs && stato.est && el.tagName !== 'SELECT') { const v = parseFloat(el.value); if (isFinite(v) && v >= 80 && v <= 1000) { stato.P.stampante[el.dataset.gs] = v; salvaLocale(); disegnaVista(); const n = $('#g-ing'); if (n) n.innerHTML = notaIngombroEst(); } return; }
     if (el.dataset.m && stato.est) {
-      if (el.type === 'checkbox') stato.est.brim = el.checked; else { const v = parseFloat(el.value); if (!isFinite(v) || v < 5 || v > 1000) return; stato.est.scala = v; }
+      if (el.type === 'checkbox') stato.est.brim = el.checked;
+      else if (el.dataset.m === 'dx' || el.dataset.m === 'dy') { const v = parseFloat(el.value); if (!isFinite(v)) return; stato.est[el.dataset.m] = A.limita(v, -1000, 1000); }
+      else { const v = parseFloat(el.value); if (!isFinite(v) || v < 5 || v > 1000) return; stato.est.scala = v; }
       pianifica('x', false, el.type === 'checkbox'); return;
     }
     if (!el.dataset.k || el.readOnly) return;
@@ -3694,6 +3847,12 @@ function eventiModulo() {
   box.addEventListener('change', ev => {
     const el = ev.target;
     if (el.dataset.preimp) { if (el.value) { stato.P.naca = el.value; pianifica('naca', true, true); } return; }
+    if (el.dataset.gs && stato.est) { // piano della stampante per un G-code esterno
+      if (el.tagName === 'SELECT' && A.STAMPANTI[el.value]) { stato.P.stampante = Object.assign({}, A.STAMPANTI[el.value]); salvaLocale(); }
+      const I = ingombroEst(); stato.est.mod.dx = I.dx0 < I.dx1 ? A.limita(stato.est.mod.dx || 0, I.dx0, I.dx1) : stato.est.mod.dx || 0; stato.est.mod.dy = I.dy0 < I.dy1 ? A.limita(stato.est.mod.dy || 0, I.dy0, I.dy1) : stato.est.mod.dy || 0;
+      costruisciModulo(); disegnaVista(); return;
+    }
+    if (el.dataset.g && stato.est) { if (el.dataset.g === 'dx' || el.dataset.g === 'dy') el.value = stato.est.mod[el.dataset.g] || 0; return; }
     if (!el.dataset.k || el.readOnly) return;
     const strutt = el.type === 'checkbox' || el.tagName === 'SELECT';
     if (leggi(el, true)) pianifica(el.dataset.k, strutt, true);
@@ -3719,6 +3878,11 @@ function eventiModulo() {
     else if (az === 'torna') { stato.est = null; stato.vista = 'assieme'; stato.gcode = []; stato.generato = false; pianifica('', true, true); }
     else if (az === 'ruota') { stato.est.quarti = (stato.est.quarti + 1) % 4; pianifica('x', false, true); }
     else if (az === 'salva-mod') salvaModificato();
+    else if ((az === 'g-centra' || az === 'g-zero') && stato.est && stato.est.tipo === 'gcode') {
+      const e = stato.est, bb = e.analisi.stat.bb, st = stato.P.stampante;
+      e.mod.dx = az === 'g-zero' ? 0 : Math.round(st.lx / 2 - (bb.x0 + bb.x1) / 2); e.mod.dy = az === 'g-zero' ? 0 : Math.round(st.ly / 2 - (bb.y0 + bb.y1) / 2);
+      costruisciModulo(); disegnaVista(); disegnaRiepilogo();
+    }
   });
 }
 function parametriSicuri() { try { return A.parametriProfilo(stato.P); } catch (err) { return { t: 12, f: 4, p: 40 }; } }
@@ -3739,7 +3903,7 @@ function disposizione() {
   const P = stato.P, e = stato.est;
   if (e && e.tipo === 'mesh') {
     e.parti = e.oggetti.map((o, i) => { const p = A.parteDaMesh(o.nome, A.trasformaMesh(o.mesh, e.scala / 100, e.quarti)); p.chiave += '|' + i; p.brim = e.brim; return p; });
-    stato.disposizione = A.disponiEsterni(e.parti, P.stampante);
+    stato.disposizione = A.disponiEsterni(e.parti, P.stampante, e.dx, e.dy);
   } else if (stato.M && P.piano && P.piano.manuale) {
     stato.disposizione = A.disponiManuale(stato.M.parti, P.stampante, P.stampa, P.piano.pos, stato.riparaPiano);
     P.piano.pos = stato.disposizione.pos; stato.riparaPiano = false; salvaLocale();
@@ -3829,7 +3993,8 @@ function salvaModificato() {
   const e = stato.est; if (!e || e.tipo !== 'gcode') return;
   const m = {}, s = e.analisi.stat;
   if (e.mod.tU !== (s.tU || 0)) m.tU = e.mod.tU; if (e.mod.tP !== (s.tP || 0)) m.tP = e.mod.tP;
-  m.vel = e.mod.vel; m.flusso = e.mod.flusso;
+  m.vel = e.mod.vel; m.flusso = e.mod.flusso; m.dx = e.mod.dx || 0; m.dy = e.mod.dy || 0;
+  if (ingombroEst().fuori) toast('Attenzione: con questo spostamento la stampa esce dal piano.', 'errore');
   return salva(nomeBase() + '_mod.gcode', A.modificaGcode(e.testo, m));
 }
 function caricaProgetto(p, origine) {
@@ -3852,7 +4017,7 @@ async function apriFile(file) {
       const testo = await file.text(), an = A.analizzaGcode(testo);
       if (an.progetto) return caricaProgetto(an.progetto, nome);
       if (!an.strati.length) throw new Error('non ci sono movimenti di estrusione riconoscibili.');
-      stato.est = { tipo: 'gcode', nome, testo, analisi: an, mod: { tU: an.stat.tU || 0, tP: an.stat.tP || 0, vel: 100, flusso: 100 } };
+      stato.est = { tipo: 'gcode', nome, testo, analisi: an, mod: { tU: an.stat.tU || 0, tP: an.stat.tP || 0, vel: 100, flusso: 100, dx: 0, dy: 0 } };
       stato.vista = 'gcode'; stato.opz.strato = 1e9; stato.opz.solo = false; tre.inq = {};
       costruisciModulo(); disegnaRiepilogo(); disegnaVista(); toast('G-code aperto: ' + an.strati.length + ' strati.');
     } else throw new Error('formato non previsto. Si aprono file .gcode, .3mf e .json.');
@@ -3897,7 +4062,7 @@ function disegnaRiepilogo() {
   const P = stato.P, M = stato.M, e = stato.est, box = $('#riepilogo');
   let h = '';
   if (e && e.tipo === 'gcode') {
-    const s = e.analisi.stat, bb = s.bb;
+    const s = analisiEst().stat, bb = s.bb;
     h += '<section><h3>G-code esterno</h3><div class="tessere">' +
       '<div><span>Strati</span><b>' + s.strati + '</b></div><div><span>Altezza</span><b>' + num(bb.z1, 2) + ' <small>mm</small></b></div>' +
       '<div><span>Filamento</span><b>' + num(s.filamento / 1000, 2) + ' <small>m</small></b></div><div><span>Tempo stimato</span><b>' + A.durata(s.tempo).replace(/ \d+s$/, '') + '</b></div></div></section>' +
@@ -4264,7 +4429,20 @@ function gruppoPiatto() {
   });
   return g;
 }
-function analisiCorrente() { return stato.est && stato.est.tipo === 'gcode' ? stato.est.analisi : (stato.valido && stato.gcode[stato.piatto] ? stato.gcode[stato.piatto].analisi : null); }
+/* G-code esterno spostato: l'anteprima mostra il file come verra' salvato (i percorsi si spostano, gli script no). */
+function analisiEst() {
+  const e = stato.est, dx = e.mod.dx || 0, dy = e.mod.dy || 0;
+  if (!dx && !dy) return e.analisi;
+  if (!e.spostata || e.spostata.dx !== dx || e.spostata.dy !== dy) e.spostata = { dx, dy, analisi: A.analizzaGcode(A.modificaGcode(e.testo, { dx, dy })) };
+  return e.spostata.analisi;
+}
+function analisiCorrente() { return stato.est && stato.est.tipo === 'gcode' ? analisiEst() : (stato.valido && stato.gcode[stato.piatto] ? stato.gcode[stato.piatto].analisi : null); }
+let tSposta = 0;
+function spostaAnteprimaEst() { // l'anteprima di un G-code esterno segue lo spostamento scelto (ricalcolo differito mentre si scrive)
+  const e = stato.est; if (!e || e.tipo !== 'gcode') return;
+  const n = $('#g-ing'); if (n) n.innerHTML = notaIngombroEst();
+  clearTimeout(tSposta); tSposta = setTimeout(() => { if (stato.est === e) { disegnaVista(); disegnaRiepilogo(); } }, 250);
+}
 function gruppoGcode(an) {
   const g = piano(stato.est ? an.stat.bb : null), n = an.stat.segmenti, pos = new Float32Array(n * 6), col = new Float32Array(n * 6), inizi = [0];
   const pal = COL_TIPI.map(c => new T3.Color(c)); let k = 0;
@@ -4641,7 +4819,7 @@ function fissaPiano() {
   const P = stato.P;
   if (P.piano && P.piano.manuale) return;
   const pos = {};
-  disposizione().piatti.forEach((pl, k) => pl.items.forEach(it => { pos[it.parte.id] = { k, x: A.arr(it.x, 10), y: A.arr(it.y, 10), r: 0 }; }));
+  disposizione().piatti.forEach((pl, k) => pl.items.forEach(it => { pos[it.parte.id] = { k, x: A.arr(it.x, 10), y: A.arr(it.y, 10), r: 0, a: 0 }; }));
   P.piano = { manuale: true, pos };
 }
 function aggiornaPiano() { stato.disposizione = null; stato.valido = false; disposizione(); disegnaVista(); disegnaRiepilogo(); }
@@ -4650,6 +4828,18 @@ function limitiPezzo(p) {
   const x0 = Math.ceil((bo + a) * 10) / 10; // limiti al decimo di millimetro, verso l'interno
   return { x0, y0: x0, x1: Math.max(x0, Math.floor((st.lx - bo - a - p.lx) * 10) / 10), y1: Math.max(x0, Math.floor((st.ly - bo - a - p.ly) * 10) / 10) };
 }
+/* Tutti i pezzi del piatto come un blocco solo: ingombro e spostamenti ammessi. */
+const gruppoPiano = () => { const pl = disposizione().piatti[stato.piatto]; return pl && pl.items.length ? A.limitiGruppo(pl.items, stato.P.stampante, stato.P.stampa) : null; };
+function spostaTutto(dx, dy) {
+  const P = stato.P, G = gruppoPiano(); if (!G) return false;
+  dx = A.arr(A.limita(dx, G.dx0, G.dx1), 10); dy = A.arr(A.limita(dy, G.dy0, G.dy1), 10);
+  if (!dx && !dy) return false;
+  const ids = disposizione().piatti[stato.piatto].items.map(it => it.parte.id);
+  fissaPiano();
+  ids.forEach(id => { const o = P.piano.pos[id]; if (o) { o.x = A.arr(o.x + dx, 10); o.y = A.arr(o.y + dy, 10); } });
+  return true;
+}
+const ANCORE = ['in alto a sinistra', 'in alto al centro', 'in alto a destra', 'a sinistra', 'al centro del piano', 'a destra', 'in basso a sinistra', 'in basso al centro', 'in basso a destra'];
 function svgPiano() {
   const P = stato.P, st = P.stampante, S = P.stampa, D = disposizione(), pl = D.piatti[stato.piatto], bo = A.bordoPiano(S), u = Math.max(st.lx, st.ly) / 62;
   let s = '<svg data-nome="piano" viewBox="' + [-4.5 * u, -2.5 * u, st.lx + 7 * u, st.ly + 6.5 * u].join(' ') + '" role="img" aria-label="Piano di stampa visto dall’alto">';
@@ -4670,21 +4860,38 @@ function svgPiano() {
       '<path class="sag" fill-rule="evenodd" style="fill:var(' + COL_PARTE[p.tipo] + ')" d="' + reg.map(q => 'M' + A.fromC(q).map(w => w[0].toFixed(2) + ' ' + (-w[1]).toFixed(2)).join('L') + 'Z').join('') + '"/>' +
       (cima && cima !== reg ? '<path class="sag cima" fill-rule="evenodd" d="' + cima.map(q => 'M' + A.fromC(q).map(w => w[0].toFixed(2) + ' ' + (-w[1]).toFixed(2)).join('L') + 'Z').join('') + '"/>' : '') +
       '<text x="' + p.lx / 2 + '" y="' + (-p.ly / 2 + 0.36 * u) + '" font-size="' + Math.min(1.05 * u, Math.max(0.6 * u, p.ly * 0.8)) + '" text-anchor="middle">' + esc(p.id) + '</text></g>';
-    if (sel) quote = '<g class="q-pos">' + quotaH(0, it.x, yb, 'X ' + num(it.x, 1), u, yb) + quotaV(yb, st.ly, it.x, 'Y ' + num(it.y, 1), u, it.x) + '</g>';
+    if (sel && !stato.opz.tutto) quote = '<g class="q-pos">' + quotaH(0, it.x, yb, 'X ' + num(it.x, 1), u, yb) + quotaV(yb, st.ly, it.x, 'Y ' + num(it.y, 1), u, it.x) + '</g>';
   });
+  if (stato.opz.tutto && pl && pl.items.length) { // contorno di tutti i pezzi, che si muovono insieme
+    const G = A.limitiGruppo(pl.items, st, S), yb = st.ly - G.y0;
+    s += '<g class="gruppo-tutto"><rect x="' + G.x0 + '" y="' + (st.ly - G.y1) + '" width="' + G.lx + '" height="' + G.ly + '"/><text x="' + (G.x0 + G.lx / 2) + '" y="' + (st.ly - G.y1 - 0.5 * u) + '" font-size="' + 0.95 * u + '" text-anchor="middle">tutti i pezzi · ' + num(G.lx, 1) + ' × ' + num(G.ly, 1) + ' mm</text></g>';
+    quote = '<g class="q-pos">' + quotaH(0, G.x0, yb, 'X ' + num(G.x0, 1), u, yb) + quotaV(yb, st.ly, G.x0, 'Y ' + num(G.y0, 1), u, G.x0) + '</g>';
+  }
   return s + quote + '</svg>';
 }
 function barraPiano(selPiatto) {
   const D = disposizione(), np = D.piatti.length, due = stato.opz.piano2d, it = due ? itemScelto() : null, P = stato.P;
   let s = selPiatto + '<span class="segm"><button class="btn piccolo" data-az="p-2d" aria-pressed="' + due + '">Pianta</button><button class="btn piccolo" data-az="p-3d" aria-pressed="' + !due + '">3D</button></span>';
   if (!due) return s + '<button class="btn piccolo" data-az="inquadra">Inquadra</button><span class="spazio"></span><span>piano ' + P.stampante.lx + ' × ' + P.stampante.ly + ' mm</span>';
-  if (it) {
+  const G = gruppoPiano();
+  s += '<button class="btn piccolo" data-az="p-tutto" aria-pressed="' + !!stato.opz.tutto + '" title="Tutti i pezzi del piatto si spostano insieme, conservando le distanze fra loro (anche: Maiusc + trascinamento)">Sposta tutto</button>';
+  if (stato.opz.tutto && G) {
+    const bo = A.bordoPiano(P.stampa);
+    s += '<b class="pz-nome">Tutti i pezzi · ' + num(G.lx, 1) + ' × ' + num(G.ly, 1) + ' mm</b>' +
+      '<label>X <input type="number" class="corto" data-b="pz-gx" value="' + A.arr(G.x0, 10) + '" min="' + A.arr(G.x0 + G.dx0, 10) + '" max="' + A.arr(G.x0 + G.dx1, 10) + '" step="1"></label>' +
+      '<label>Y <input type="number" class="corto" data-b="pz-gy" value="' + A.arr(G.y0, 10) + '" min="' + A.arr(G.y0 + G.dy0, 10) + '" max="' + A.arr(G.y0 + G.dy1, 10) + '" step="1"></label>' +
+      '<span class="ancore" role="group" aria-label="Porta tutti i pezzi in una zona del piano">' + ANCORE.map((t, a) => '<button type="button" data-az="p-ancora" data-a="' + a + '" title="Porta tutto ' + t + '" aria-label="Porta tutto ' + t + '"></button>').join('') + '</span>' +
+      '<span class="suggerimento">Trascina un pezzo qualsiasi: si muovono tutti. Frecce: 1 mm (Maiusc 10 mm). Zona utile da ' + num(bo, 1) + ' mm dal bordo.</span>';
+  } else if (it) {
     const lim = limitiPezzo(it.parte);
     s += '<b class="pz-nome">' + esc(it.parte.nome) + '</b><label>X <input type="number" class="corto" data-b="pz-x" value="' + A.arr(it.x, 10) + '" min="' + A.arr(lim.x0, 10) + '" max="' + A.arr(lim.x1, 10) + '" step="1"></label>' +
       '<label>Y <input type="number" class="corto" data-b="pz-y" value="' + A.arr(it.y, 10) + '" min="' + A.arr(lim.y0, 10) + '" max="' + A.arr(lim.y1, 10) + '" step="1"></label>' +
-      '<button class="btn piccolo" data-az="p-ruota">Ruota 90°</button><label>Piatto <select data-b="pz-k">' +
-      D.piatti.map((q, k) => '<option value="' + k + '"' + (k === stato.piatto ? ' selected' : '') + '>' + (k + 1) + '</option>').join('') + '<option value="' + np + '">nuovo</option></select></label>';
-  } else s += '<span class="suggerimento">Trascina un pezzo nel punto del piano in cui vuoi stamparlo.</span>';
+      '<label title="Angolo del pezzo sul piano, in gradi, antiorario: qualsiasi valore">Angolo <input type="number" class="corto" data-b="pz-a" value="' + A.arr(it.a || 0, 10) + '" min="-360" max="360" step="5"> °</label>' +
+      '<button class="btn piccolo" data-az="p-ruota" title="R">Ruota 90°</button><label>Piatto <select data-b="pz-k">' +
+      D.piatti.map((q, k) => '<option value="' + k + '"' + (k === stato.piatto ? ' selected' : '') + '>' + (k + 1) + '</option>').join('') + '<option value="' + np + '">nuovo</option></select></label>' +
+      '<button class="btn piccolo" data-az="p-dup" title="Aggiunge al kit un’altra copia di questo pezzo (Ctrl+D)">Duplica</button>' +
+      (it.parte.copiaDi ? '<button class="btn piccolo" data-az="p-del" title="Toglie questa copia dal kit (Canc)">Elimina copia</button>' : '');
+  } else s += '<span class="suggerimento">Trascina un pezzo nel punto del piano in cui vuoi stamparlo; con «Sposta tutto» si muove l’intera stampa.</span>';
   return s + '<span class="spazio"></span>' + (D.manuale ? '<button class="btn piccolo" data-az="p-auto">Disposizione automatica</button>' : '<span class="suggerimento">disposizione automatica</span>');
 }
 function pdPiano(ev) {
@@ -4694,8 +4901,27 @@ function pdPiano(ev) {
   ev.preventDefault();
   const P = stato.P, st = P.stampante, S = P.stampa, D = disposizione(), pl = D.piatti[stato.piatto], id = g.dataset.id, it = pl.items.find(q => q.parte.id === id);
   if (!it) return;
+  if (stato.opz.tutto || ev.shiftKey) { // tutta la stampa come un blocco
+    const G = A.limitiGruppo(pl.items, st, S), mat = g.ownerSVGElement.getScreenCTM().inverse(), p0 = puntoSvg(ev, mat), cx = ev.clientX, cy = ev.clientY;
+    const nodi = [...g.ownerSVGElement.querySelectorAll('.pezzo')].map(el => ({ el, it: pl.items.find(q => q.parte.id === el.dataset.id) })).filter(q => q.it);
+    const cont = g.ownerSVGElement.querySelector('.gruppo-tutto');
+    let ddx = 0, ddy = 0, mosso = false;
+    ascoltaTrascina({
+      muovi(e) {
+        if (!mosso && Math.hypot(e.clientX - cx, e.clientY - cy) < 4) return;
+        if (!mosso) { mosso = true; const q = $('#tavola .q-pos'); if (q) q.remove(); }
+        const pt = puntoSvg(e, mat), passo = e.altKey ? 0.1 : 1;
+        ddx = A.arr(A.limita(Math.round((pt.x - p0.x) / passo) * passo, G.dx0, G.dx1), 10); ddy = A.arr(A.limita(Math.round((p0.y - pt.y) / passo) * passo, G.dy0, G.dy1), 10);
+        nodi.forEach(q => q.el.setAttribute('transform', 'translate(' + (q.it.x + ddx) + ' ' + (st.ly - q.it.y - ddy) + ')'));
+        if (cont) cont.setAttribute('transform', 'translate(' + ddx + ' ' + (-ddy) + ')');
+        const ix = $('[data-b="pz-gx"]'), iy = $('[data-b="pz-gy"]'); if (ix) { ix.value = A.arr(G.x0 + ddx, 10); iy.value = A.arr(G.y0 + ddy, 10); }
+      },
+      fine() { if (mosso && spostaTutto(ddx, ddy)) aggiornaPiano(); else disegnaVista(); }
+    });
+    return;
+  }
   const p = it.parte, mat = g.ownerSVGElement.getScreenCTM().inverse(), p0 = puntoSvg(ev, mat), dx = p0.x - it.x, dy = (st.ly - p0.y) - it.y, lim = limitiPezzo(p);
-  const altri = pl.items.filter(q => q !== it).map(q => A.improntaPezzo(q.parte, q.x, q.y, S)), cx = ev.clientX, cy = ev.clientY;
+  const altri = pl.items.filter(q => q !== it), cx = ev.clientX, cy = ev.clientY;
   let x = it.x, y = it.y, mosso = false;
   ascoltaTrascina({
     muovi(e) {
@@ -4705,14 +4931,13 @@ function pdPiano(ev) {
       x = A.limita(Math.round((pt.x - dx) / passo) * passo, lim.x0, lim.x1); y = A.limita(Math.round((st.ly - pt.y - dy) / passo) * passo, lim.y0, lim.y1);
       x = A.arr(x, 10); y = A.arr(y, 10);
       g.setAttribute('transform', 'translate(' + x + ' ' + (st.ly - y) + ')');
-      const q = A.improntaPezzo(p, x, y, S);
-      g.classList.toggle('urto', altri.some(w => w[0] < q[2] && q[0] < w[2] && w[1] < q[3] && q[1] < w[3]));
+      g.classList.toggle('urto', altri.some(w => A.pezziSiUrtano(w.parte, w.x, w.y, p, x, y, S)));
       const ix = $('[data-b="pz-x"]'), iy = $('[data-b="pz-y"]'); if (ix && stato.pezzo === id) { ix.value = x; iy.value = y; }
     },
     fine() {
       stato.pezzo = id;
       if (!mosso) { disegnaVista(); return; }
-      fissaPiano(); P.piano.pos[id] = { k: stato.piatto, x, y, r: it.r || 0 }; aggiornaPiano();
+      fissaPiano(); P.piano.pos[id] = { k: stato.piatto, x, y, r: it.r || 0, a: it.a || 0 }; aggiornaPiano();
     }
   });
 }
@@ -4720,20 +4945,48 @@ function azionePiano(az, valore) {
   const P = stato.P;
   if (az === 'p-2d' || az === 'p-3d') { stato.opz.piano2d = az === 'p-2d'; disegnaVista(); return; }
   if (az === 'p-auto') { P.piano = { manuale: false, pos: {} }; stato.pezzo = null; aggiornaPiano(); toast('Disposizione automatica ripristinata.'); return; }
+  if (az === 'p-tutto') { stato.opz.tutto = !stato.opz.tutto; if (stato.opz.tutto) stato.pezzo = null; disegnaVista(); return; }
+  if (az === 'p-ancora' || az === 'pz-gx' || az === 'pz-gy' || az === 'sposta-tutto') { // l'intera stampa del piatto
+    const G = gruppoPiano(); if (!G) return;
+    let dx = 0, dy = 0;
+    if (az === 'p-ancora') { const a = Math.round(+valore) || 0, c = a % 3, r = Math.floor(a / 3); dx = c === 0 ? G.dx0 : c === 2 ? G.dx1 : (G.dx0 + G.dx1) / 2; dy = r === 0 ? G.dy1 : r === 2 ? G.dy0 : (G.dy0 + G.dy1) / 2; }
+    else if (az === 'sposta-tutto') { dx = valore[0]; dy = valore[1]; }
+    else { const v = parseFloat(valore); if (!isFinite(v)) return; if (az === 'pz-gx') dx = v - G.x0; else dy = v - G.y0; }
+    if (spostaTutto(dx, dy)) aggiornaPiano(); else { disegnaVista(); if (az === 'sposta-tutto' || az === 'p-ancora') toast(G.dx0 === G.dx1 && G.dy0 === G.dy1 ? 'I pezzi occupano già tutto il piano: non c’è spazio per spostarli.' : 'La stampa è già in quella posizione.'); }
+    return;
+  }
   const it = itemScelto(); if (!it) return;
   const id = it.parte.id; fissaPiano();
   const o = P.piano.pos[id];
-  if (az === 'p-ruota') {
-    const p = it.parte, st = P.stampante, bo = A.bordoPiano(P.stampa), al = aloneDi(p);
-    if (p.ly + 2 * (al + bo) > st.lx || p.lx + 2 * (al + bo) > st.ly) { toast('Ruotato di 90° questo pezzo non entra nel piano.', 'errore'); return; }
-    const r = ((o.r || 0) + 1) % 4, cx = it.x + p.lx / 2, cy = it.y + p.ly / 2;
-    const lim = limitiPezzo({ tipo: p.tipo, brim: p.brim, lx: p.ly, ly: p.lx });
-    P.piano.pos[id] = { k: o.k, r, x: A.limita(Math.round(cx - p.ly / 2), lim.x0, lim.x1), y: A.limita(Math.round(cy - p.lx / 2), lim.y0, lim.y1) };
+  if (az === 'p-ruota' || az === 'pz-a') { // rotazione attorno al centro dell'ingombro, di un angolo qualsiasi
+    const v = az === 'pz-a' ? parseFloat(String(valore).replace(',', '.')) : (it.a || 0) + 90; if (!isFinite(v)) return;
+    const a = A.angoloNorm(v), p = it.parte, st = P.stampante, bo = A.bordoPiano(P.stampa), pr = A.ruotaParteGradi(p.base || p, a, P.stampa), al = aloneDi(pr);
+    if (pr.lx + 2 * (al + bo) > st.lx || pr.ly + 2 * (al + bo) > st.ly) { toast('Ruotato di ' + num(a, 1) + '° questo pezzo non entra nel piano (ingombro ' + num(pr.lx, 1) + ' × ' + num(pr.ly, 1) + ' mm).', 'errore'); disegnaVista(); return; }
+    const cx = it.x + p.lx / 2, cy = it.y + p.ly / 2, lim = limitiPezzo(pr);
+    P.piano.pos[id] = { k: o.k, a, r: a % 90 === 0 ? a / 90 : 0, x: A.limita(A.arr(cx - pr.lx / 2, 10), lim.x0, lim.x1), y: A.limita(A.arr(cy - pr.ly / 2, 10), lim.y0, lim.y1) };
+  } else if (az === 'p-dup') { // un'altra copia della stessa parte, messa nel primo posto libero con lo stesso angolo
+    const orig = it.parte.copiaDi || id, n = (P.copie && P.copie[orig]) || 0, tot = Object.values(P.copie || {}).reduce((s, q) => s + q, 0);
+    if (n >= 20 || tot >= 60) { toast('Troppe copie: al massimo 20 per pezzo e 60 in tutto.', 'errore'); return; }
+    P.copie = P.copie || {}; P.copie[orig] = n + 1;
+    const nuovo = orig + '+' + (n + 1); P.piano.pos[nuovo] = { k: stato.piatto, x: 0, y: 0, a: it.a || 0, r: it.r || 0, libero: true };
+    stato.pezzo = nuovo; aggiorna('copie', true);
+    const D2 = disposizione(), k2 = D2.piatti.findIndex(pl => pl.items.some(q => q.parte.id === nuovo));
+    if (k2 >= 0) { stato.piatto = k2; toast('Copia aggiunta' + (k2 !== o.k ? ' sul piatto ' + (k2 + 1) + ' (su questo non c’era posto)' : '') + ': ora il kit contiene ' + (n + 2) + ' pezzi uguali.'); }
+    else toast('Copia aggiunta, ma non trova posto sul piano.', 'errore');
+    disegnaVista(); disegnaRiepilogo(); return;
+  } else if (az === 'p-del') {
+    const m = /^(.+)\+(\d+)$/.exec(id);
+    if (!m || !it.parte.copiaDi) { toast('Questo pezzo fa parte del progetto: si possono eliminare solo le copie aggiunte con «Duplica».', 'errore'); return; }
+    const orig = m[1], k = +m[2], n = (P.copie && P.copie[orig]) || 0;
+    for (let j = k; j < n; j++) { const s = P.piano.pos[orig + '+' + (j + 1)]; if (s) P.piano.pos[orig + '+' + j] = s; else delete P.piano.pos[orig + '+' + j]; } // le copie successive scalano di un posto e restano dove sono
+    delete P.piano.pos[orig + '+' + n];
+    if (n > 1) P.copie[orig] = n - 1; else delete P.copie[orig];
+    stato.pezzo = null; aggiorna('copie', true); stato.riparaPiano = false; disegnaVista(); disegnaRiepilogo(); toast('Copia eliminata.'); return;
   } else if (az === 'pz-x' || az === 'pz-y') {
     const lim = limitiPezzo(it.parte), v = parseFloat(valore); if (!isFinite(v)) return;
     if (az === 'pz-x') o.x = A.limita(v, lim.x0, lim.x1); else o.y = A.limita(v, lim.y0, lim.y1);
   } else if (az === 'pz-k') {
-    P.piano.pos[id] = { k: Math.max(0, Math.round(+valore) || 0), x: 0, y: 0, r: o.r || 0, libero: true };
+    P.piano.pos[id] = { k: Math.max(0, Math.round(+valore) || 0), x: 0, y: 0, r: o.r || 0, a: o.a || 0, libero: true };
   } else if (az === 'sposta') { const lim = limitiPezzo(it.parte); o.x = A.limita(A.arr(o.x + valore[0], 10), lim.x0, lim.x1); o.y = A.limita(A.arr(o.y + valore[1], 10), lim.y0, lim.y1); }
   stato.disposizione = null; stato.valido = false;
   const D = disposizione();
@@ -4913,7 +5166,7 @@ function ispettoreForma(f) {
   else if (f.t === 'r') s += n('w', 'Lunghezza L', f.w) + n('h', 'Altezza H', f.h) + n('r', 'Raccordo degli spigoli', f.r || 0) + gr('Posizione') + pos('Vertice') + giro;
   else if (f.t === 'c') s += n('d', 'Diametro', f.d) + gr('Posizione') + pos('Centro');
   else if (f.t === 'g') s += n('d', 'Ø circoscritto', f.d) + n('n', 'Numero di lati', f.n, 1) + '<p class="nota">Esagono: apertura chiave = ' + num(f.d * Math.cos(Math.PI / f.n), 2) + ' mm tra i lati opposti' + (f.n % 2 ? ' (lati dispari: misura vertice–lato)' : '') + '.</p>' + gr('Posizione') + pos('Centro') + giro;
-  else if (f.t === 'p') s += '<p class="nota">' + f.pts.length + ' vertici: trascinali nel disegno. Per spostare tutto il poligono trascinalo dall’interno.</p>';
+  else if (f.t === 'p') s += n('rotp', 'Ruota di (°)', 0, 5) + '<p class="nota">' + f.pts.length + ' vertici: trascinali nel disegno. Per spostare tutto il poligono trascinalo dall’interno.</p>';
   else if (f.t === 'cen') {
     const fam = f.profilo, par = fam === 'lamina' || fam === 'libero';
     s += gr('Profilo') + sc('profilo', 'Famiglia', fam, Object.keys(A.FAMIGLIE).map(k => [k, A.FAMIGLIE[k].nome])) +
@@ -4966,7 +5219,7 @@ function barraSchizzo() {
   const P = stato.P, K = stato.sk, sk = skCorrente(), H = stato.storia, pronto = H.P === P;
   let s = '<label class="evid" title="Il kit di stampa contiene soltanto i pezzi liberi: niente ala né centine"><input type="checkbox" data-b="sk-solo"' + (P.soloLiberi ? ' checked' : '') + '> Stampa solo i pezzi liberi</label>';
   if (P.schizzi.length) s += '<label>Pezzo <select data-b="sk-sel">' + P.schizzi.map((q, i) => '<option value="' + i + '"' + (i === K.i ? ' selected' : '') + '>' + (i + 1) + ' · ' + esc(q.nome) + '</option>').join('') + '</select></label>';
-  s += '<button class="btn piccolo" data-az="sk-nuovo">Nuovo pezzo</button><label><select data-b="sk-esempio" aria-label="Esempi pronti"><option value="">Esempi…</option>' +
+  s += '<button class="btn piccolo" data-az="sk-nuovo">Nuovo pezzo</button>' + (skCorrente() ? '<button class="btn piccolo" data-az="sk-dup-pezzo" title="Crea un altro pezzo uguale a questo, indipendente: si può poi modificare senza toccare l’originale">Duplica pezzo</button>' : '') + '<label><select data-b="sk-esempio" aria-label="Esempi pronti"><option value="">Esempi…</option>' +
     ESEMPI_SK.map(q => '<option value="' + q[0] + '">' + q[1] + '</option>').join('') + '</select></label>';
   s += '<span class="segm"><button class="btn piccolo" data-az="sk-annulla" title="Ctrl+Z"' + (pronto && H.pass.length ? '' : ' disabled') + '>↶ Annulla</button><button class="btn piccolo" data-az="sk-ripeti" title="Ctrl+Y"' + (pronto && H.fut.length ? '' : ' disabled') + '>↷ Ripeti</button></span>';
   if (!sk) return s;
@@ -5169,6 +5422,13 @@ function azioneSchizzo(az, b) {
     Object.assign(f, { c: A.arr(c.c, 10), te: P.te, sf: l ? l.sp.forma : '', sx: l ? A.arr(100 * (l.pos[c.j] ? l.pos[c.j].f : l.xi), 10) : 30, sH: l ? l.sez.H : 0, cd: cor ? P.cNd : 0, cv: cor ? P.cNv : 0, all: !!P.alleggerimenti, pm: P.parete, ra: P.rAll });
     q.forme.push(conModo(f, 'pieno')); Object.assign(K, { sel: q.forme.length - 1, str: 'sel', vb: null }); aggiorna('schizzo', false); return;
   }
+  if (az === 'sk-dup-pezzo') { // copia indipendente del pezzo corrente
+    if (!sk) return;
+    if (P.schizzi.length >= 12) { toast('Il progetto può contenere al massimo 12 pezzi liberi.', 'errore'); return; }
+    const d = copia(sk); d.nome = (sk.nome.replace(/ \(copia( \d+)?\)$/, '') + ' (copia)').slice(0, 40); d.n = 1; d.st = true;
+    P.schizzi.splice(K.i + 1, 0, d); Object.assign(K, { i: K.i + 1, sel: -1, str: 'sel', poli: null, prev: null });
+    aggiorna('schizzo', false); toast('Pezzo duplicato: «' + d.nome + '» è indipendente dall’originale.'); return;
+  }
   if (az === 'sk-esempio') {
     if (P.schizzi.length >= 12) { toast('Il progetto può contenere al massimo 12 pezzi liberi.', 'errore'); return; }
     P.schizzi.push(Object.assign({ st: true, or: 'piedi' }, esempioSchizzo(b))); Object.assign(K, { i: P.schizzi.length - 1, sel: -1, str: 'sel', poli: null, vb: null, prev: null }); aggiorna('schizzo', false); return;
@@ -5229,6 +5489,11 @@ function campoSchizzo(k, el) {
   else if (k === 'f-forma' && f.t === 'cor' && A.FORME_COR[el.value]) f.forma = el.value;
   else if (k === 'f-profilo' && A.FAMIGLIE[el.value]) { const prima = f.profilo; f.profilo = el.value; if (el.value === 'lamina') f.spProf = Math.min(f.spProf, 8); else if (prima === 'lamina') f.spProf = 12; }
   else if (k === 'f-naca') { const s = el.value.replace(/[^0-9]/g, '').slice(0, 5); try { A.nacaDef(s); f.naca = s; } catch (err) { toast(err.message, 'errore'); return; } }
+  else if (k === 'f-rotp' && f.t === 'p') { // rotazione del poligono attorno al centro del suo ingombro
+    if (!isFinite(v) || !v) return;
+    const b = ingombroForme({ forme: [f] }), cx = (b[0] + b[2]) / 2, cy = (b[1] + b[3]) / 2, t = v * Math.PI / 180, co = Math.cos(t), si = Math.sin(t);
+    f.pts = f.pts.map(q => [A.arr(cx + (q[0] - cx) * co - (q[1] - cy) * si, 1000), A.arr(cy + (q[0] - cx) * si + (q[1] - cy) * co, 1000)]);
+  }
   else if (LIMITI_F[c] && isFinite(v)) { const L = LIMITI_F[c]; f[c] = INTERI_F.has(c) ? A.limita(Math.round(v), L[0], L[1]) : A.limita(v, L[0], L[1]); if (f.t === 'lon') A.limitiSezione(f); }
   else return;
   aggiorna('schizzo', false);
@@ -5281,10 +5546,13 @@ function eventiCad() {
         const d = (K.passo || 1) * (ev.shiftKey ? 10 : 1);
         azioneSchizzo('sk-muovi', ev.key === 'ArrowLeft' ? [-d, 0] : ev.key === 'ArrowRight' ? [d, 0] : ev.key === 'ArrowUp' ? [0, d] : [0, -d]);
       }
-    } else if (stato.vista === 'piatto' && stato.opz.piano2d && stato.pezzo && /^Arrow/.test(ev.key)) {
+    } else if (stato.vista === 'piatto' && stato.opz.piano2d && !stato.est && stato.pezzo && (ev.ctrlKey || ev.metaKey) && (ev.key === 'd' || ev.key === 'D')) { ev.preventDefault(); azionePiano('p-dup'); }
+    else if (stato.vista === 'piatto' && stato.opz.piano2d && !stato.est && stato.pezzo && !ev.ctrlKey && !ev.metaKey && (ev.key === 'r' || ev.key === 'R')) azionePiano('p-ruota');
+    else if (stato.vista === 'piatto' && stato.opz.piano2d && !stato.est && stato.pezzo && (ev.key === 'Delete' || ev.key === 'Backspace') && /\+\d+$/.test(stato.pezzo)) { ev.preventDefault(); azionePiano('p-del'); }
+    else if (stato.vista === 'piatto' && stato.opz.piano2d && !stato.est && (stato.pezzo || stato.opz.tutto) && /^Arrow/.test(ev.key)) {
       ev.preventDefault();
       const d = ev.shiftKey ? 10 : 1;
-      azionePiano('sposta', ev.key === 'ArrowLeft' ? [-d, 0] : ev.key === 'ArrowRight' ? [d, 0] : ev.key === 'ArrowUp' ? [0, d] : [0, -d]);
+      azionePiano(stato.opz.tutto ? 'sposta-tutto' : 'sposta', ev.key === 'ArrowLeft' ? [-d, 0] : ev.key === 'ArrowRight' ? [d, 0] : ev.key === 'ArrowUp' ? [0, d] : [0, -d]);
     }
   });
 }
@@ -5400,7 +5668,7 @@ function avvia() {
     else if (az === 'kit-tutto') { stato.P.soloLiberi = false; aggiorna('soloLiberi', true); }
     else if (az === 'vai-schizzo') { stato.vista = 'schizzo'; disegnaVista(); }
     else if (az === 'm-sblocca') { const P = stato.P; P.man = {}; P.longheroni.forEach(sp => { sp.man = {}; }); stato.scrollMisure = $('#tavola').scrollTop; aggiorna('auto', true); }
-    else if (/^p-/.test(az)) azionePiano(az);
+    else if (/^p-/.test(az)) azionePiano(az, b.dataset.a);
     else if (az === 'sk-esempio') azioneSchizzo(az, b.dataset.e);
     else if (/^sk-/.test(az)) azioneSchizzo(az, b);
     else if (az === 's-gcode') salvaSingolo('gcode'); else if (az === 's-3mf') salvaSingolo('3mf'); else if (az === 's-json') salvaSingolo('json');
