@@ -1314,8 +1314,11 @@ function sezioneDiStampa(sez) {
 }
 
 // ---------------------------------------------------------------- progetto
+/* Niente M862.3 (controllo del modello): la Prusa lo confronta con il nome con cui si presenta, che non e' "MK3S"
+   se e' collegata una MMU o se monta un firmware di un'altra variante, e allora chiede «G-code processato per una
+   stampante diversa. Continuare?» anche se il file e' giusto. Resta il controllo dell'ugello, che protegge davvero. */
+const M862_MODELLO = 'M862.3 P "MK3S" ; controllo del modello di stampante';
 const START_MK3S = [
-  'M862.3 P "MK3S" ; controllo del modello di stampante',
   'M862.1 P{ugello} ; controllo del diametro dell\'ugello',
   'G90 ; coordinate assolute',
   'M83 ; estrusore in relativo',
@@ -1480,6 +1483,8 @@ function normalizzaProgetto(p) {
   const d = progettoPredefinito(), o = conforma(p, d);
   o.stampante = conforma(p && p.stampante, d.stampante);
   if (!STAMPANTI[o.stampante.id]) o.stampante.id = 'generica';
+  if (typeof o.stampante.start === 'string' && o.stampante.start.indexOf(M862_MODELLO) >= 0) // progetti salvati prima del 28/11/2026: si toglie solo quella riga, il resto dell'avvio resta com'e'
+    o.stampante.start = o.stampante.start.split('\n').filter(r => r.trim() !== M862_MODELLO).join('\n');
   o.stampa = conforma(p && p.stampa, d.stampa);
   const base = { x: 30, xt: 30, via: 'retto', forma: 'I', stampa: true, H: 6, B: 5, tf: 1.2, tw: 1.5, s: 1.2 };
   o.longheroni = (p && Array.isArray(p.longheroni) ? p.longheroni : d.longheroni).slice(0, 5).map(s => {
