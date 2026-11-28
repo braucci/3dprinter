@@ -273,7 +273,7 @@ details.sotto > div { display: flex; flex-direction: column; gap: 8px; padding-t
 .avanzamento i { display: block; height: 100%; width: 0; background: var(--accento); transition: width .1s linear; }
 .goccia { position: absolute; inset: 8px; border: 2px dashed var(--acciaio); border-radius: 10px; background: color-mix(in srgb, var(--acciaio) 10%, var(--carta)); display: none; align-items: center; justify-content: center; font-size: 18px; font-weight: 600; color: var(--acciaio); pointer-events: none; z-index: 7; }
 .tela.sopra .goccia { display: flex; }
-.sk-attrezzi, .sk-stato, .ispettore { display: none; }
+.sk-attrezzi, .sk-stato, .ispettore, .sk-selbar { display: none; }
 
 /* ---------- tavole 2D */
 #tavola { position: absolute; inset: 0; overflow: auto; padding: 16px; display: none; }
@@ -433,7 +433,6 @@ details.sotto > div { display: flex; flex-direction: column; gap: 8px; padding-t
 .isp-lista .riga { display: flex; align-items: center; border-radius: var(--r-p); }
 .isp-lista .riga:hover { background: var(--velo); }
 .isp-lista .riga.sel { background: color-mix(in srgb, var(--acciaio) 14%, transparent); box-shadow: inset 2px 0 0 var(--acciaio); }
-.isp-lista .riga.gr > button:first-child { padding-left: 12px; }
 .isp-lista .riga > button:first-child { flex: 1; min-width: 0; display: grid; grid-template-columns: 10px minmax(0, 1fr); column-gap: 7px; align-items: center; text-align: left; background: none; border: 0; padding: 4px 6px; cursor: pointer; color: var(--inchiostro); font: inherit; }
 .isp-lista .riga span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .isp-lista .riga small { grid-column: 2; color: var(--tenue); font-size: 11px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -441,6 +440,17 @@ details.sotto > div { display: flex; flex-direction: column; gap: 8px; padding-t
 .lucchetto { flex: none; display: grid; place-items: center; width: 26px; height: 26px; border: 0; border-radius: var(--r-p); background: none; color: var(--tenue); opacity: .28; cursor: pointer; }
 .lucchetto .ic { width: 15px; height: 15px; }
 .riga:hover .lucchetto, .lucchetto:focus-visible { opacity: .8; } .lucchetto[aria-pressed="true"] { opacity: 1; color: var(--accento); }
+.tela.sk .sk-selbar:not(:empty) { grid-area: tav; align-self: start; justify-self: center; z-index: 4; display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 6px; max-width: calc(100% - 60px); margin-top: 32px; padding: 5px 6px 5px 12px; background: var(--rialzo); border: 1px solid var(--linea-forte); border-radius: 999px; box-shadow: var(--ombra); font-size: 12.5px; }
+.sk-selbar .sb-et { font-weight: 600; max-width: 220px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin-right: 4px; }
+.sk-selbar .btn { border-radius: 999px; }
+.att.multi[aria-pressed="true"] { background: var(--accento); color: var(--su-accento); }
+.isp-lista .riga.figlio > button:first-child { padding-left: 30px; }
+.isp-lista .riga.gruppo > button[data-skg] { flex: 1; min-width: 0; display: grid; grid-template-columns: 16px minmax(0, 1fr); column-gap: 7px; align-items: center; text-align: left; background: none; border: 0; padding: 4px 6px 4px 0; cursor: pointer; color: var(--inchiostro); font: inherit; }
+.isp-lista .riga.gruppo .ic { width: 15px; height: 15px; grid-row: 1 / 3; color: var(--acciaio); }
+.isp-lista .riga.gruppo span { font-weight: 600; }
+.isp-lista .riga > button.apri:first-child { flex: none; display: block; width: 22px; height: 30px; padding: 0; border: 0; background: none; cursor: pointer; position: relative; }
+.isp-lista .apri::before { content: ""; position: absolute; left: 8px; top: 11px; width: 5px; height: 5px; border-right: 1.6px solid var(--tenue); border-bottom: 1.6px solid var(--tenue); transform: rotate(-45deg); transition: transform .12s; }
+.isp-lista .apri[aria-expanded="true"]::before { transform: rotate(45deg); top: 10px; }
 .sk-menu { position: absolute; z-index: 8; min-width: 232px; padding: 5px; background: var(--rialzo); border: 1px solid var(--linea-forte); border-radius: 8px; box-shadow: var(--ombra); display: flex; flex-direction: column; font-size: 13px; }
 .sk-menu button { display: flex; align-items: center; justify-content: space-between; gap: 18px; min-height: 28px; padding: 0 9px; border: 0; border-radius: var(--r-p); background: none; text-align: left; cursor: pointer; }
 .sk-menu button:hover, .sk-menu button:focus-visible { background: var(--acciaio); color: var(--su-acciaio); outline: none; }
@@ -537,6 +547,44 @@ dialog::backdrop { background: rgba(10, 20, 35, .55); }
 .aiuto dl { display: grid; grid-template-columns: auto 1fr; gap: 5px 12px; margin: 0; font-size: 12.5px; align-items: baseline; }
 .aiuto dt { white-space: nowrap; color: var(--tenue); } .aiuto dd { margin: 0; }
 .aiuto > .nota { padding: 10px 18px 14px; }
+/* modellini e gadget */
+#modellini { width: min(1120px, 97vw); height: min(820px, 94vh); max-width: none; max-height: none; padding: 0; border: 1px solid var(--linea-forte); border-radius: 10px; background: var(--foglio); box-shadow: var(--ombra); overflow: hidden; }
+.mdl { display: flex; flex-direction: column; height: 100%; min-height: 0; }
+.mdl > header { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; padding: 12px 16px 8px; }
+.mdl h2 { font-size: 18px; } .mdl > header p { margin: 2px 0 0; color: var(--tenue); font-size: 12.5px; }
+.mdl-tipi { display: flex; flex-wrap: wrap; gap: 8px 22px; padding: 4px 16px 10px; border-bottom: 1px solid var(--linea); }
+.mdl-tipi .fam { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.mdl-tipi .fam > span { font-size: 12px; color: var(--tenue); margin-right: 2px; }
+.mdl-tipi button { flex: none; border: 1px solid var(--linea-forte); border-radius: 999px; padding: 5px 14px; background: var(--rialzo); color: var(--inchiostro); font-size: 13px; cursor: pointer; white-space: nowrap; }
+.mdl-tipi button[aria-selected="true"] { background: var(--acciaio); border-color: var(--acciaio); color: var(--su-acciaio); }
+.mdl-corpo { flex: 1; min-height: 0; display: grid; grid-template-columns: 330px minmax(0, 1fr); }
+.mdl-opz { overflow-y: auto; padding: 12px 16px 16px; border-right: 1px solid var(--linea); display: flex; flex-direction: column; gap: 7px; font-size: 12.5px; scrollbar-width: thin; }
+.mdl-opz h5 { margin: 8px 0 0; padding-top: 10px; border-top: 1px solid var(--linea); font-size: 11.5px; font-weight: 600; color: var(--tenue); }
+.mdl-opz h5:first-child { margin-top: 0; padding-top: 0; border-top: 0; }
+.mdl-opz .cp { display: grid; grid-template-columns: minmax(0, 1fr) 118px; align-items: center; gap: 8px; }
+.mdl-opz .cp:has(select) { grid-template-columns: minmax(0, .7fr) minmax(0, 1.3fr); } .mdl-opz .cp.unico { grid-template-columns: 1fr; }
+.mdl-opz .mdl-riga { display: grid; grid-template-columns: minmax(0, .5fr) minmax(0, 1.5fr); align-items: center; gap: 8px; }
+.mdl-opz .segm { display: flex; } .mdl-opz .segm .btn { flex: 1; padding: 0 4px; }
+.mdl-opz .ck { display: flex; align-items: center; gap: 7px; cursor: pointer; }
+.mdl-opz .tx { display: grid; gap: 3px; }
+.mdl-opz .tx input { width: 100%; min-height: 28px; border: 1px solid var(--linea-forte); border-radius: var(--r-p); background: var(--rialzo); padding: 3px 7px; font-size: 13px; }
+.mdl-opz .nota { margin-top: -3px; }
+.mdl-ant { overflow-y: auto; padding: 12px 16px 16px; display: flex; flex-direction: column; gap: 12px; background: var(--carta); scrollbar-width: thin; }
+.mdl-ant figure { margin: 0; border: 1px solid var(--linea); border-radius: var(--r); background: var(--rialzo); }
+.mdl-ant figcaption { padding: 6px 10px 0; font-size: 11.5px; font-weight: 600; color: var(--tenue); }
+.mdl-ant svg { display: block; width: 100%; max-height: 270px; padding: 4px 10px 10px; }
+.mdl-ant svg * { vector-effect: non-scaling-stroke; stroke-linejoin: round; }
+.mv-fus { fill: color-mix(in srgb, var(--acciaio) 24%, var(--rialzo)); stroke: var(--acciaio); stroke-width: 1.3; }
+.mv-ala { fill: color-mix(in srgb, var(--accento) 30%, var(--rialzo)); stroke: var(--accento); stroke-width: 1.3; }
+.mv-tel { fill: var(--tenue); fill-opacity: .16; stroke: var(--tenue); stroke-width: 1; stroke-dasharray: 4 3; }
+.mv-asta { fill: var(--libero); fill-opacity: .28; stroke: var(--libero); stroke-width: 1.2; }
+.mv-elica { fill: var(--inchiostro); fill-opacity: .55; stroke: var(--inchiostro); stroke-width: 1; }
+.mv-ril { fill: var(--accento); fill-opacity: .7; stroke: none; } .mv-inc { fill: var(--acciaio); fill-opacity: .55; stroke: none; }
+.mdl-ant table.dati { background: var(--rialzo); border: 1px solid var(--linea); border-radius: var(--r); border-collapse: separate; border-spacing: 0; }
+.mdl-ant table.dati th, .mdl-ant table.dati td { padding: 5px 10px; }
+.mdl-ant table.dati tr:last-child td { border-bottom: 0; } .mdl-ant table.dati tr.ko td { color: var(--errore); font-weight: 600; }
+.mdl-piede { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 16px; padding: 10px 16px; border-top: 1px solid var(--linea); }
+.mdl-piede .nota { flex: 1 1 320px; } .mdl-piede .pulsanti { flex: none; }
 /* atlante dei profili */
 #banca { width: min(1320px, 97vw); height: min(860px, 94vh); max-width: none; max-height: none; padding: 0; border: 1px solid var(--linea-forte); border-radius: 10px; background: var(--foglio); box-shadow: var(--ombra); overflow: hidden; }
 #banca .atlante { display: flex; flex-direction: column; height: 100%; min-height: 0; }
@@ -639,6 +687,11 @@ dialog::backdrop { background: rgba(10, 20, 35, .55); }
   .solo-stretto { display: inline-flex; margin-left: auto; }
   .ispettore .isp-lista { max-height: 30%; }
   #aiuto-sk { width: 100vw; max-height: 100dvh; border-radius: 0; }
+  #modellini { width: 100vw; height: 100vh; height: 100dvh; margin: 0; border: 0; border-radius: 0; }
+  .mdl-corpo { display: flex; flex-direction: column; overflow-y: auto; } .mdl-opz, .mdl-ant { overflow: visible; border-right: 0; } .mdl-ant { order: -1; border-bottom: 1px solid var(--linea); }
+  .mdl-tipi { flex-wrap: nowrap; overflow-x: auto; gap: 8px 16px; scrollbar-width: none; } .mdl-tipi .fam { flex: none; flex-wrap: nowrap; }
+  .tela.sk .sk-selbar:not(:empty) { margin-top: 28px; max-width: calc(100% - 16px); padding: 5px 6px; border-radius: 16px; } .sk-selbar .sb-et { display: none; }
+  .mdl-ant svg { max-height: 150px; } .mdl > header p { display: none; } .mdl-piede .pulsanti { width: 100%; }
   #banca { width: 100vw; height: 100vh; height: 100dvh; margin: 0; border: 0; border-radius: 0; }
   #banca .at-testa { padding: 10px 12px 6px; }
   #banca .at-testa h2 { font-size: 16px; }
@@ -702,6 +755,7 @@ dialog::backdrop { background: rgba(10, 20, 35, .55); }
       <div id="tavola"></div>
       <div class="ispettore" aria-label="Proprietà e oggetti del pezzo libero"></div>
       <div class="sk-stato"></div>
+      <div class="sk-selbar" role="toolbar" aria-label="Azioni sugli oggetti scelti"></div>
       <div class="sk-menu" role="menu" hidden></div>
       <div class="vuoto"></div>
       <div class="legenda"></div>
@@ -731,6 +785,17 @@ dialog::backdrop { background: rgba(10, 20, 35, .55); }
     <footer class="at-piede"><p>Coordinate e descrizioni: <a href="https://m-selig.ae.illinois.edu/ads/coord_database.html" target="_blank" rel="noopener">UIUC Airfoil Coordinates Database</a> (M. Selig). Aerei: esempi da <a href="https://m-selig.ae.illinois.edu/ads/aircraft.html" target="_blank" rel="noopener">The Incomplete Guide to Airfoil Usage</a> (D. Lednicer). Un profilo che manca si scarica come .dat e si apre con «Apri un file .dat».</p><input id="banca-file" type="file" accept=".dat,.txt" hidden></footer>
   </div>
 </dialog>
+<dialog id="modellini" aria-labelledby="mdl-tit">
+  <div class="mdl">
+    <header><div><h2 id="mdl-tit">Modellini e gadget</h2><p>Si personalizzano qui, poi diventano pezzi piani da stampare e da ritoccare nello schizzo.</p></div><button type="button" class="btn piccolo" data-az="mdl-chiudi">Chiudi</button></header>
+    <nav class="mdl-tipi" role="tablist" aria-label="Che cosa costruire"></nav>
+    <div class="mdl-corpo">
+      <section class="mdl-opz" aria-label="Opzioni"></section>
+      <section class="mdl-ant" aria-label="Anteprima" aria-live="polite"></section>
+    </div>
+    <footer class="mdl-piede"><p class="nota"></p><span class="pulsanti"><button type="button" class="btn" data-az="mdl-aggiungi">Aggiungi al progetto aperto</button><button type="button" class="btn primario" data-az="mdl-crea">Crea il kit</button></span></footer>
+  </div>
+</dialog>
 <dialog id="aiuto-sk" aria-labelledby="aiuto-tit">
   <div class="aiuto">
     <header><h2 id="aiuto-tit">Disegnare nello schizzo</h2><button type="button" class="btn piccolo" data-az="aiuto-chiudi">Chiudi</button></header>
@@ -743,7 +808,7 @@ dialog::backdrop { background: rgba(10, 20, 35, .55); }
       </dl></section>
       <section><h3>Selezione</h3><dl>
         <dt>Clic</dt><dd>Sceglie una forma</dd><dt><kbd>Maiusc</kbd>+clic</dt><dd>Aggiunge o toglie dalla selezione</dd>
-        <dt>Trascina nel vuoto</dt><dd>Racchiude più forme in un riquadro</dd><dt><kbd>Ctrl</kbd>+<kbd>A</kbd></dt><dd>Seleziona tutto</dd>
+        <dt>Trascina nel vuoto</dt><dd>Racchiude più forme in un riquadro</dd><dt>Pulsante «selezione multipla»</dt><dd>Ogni clic aggiunge o toglie, senza tastiera</dd><dt><kbd>Ctrl</kbd>+<kbd>A</kbd></dt><dd>Seleziona tutto</dd>
         <dt><kbd>Esc</kbd></dt><dd>Lascia lo strumento, poi la selezione</dd><dt>Tasto destro</dt><dd>Menu con le azioni</dd>
         <dt>Doppio clic</dt><dd>Su un tracciato apre i suoi punti, su una scritta il testo</dd>
       </dl></section>
@@ -755,9 +820,10 @@ dialog::backdrop { background: rgba(10, 20, 35, .55); }
         <dt><kbd>Ctrl</kbd> premuto</dt><dd>Sospende l’aggancio a punti, bordi e griglia</dd>
       </dl></section>
       <section><h3>Modifica</h3><dl>
-        <dt><kbd>Ctrl</kbd>+<kbd>Z</kbd> / <kbd>Y</kbd></dt><dd>Annulla / ripeti</dd><dt><kbd>Ctrl</kbd>+<kbd>C</kbd> <kbd>X</kbd> <kbd>V</kbd></dt><dd>Copia, taglia, incolla (anche in un altro pezzo)</dd>
+        <dt><kbd>Ctrl</kbd>+<kbd>Z</kbd> / <kbd>Y</kbd></dt><dd>Passo indietro / passo avanti (anche con i due pulsanti nella barra)</dd><dt><kbd>Ctrl</kbd>+<kbd>C</kbd> <kbd>X</kbd> <kbd>V</kbd></dt><dd>Copia, taglia, incolla (anche in un altro pezzo)</dd>
         <dt><kbd>Ctrl</kbd>+<kbd>D</kbd></dt><dd>Duplica</dd><dt><kbd>Canc</kbd></dt><dd>Elimina la forma, o il punto scelto</dd>
-        <dt><kbd>Ctrl</kbd>+<kbd>G</kbd></dt><dd>Raggruppa; con <kbd>Maiusc</kbd> separa</dd>
+        <dt><kbd>Ctrl</kbd>+<kbd>G</kbd></dt><dd>Raggruppa in un elemento solo; con <kbd>Maiusc</kbd> separa</dd>
+        <dt>Doppio clic su un gruppo</dt><dd>Sceglie un solo oggetto del gruppo, per ritoccarlo</dd>
       </dl></section>
       <section><h3>Penna e punti</h3><dl>
         <dt>Clic</dt><dd>Punto d’angolo</dd><dt>Premi e trascina</dt><dd>Punto curva (anche <kbd>Maiusc</kbd>+clic)</dd>
@@ -1327,7 +1393,7 @@ function progettoPredefinito() {
     naca: '4412', profilo: 'naca', spProf: 12, fProf: 4, pProf: 40, autore: AUTORE, tipo: 'completa', b: 230, cr: 96, tr: 1, AR: 2.4, arLock: false, auto: true, adatta: true, man: {},
     rifFr: 'c4', centine: 'vento', fr1: 0, fr2: 0, doppia: false, yk: 40, trk: 1, nCentine2: 3,
     nCentine: 4, spCentina: 6, te: 0.96, e: 10, parete: 1.7, rAll: 2.1, gioco: 0.25, alleggerimenti: true, dima: true,
-    livello: 'struttura', soloLiberi: false, dCorde: '200', dCopie: 1, dSp: 5, dCorda: true, dMedia: true, dSpessore: true, dFreccia: true, dStazioni: true, dScritta: true, dModo: 'incavo', dH: 0.6, dTesto: '', dBase: true,
+    livello: 'struttura', soloLiberi: false, dCorde: '200', dNaca: '', dCopie: 1, dSp: 5, dCorda: true, dMedia: true, dSpessore: true, dFreccia: true, dStazioni: true, dScritta: true, dModo: 'incavo', dH: 0.6, dTesto: '', dBase: true,
     cNd: 2, cNv: 2, cB: 2.5, cH: 2.1, cX0: 12, cX1: 60, ts: 0.9,
     longheroni: [{ x: 30, xt: 30, via: 'retto', forma: 'I', stampa: true, H: 7.2, B: 6, tf: 1.45, tw: 1.8, s: 1.2 }],
     piano: { manuale: false, pos: {} }, copie: {}, pDati: null, schizzi: [],
@@ -1447,7 +1513,7 @@ function normalizzaProgetto(p) {
   if (!['le', 'c4', 'te', 'lon'].includes(o.rifFr)) o.rifFr = 'c4';
   if (o.centine !== 'normali') o.centine = 'vento';
   o.fr1 = limita(o.fr1, -45, 60); o.fr2 = limita(o.fr2, -45, 60); o.yk = limita(o.yk, 10, 90); o.trk = limita(o.trk, 0.3, 1.2);
-  o.dCorde = String(o.dCorde).replace(/[^0-9.,; ]/g, '').slice(0, 80) || '200'; o.dCopie = limita(Math.round(o.dCopie), 1, 20); o.dSp = limita(o.dSp, 1.2, 80); o.dH = limita(o.dH, 0.2, 3);
+  o.dCorde = String(o.dCorde).replace(/[^0-9.,; ]/g, '').slice(0, 80) || '200'; o.dNaca = String(o.dNaca || '').replace(/[^0-9,; ]/g, '').slice(0, 80).trim(); o.dCopie = limita(Math.round(o.dCopie), 1, 20); o.dSp = limita(o.dSp, 1.2, 80); o.dH = limita(o.dH, 0.2, 3);
   if (o.dModo !== 'rilievo') o.dModo = 'incavo'; o.dTesto = testoSano(o.dTesto, '', 24);
   o.nCentine2 = limita(Math.round(o.nCentine2), 2, 60); if (o.tipo === 'completa') o.doppia = false;
   o.naca = o.naca.replace(/[^0-9]/g, '').slice(0, 5);
@@ -2197,7 +2263,16 @@ function striscia(pts, w) { // fascia larga w attorno a una spezzata aperta
   co.AddPath(toC(pts), JT.jtRound, CL.EndType.etOpenButt); co.Execute(out, w / 2 * SC);
   return out;
 }
-function centinaDidattica(P, def, c, j) {
+/* Profili delle centine didattiche: quello del progetto e, in piu', i NACA a 4 o 5 cifre scritti per codice
+   («0012, 2412, 23012»). I codici non validi finiscono negli scarti, con il motivo. */
+function profiliDidattici(P) {
+  const lista = [profiloDef(P)], visti = new Set([lista[0].nome]), scarti = [];
+  String(P.dNaca || '').split(/[;,\s]+/).filter(Boolean).slice(0, 11).forEach(s => {
+    try { const d = nacaDef(s); if (!visti.has(d.nome)) { visti.add(d.nome); lista.push(d); } } catch (e) { scarti.push({ codice: s, motivo: e.message }); }
+  });
+  return { lista, scarti };
+}
+function centinaDidattica(P, def, c, j, altro) {
   const S = P.stampa, t = P.dSp, w = arr(Math.max(2 * S.w, 0.005 * c), 100), te = Math.max(2 * S.w + 0.05, 0.005 * c), pr = nacaProfilo(def, te / c, 160);
   const profC = unisci([toC(pr.pts.map(p => [p[0] * c, p[1] * c]))]), mg = Math.max(1.2, 1.5 * w), dentro = offset(profC, -mg, JT.jtRound);
   let xt = 0.3, tm = 0, xf = 0, fm = 0; // massimi misurati sul contorno (spessore verticale, freccia della linea media)
@@ -2210,7 +2285,7 @@ function centinaDidattica(P, def, c, j) {
   if (P.dStazioni) [0.1, 0.2, 0.25, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9].forEach(f => { const l = f === 0.25 ? 2 * L : f === 0.5 ? 1.5 * L : L; voci.push({ k: 'stazione', reg: striscia([[f * c, -l], [f * c, l]], w), x: f * c, l, f }); });
   voci.forEach(v => { v.reg = interseca(v.reg, dentro); });
   // scritta: la piu' grande che entra, sopra o sotto i segni orizzontali, senza toccare i segni verticali
-  const testo = (P.dTesto || '').trim() || (def.nome.length <= 12 ? def.nome : def.codice);
+  const testo = (!altro && (P.dTesto || '').trim()) || (def.nome.length <= 12 ? def.nome : def.codice); // il testo scelto vale per il profilo del progetto; gli altri portano la propria sigla
   let scritta = null;
   if (P.dScritta && testo) {
     const k = larghezzaTesto({ testo, font: CAR_PREDEFINITO, a: 10, sp: 0 }) / 10, cl = Math.max(1, w), dx = 0.25, N = Math.floor(c / dx) + 1;
@@ -2241,7 +2316,7 @@ function centinaDidattica(P, def, c, j) {
   const parte = { id: 'C' + (j + 1), tipo: 'centina', nome: 'Centina didattica ' + def.nome + ' (c = ' + arr(c, 10) + ' mm)', chiave: 'did|' + def.nome + '|' + c + '|' + t + '|' + area(tutto).toFixed(2) + '|' + h + (ril ? 'r' : 'i'),
     lx: bb.x1 - bb.x0, ly: bb.y1 - bb.y0, lz: t + hR, rif: { centina: j }, gradini: grS };
   const rLE = nacaSpessori(def) ? 1.1019 * def.t * def.t * c : null;
-  return { j, c, y: 0, xLE: 0, yLE: 0, phi: 0, chiusa: true, tronca: false, u0: 0, u1: c, imp: [[bb.x0, bb.x1], [bb.x0, bb.x1]], smusso: false, prof: pr, regione: profC, profC, contorno: profC,
+  return { j, c, def, y: 0, xLE: 0, yLE: 0, phi: 0, chiusa: true, tronca: false, u0: 0, u1: c, imp: [[bb.x0, bb.x1], [bb.x0, bb.x1]], smusso: false, prof: pr, regione: profC, profC, contorno: profC,
     intagli: [], sedi: [], finestre: [], posLon: [], corr: [], zs: [], parte, ox: bb.x0, oy: bb.y0, area: area(profC), areaProfilo: area(profC), pts: pr.pts, rottura: false,
     didattica: { voci, segni, scritta, w, te, h, hR, ril, mg, xt, tm, xf, fm, curvo, rLE, L } };
 }
@@ -2262,7 +2337,7 @@ function basettaDidattica(P, cen) {
   }
   gr.forEach(q => delete q.firma);
   if (gr.length > 1 && gr[0].regione === gr[1].regione) { gr[1].z0 = 0; gr.shift(); }
-  const parte = { id: 'B' + (cen.j + 1), tipo: 'basetta', nome: 'Basetta della centina da ' + arr(c, 10) + ' mm', chiave: 'bas|' + c + '|' + t + '|' + g + '|' + D.hR + '|' + P.naca + P.profilo + P.spProf + P.fProf + P.pProf,
+  const parte = { id: 'B' + (cen.j + 1), tipo: 'basetta', nome: 'Basetta della centina da ' + arr(c, 10) + ' mm', chiave: 'bas|' + c + '|' + t + '|' + g + '|' + D.hR + '|' + cen.def.nome + P.profilo + P.spProf + P.fProf + P.pProf,
     lx: L, ly: W, lz: H, rif: { centina: cen.j }, gradini: gr };
   return { parte, xa, xb, L, W, Wc, d, H, zTop, zBot, fondo, parete };
 }
@@ -2270,9 +2345,14 @@ function costruisciDidattico(P) {
   const avvisi = [], avv = (liv, testo) => avvisi.push({ liv, testo });
   const def = profiloDef(P), S = P.stampa, st = P.stampante, margine = 4 + (S.skirt > 0 ? S.skirtDist : 0), Lmax = st.lx - 2 * margine;
   const corde = cordeDidattiche(P), copie = limita(Math.round(P.dCopie) || 1, 1, 20), centine = [], parti = [];
-  corde.forEach((c, j) => {
-    const cen = centinaDidattica(P, def, c, j);
-    if (P.dBase) cen.base = basettaDidattica(P, cen);
+  const PD = profiliDidattici(P), nMax = Math.max(1, Math.floor(12 / corde.length)), profili = PD.lista.slice(0, nMax); // al piu' dodici centine diverse
+  PD.scarti.forEach(q => avv('attenzione', 'Altri profili NACA: «' + q.codice + '» non e\' un codice valido. ' + q.motivo));
+  if (PD.lista.length > nMax) avv('attenzione', 'Con ' + corde.length + (corde.length === 1 ? ' corda' : ' corde') + ' si costruiscono al piu\' ' + nMax + ' profili (dodici centine diverse): restano fuori ' + PD.lista.slice(nMax).map(d => d.nome).join(', ') + '.');
+  if (profili.length > 1) avv('info', 'Profili a confronto: ' + profili.map(d => d.nome).join(', ') + '. Una centina per ogni profilo e per ogni corda, tutte con gli stessi segni.');
+  const coppie = []; profili.forEach((d, ip) => corde.forEach(c => coppie.push([d, c, ip]))); // prima tutte le corde del profilo del progetto, poi gli altri
+  coppie.forEach((q, j) => {
+    const c = q[1], cen = centinaDidattica(P, q[0], c, j, q[2] > 0);
+    if (P.dBase) { cen.base = basettaDidattica(P, cen); if (profili.length > 1) cen.base.parte.nome = 'Basetta ' + q[0].nome + ' da ' + arr(c, 10) + ' mm'; }
     centine.push(cen);
     for (let q = 0; q < copie; q++) {
       const s = copie > 1 ? String.fromCharCode(97 + q) : '';
@@ -2286,13 +2366,14 @@ function costruisciDidattico(P) {
   if (!D0.curvo && (P.dMedia || P.dFreccia)) avv('info', def.nome + ' e\' simmetrico: la linea media coincide con la corda e la freccia e\' nulla, quindi non si incidono.');
   centine.forEach(cn => {
     const Dd = cn.didattica;
-    if (P.dScritta && !Dd.scritta) avv('attenzione', 'Centina da ' + arr(cn.c, 10) + ' mm: la scritta non trova posto fra i segni (altezza minima 2,5 mm). Togliere qualche segno, accorciare il testo o aumentare la corda.');
-    else if (Dd.scritta && Dd.scritta.a < 3) avv('attenzione', 'Centina da ' + arr(cn.c, 10) + ' mm: scritta alta solo ' + nf(Dd.scritta.a, 1) + ' mm, poco leggibile.');
+    const chi = 'Centina ' + (profili.length > 1 ? cn.def.nome + ' ' : '') + 'da ';
+    if (P.dScritta && !Dd.scritta) avv('attenzione', chi + arr(cn.c, 10) + ' mm: la scritta non trova posto fra i segni (altezza minima 2,5 mm). Togliere qualche segno, accorciare il testo o aumentare la corda.');
+    else if (Dd.scritta && Dd.scritta.a < 3) avv('attenzione', chi + arr(cn.c, 10) + ' mm: scritta alta solo ' + nf(Dd.scritta.a, 1) + ' mm, poco leggibile.');
   });
   avv('info', 'Segni ' + (D0.ril ? 'in rilievo alti ' : 'incisi profondi ') + nf(D0.h, 2) + ' mm (' + Math.round(D0.h / S.h) + ' strati da ' + nf(S.h, 2) + ' mm), larghi ' + nf(D0.w, 2) + ' mm: corda, linea media, spessore massimo, freccia massima e stazioni ogni 10 % della corda, dove scelti.');
   if (P.dSp > 20) avv('info', 'Spessore di ' + P.dSp + ' mm: piu\' che una centina e\' un tronco d\'ala. Riempimento ' + S.riemp + ' %: valutare un valore basso per risparmiare filamento.');
   const schizzi = pezziLiberi(P, parti, avv), c0 = centine[0];
-  return { didattico: true, livello: 'profilo', def, corde, copie, n: centine.length, t: P.dSp, cr: corde[0], ct: corde[corde.length - 1], cm: corde[0], b: 0, bh: 0, e: 0, S: 0, Sh: 0, AR: 0, k: 1,
+  return { didattico: true, livello: 'profilo', def, profili: profili.map(d => d.nome), corde, copie, n: centine.length, t: P.dSp, cr: corde[0], ct: corde[corde.length - 1], cm: corde[0], b: 0, bh: 0, e: 0, S: 0, Sh: 0, AR: 0, k: 1,
     passo: 0, passi: [], luci: [], Lmax, margine, pianta: null, stazioni: null, cma: c0.c, rid: 0, obl: false, intera: false, doppia: false, ik: -1,
     longheroni: [], correnti: [], gusci: [], giunti: [], dime: [], centine, schizzi, parti, avvisi, errori: avvisi.filter(a => a.liv === 'errore').length };
 }
@@ -2418,7 +2499,9 @@ function leggimiDidattico(P, M, piatti, stat) {
     riga('  Spessore massimo ' + n(100 * def.mis.t) + '% della corda al ' + n(100 * def.mis.xt) + '%; freccia massima ' + n(100 * def.mis.f) + '% della corda' + (Math.abs(def.mis.f) > 5e-4 ? ' al ' + n(100 * def.mis.xf) + '%' : ' (profilo simmetrico)') + '.');
   } else riga('  ' + (FAMIGLIE[P.profilo] ? FAMIGLIE[P.profilo].desc : ''));
   riga('  Sulla centina da ' + n(c) + ' mm: spessore massimo ' + n(D.tm * c) + ' mm a ' + n(D.xt * c) + ' mm dal bordo d\'attacco' + (D.curvo ? '; freccia massima ' + n(D.fm * c) + ' mm a ' + n(D.xf * c) + ' mm' : '') +
-    (D.rLE ? '; raggio del bordo d\'attacco ' + n(D.rLE) + ' mm' : '') + '.'); riga('');
+    (D.rLE ? '; raggio del bordo d\'attacco ' + n(D.rLE) + ' mm' : '') + '.');
+  if (M.profili && M.profili.length > 1) riga('  Altri profili del kit, per il confronto: ' + M.profili.slice(1).join(', ') + '. Le loro centine portano gli stessi segni e la propria sigla.');
+  riga('');
   riga('2. LE CENTINE'); riga('-------------');
   riga('  Corde: ' + M.corde.map(n).join(', ') + ' mm; ' + M.copie + (M.copie === 1 ? ' copia' : ' copie') + ' di ciascuna; spessore ' + n(P.dSp) + ' mm.');
   const nomi = { corda: 'corda (dal bordo d\'attacco al bordo d\'uscita)', media: 'linea media', spessore: 'spessore massimo (segmento verticale)', freccia: 'freccia massima (dalla corda alla linea media)', stazione: 'stazioni al 10, 20, 25, 30 ... 90% della corda (piu\' lunghe al 25% e al 50%)' };
@@ -3971,11 +4054,552 @@ G.Ala = {
   NOME_APP, SC, FORME, STAMPANTI, POSIZIONI, TIPI, ANGOLO_SBALZO, arr, limita, toC, fromC, unisci, sottrai, interseca, offset, sposta, area, ingombro,
   poligoniConFori, proprietaSezione, nacaDef, profiloDef, parametriProfilo, FAMIGLIE, AUTORE, nacaProfilo, lineaMedia, limitiSezione, sediEntrano, adatta, ricalcola,
   tabellaMisure, compatibilita, nf, posizioniCorrenti, puntoCorrente, riduzione, LIVELLI, anelloRicampionato, loftGuscio,
-  regioneSchizzo, solidoSchizzo, puntiPoligono, semplificaTratto, sanaSchizzo, testoRegione, larghezzaTesto, carattereValido, caratteri, MODI, CAR_PREDEFINITO, percorsoForma, ruotaParte, disponiManuale, improntaPezzo, bordoPiano, rettangolo, MAN_CAMPI, MAN_SEZ, sezioneLongherone, sezioneDiStampa, progettoPredefinito, stampaPredefinita, normalizzaProgetto,
+  profiliDidattici, regioneSchizzo, solidoSchizzo, puntiPoligono, semplificaTratto, sanaSchizzo, testoRegione, larghezzaTesto, carattereValido, caratteri, MODI, CAR_PREDEFINITO, percorsoForma, ruotaParte, disponiManuale, improntaPezzo, bordoPiano, rettangolo, MAN_CAMPI, MAN_SEZ, sezioneLongherone, sezioneDiStampa, progettoPredefinito, stampaPredefinita, normalizzaProgetto,
   FORME_COR, proporzioniSezione, sezioneCorrente, centinaSchizzo, giraSposta, barraSchizzo, guscioInOpera, cordeDidattiche, costruisciDidattico, tabellaDidattica, nacaSpessori, spNACA, corde, applicaAR, pianta, stazioni, piantaEStazioni, convertiFreccia, RIF_FR, RIF_NOMI, assi, giuntiAngolati, sedeA, tagliaAla, incrocio, contornoCentina, pianiCentine,
   autoProporzioni, autoSezione, costruisci, estrudi, meshParte, volumeMesh, tagliaMesh, parteDaMesh, disponi, disponiEsterni, limitiGruppo, lineaSpurgo, ruotaParteGradi, pezziSiUrtano, sagomaParte, angoloPos, angoloNorm, leggiDat, profiloDaPunti, sanaDati, codificaBanca, decodificaBanca, apriBanca, FAMIGLIE_BANCA, famigliaBanca, firmaDati, caratteriForma, descrizioneProfilo, INFO_FAMIGLIE,
   numStrati, regioniStrati, percorsiParte, generaGcode, analizzaGcode, modificaGcode, scrivi3mf, leggi3mf, trasformaMesh, durata
 };
+})(typeof window !== 'undefined' ? window : globalThis);
+
+/* Hangar Ala - modellini e gadget: aerei da montare a incastro, portachiavi, albero di Natale.
+   Ogni generatore restituisce pezzi liberi (schizzi) fatti di forme che restano modificabili nello schizzo,
+   gli avvisi e, per l'aereo, le viste di fianco e in pianta per l'anteprima. */
+(function (G) {
+'use strict';
+const A = G.Ala, arr = A.arr, limita = A.limita, r2 = v => arr(v, 100);
+const ISTITUTO = 'ITIS E. MAJORANA';
+
+/* Poligono con raccordi: vertici [x, y, r]. Ogni vertice con r > 0 diventa un arco tangente ai due lati
+   (se i lati sono corti il raggio si riduce da solo). */
+function raccorda(V) {
+  const n = V.length, out = [];
+  for (let i = 0; i < n; i++) {
+    const P = V[(i + n - 1) % n], B = V[i], C = V[(i + 1) % n], r0 = B[2] || 0;
+    const ux = P[0] - B[0], uy = P[1] - B[1], vx = C[0] - B[0], vy = C[1] - B[1], lu = Math.hypot(ux, uy), lv = Math.hypot(vx, vy);
+    if (!(r0 > 0) || lu < 1e-6 || lv < 1e-6) { out.push([r2(B[0]), r2(B[1])]); continue; }
+    const th = Math.acos(limita((ux * vx + uy * vy) / (lu * lv), -1, 1)); // angolo fra i due lati
+    if (th < 0.03 || th > Math.PI - 0.03) { out.push([r2(B[0]), r2(B[1])]); continue; }
+    const d = Math.min(r0 / Math.tan(th / 2), 0.48 * Math.min(lu, lv)), r = d * Math.tan(th / 2);
+    const p1 = [B[0] + ux / lu * d, B[1] + uy / lu * d], p2 = [B[0] + vx / lv * d, B[1] + vy / lv * d];
+    const bx = ux / lu + vx / lv, by = uy / lu + vy / lv, bl = Math.hypot(bx, by), k = r / Math.sin(th / 2) / bl, cx = B[0] + bx * k, cy = B[1] + by * k;
+    const a1 = Math.atan2(p1[1] - cy, p1[0] - cx); let da = Math.atan2(p2[1] - cy, p2[0] - cx) - a1; while (da > Math.PI) da -= 2 * Math.PI; while (da < -Math.PI) da += 2 * Math.PI;
+    const N = Math.max(2, Math.ceil(Math.abs(da) / (Math.PI / 10)));
+    for (let j = 0; j <= N; j++) { const a = a1 + da * j / N; out.push([r2(cx + r * Math.cos(a)), r2(cy + r * Math.sin(a))]); }
+  }
+  return out;
+}
+const pieno = (pts, extra) => Object.assign({ t: 'p', m: 'pieno', pts }, extra || {});
+const rett = (x0, y0, x1, y1, m, extra) => Object.assign({ t: 'r', m: m || 'pieno', x: r2(Math.min(x0, x1)), y: r2(Math.min(y0, y1)), w: r2(Math.abs(x1 - x0)), h: r2(Math.abs(y1 - y0)) }, extra || {});
+const regione = forme => A.solidoSchizzo({ forme, h: 1 }).base;
+const sposta = (f, dx, dy) => { if (f.t === 'p') f.pts = f.pts.map(q => [r2(q[0] + dx), r2(q[1] + dy)]); else { f.x = r2(f.x + dx); f.y = r2(f.y + dy); } return f; };
+const testoPulito = (s, n, pre) => { const t = String(s === undefined || s === null ? pre : s).replace(/[\u0000-\u001f\u007f<>]/g, ' ').trim().slice(0, n); return t; };
+/* Scritta centrata in (xc, yc), alta al piu' amax e lunga al piu' lmax. */
+function scritta(testo, xc, yc, lmax, amax, modo, hr, font) {
+  font = A.carattereValido ? A.carattereValido(font || A.CAR_PREDEFINITO) : A.CAR_PREDEFINITO;
+  const w1 = (A.larghezzaTesto({ testo, font, a: 10, sp: 0 }) || 10) / 10, a = arr(Math.max(1.5, Math.min(amax, lmax / w1)), 10);
+  const f = { t: 't', m: modo, testo, font, a, sp: 0, ang: 0, al: 'c', gr: 0, x: r2(xc), y: r2(yc - a / 2) }; if (modo === 'rilievo' || modo === 'incavo') f.hr = hr;
+  const reg = A.testoRegione(f); if (reg.length) { const b = A.ingombro(reg); f.x = r2(f.x + xc - (b.x0 + b.x1) / 2); f.y = r2(f.y + yc - (b.y0 + b.y1) / 2); }
+  return f;
+}
+
+// ---------------------------------------------------------------- aereo da montare a incastro
+const ALI = { rett: 'rettangolare', trap: 'rastremata', freccia: 'a freccia', delta: 'a delta', ellittica: 'ellittica' };
+const POSIZIONI = { alta: 'sopra la fusoliera (ala alta)', bassa: 'sotto la fusoliera (ala bassa)', biplano: 'biplano' };
+const MOTORI = { elica: 'a elica', getto: 'a getto', aliante: 'aliante, senza motore' };
+const AEREI = [
+  ['Monoplano da turismo ad ala alta, a elica, con montanti', { ala: 'rett', pos: 'alta', asta: true, motore: 'elica' }],
+  ['Caccia a elica ad ala bassa ellittica', { ala: 'ellittica', pos: 'bassa', asta: false, motore: 'elica' }],
+  ['Biplano a elica con montanti', { ala: 'rett', pos: 'biplano', asta: true, motore: 'elica' }],
+  ['Caccia a getto con ala a freccia', { ala: 'freccia', pos: 'bassa', asta: false, motore: 'getto' }],
+  ['Aereo a getto con ala a delta', { ala: 'delta', pos: 'bassa', asta: false, motore: 'getto', b: 130 }],
+  ['Aliante ad ala alta rastremata', { ala: 'trap', pos: 'alta', asta: false, motore: 'aliante', b: 240 }]
+];
+function opzAereo(o) {
+  o = o || {}; const n = (v, d, a, b) => { v = parseFloat(v); return isFinite(v) ? limita(v, a, b) : d; };
+  return { ala: ALI[o.ala] ? o.ala : 'rett', pos: POSIZIONI[o.pos] ? o.pos : 'alta', asta: !!o.asta, motore: MOTORI[o.motore] ? o.motore : 'elica',
+    L: n(o.L, 150, 80, 300), b: n(o.b, 180, 80, 400), t: n(o.t, 2.4, 1.2, 5), g: n(o.g, 0.15, 0, 0.5), testo: testoPulito(o.testo, 30, ISTITUTO) };
+}
+/* Pianta dell'ala: punti [y lungo l'apertura, x lungo la corda dal bordo d'attacco alla radice], corda e bordo d'attacco alle varie stazioni. */
+function piantaAla(tipo, b, L, coda) {
+  const h = b / 2;
+  if (tipo === 'ellittica') {
+    const cr = b / 4.3, corda = y => cr * Math.sqrt(Math.max(0, 1 - (y / h) * (y / h))), xle = y => 0.25 * (cr - corda(y)), pts = [], N = 22;
+    for (let i = -N; i <= N; i++) { const y = h * Math.sin(Math.PI / 2 * i / N); pts.push([r2(y), r2(xle(y))]); }
+    for (let i = N - 1; i > -N; i--) { const y = h * Math.sin(Math.PI / 2 * i / N); pts.push([r2(y), r2(xle(y) + corda(y))]); }
+    return { cr, corda, xle, xqc: 0.25 * cr, xmax: cr, pts };
+  }
+  let cr, ct, xt;
+  if (tipo === 'trap') { cr = coda ? b / 2.6 : b / 4.6; ct = (coda ? 0.6 : 0.55) * cr; xt = 0.3 * (cr - ct); }
+  else if (tipo === 'freccia') { cr = coda ? b / 2.5 : b / 4.4; ct = (coda ? 0.4 : 0.45) * cr; xt = Math.tan((coda ? 38 : 35) * Math.PI / 180) * h; }
+  else if (tipo === 'delta') { cr = limita(0.5 * L, 0.35 * b, 0.6 * L); ct = 0.08 * cr; xt = cr - ct; }
+  else { cr = ct = b / 5.5; xt = 0; }
+  const rt = (tipo === 'rett' ? 0.32 : 0.28) * ct, lam = ct / cr;
+  const pts = raccorda([[0, 0, xt > 0.1 * cr ? 0.12 * cr : 0], [h, xt, rt], [h, xt + ct, rt], [0, cr, xt > 0.1 * cr && tipo !== 'delta' ? 0.1 * cr : 0], [-h, xt + ct, rt], [-h, xt, rt]]);
+  return { cr, corda: y => cr + (ct - cr) * Math.abs(y) / h, xle: y => xt * Math.abs(y) / h, xqc: xt * (1 + 2 * lam) / (3 * (1 + lam)) + 0.25 * (2 / 3) * cr * (1 + lam + lam * lam) / (1 + lam), xmax: xt + ct > cr ? xt + ct : cr, pts };
+}
+function modellinoAereo(o0) {
+  const o = opzAereo(o0), L = o.L, b = o.b, t = o.t, g = o.g, hs = r2(t + 2 * g), jet = o.motore === 'getto', elica = o.motore === 'elica', bi = o.pos === 'biplano', alta = o.pos === 'alta', delta = o.ala === 'delta';
+  const avvisi = [], avv = (liv, testo) => avvisi.push({ liv, testo }), Hb = Math.max(13, 0.13 * L), W = piantaAla(o.ala, b, L), cr = W.cr;
+  // dove sta l'ala lungo la fusoliera: il quarto della corda media vicino al baricentro
+  const xwMax = (delta ? 0.93 : 0.74) * L - cr; let xw = delta ? 0.9 * L - cr : (jet ? 0.47 : 0.37) * L - W.xqc;
+  if (xwMax < 0.13 * L) avv('attenzione', 'L’ala è molto grande per questa fusoliera: allungare la fusoliera o ridurre l’apertura.');
+  xw = limita(xw, 0.13 * L, Math.max(0.13 * L, xwMax));
+  // ---- profilo laterale della fusoliera (x dal muso, z dal ventre), con la deriva
+  const zBassa = Math.max(0.3 * Hb, 2.4 + hs / 2), Hc = 1.02 * Hb + hs / 2 + 3.2; let zw = bi || !alta ? zBassa : jet ? 0.97 * Hb - 3 - hs / 2 : 1.02 * Hb, V;
+  const X = k => k * L, Z = k => k * Hb;
+  if (jet) V = [[0, Z(0.42), Z(0.06)], [X(0.16), Z(0.86), Z(0.6)], [X(0.24), Z(1.28), Z(0.3)], [X(0.34), Z(1.3), Z(0.3)], [X(0.48), Z(1), Z(0.5)], [X(0.74), Z(0.97), Z(0.2)], [X(0.93), Z(2), Z(0.12)], [X(1.02), Z(2), Z(0.1)], [X(0.985), Z(0.9), Z(0.15)],
+    [X(1), Z(0.8), 0], [X(1), Z(0.22), 0], [X(0.86), Z(0.04), Z(0.4)], [X(0.3), 0, Z(0.6)], [X(0.12), Z(0.1), Z(0.5)]];
+  else {
+    const muso = elica ? [[0, Z(0.28), Z(0.14)], [0, Z(0.82), Z(0.18)]] : [[0, Z(0.36), Z(0.3)], [0, Z(0.64), Z(0.3)]], coda = [[X(0.8), Z(0.78), Z(0.25)], [X(0.895), Z(1.9), Z(0.2)], [X(1), Z(1.9), Z(0.18)], [X(0.992), Z(0.56), 0], [X(0.985), Z(0.3), Z(0.08)], [X(0.58), 0, Z(0.9)], [X(0.1), 0, Z(0.55)]];
+    let dorso;
+    if (alta) dorso = [[X(0.08), Z(0.9), Z(0.2)], [Math.max(X(0.1), xw - 0.085 * L), Z(0.94), Z(0.12)], [xw - 0.03 * L, Hc, Z(0.22)], [xw + cr + 0.03 * L, Hc, Z(0.3)], [Math.min(xw + cr + 0.2 * L, X(0.76)), Z(0.8), Z(0.5)]];
+    else if (bi) { const xh = Math.min(xw + cr + 0.04 * L, X(0.6)); dorso = [[X(0.1), Z(0.92), Z(0.25)], [xh, Z(0.95), Z(0.3)], [xh + 0.05 * L, Z(1.12), Z(0.3)], [Math.min(xh + 0.2 * L, X(0.78)), Z(0.84), Z(0.6)]]; }
+    else dorso = [[X(0.2), Z(0.93), Z(0.3)], [X(0.3), Z(1.3), Z(0.26)], [X(0.43), Z(1.28), Z(0.3)], [X(0.55), Z(0.95), Z(0.5)]];
+    V = muso.concat(dorso, coda);
+  }
+  const corpo = pieno(raccorda(V)), fus = [corpo], zMuso = jet ? Z(0.42) : Z(0.55), tp = t; // tp: spessore dell'elica
+  if (elica) fus.push(rett(-(tp + 1.2), zMuso - t / 2, 1, zMuso + t / 2)); // perno quadrato per l'elica
+  let reg = regione(fus);
+  const fascia = x => { const q = A.interseca(reg, [A.rettangolo(x - 0.05, -1e4, x + 0.05, 1e4)]); if (!q.length) return null; const bb = A.ingombro(q); return [bb.y0, bb.y1]; };
+  const banda = (x0, x1) => { let lo = -Infinity, hi = Infinity; for (let i = 0; i <= 8; i++) { const f = fascia(x0 + (x1 - x0) * i / 8); if (!f) return null; if (f[0] > lo) lo = f[0]; if (f[1] < hi) hi = f[1]; } return [lo, hi]; };
+  const sede = (x0, x1, zDes, nome) => { // quota dell'asola: dentro il corpo, con almeno 2 mm di materiale sopra e sotto
+    const B = banda(x0 - 1, x1 + 1), m = 2;
+    if (!B || B[1] - B[0] < hs + 2 * 1.2) { avv('errore', nome + ': in quel tratto la fusoliera è troppo bassa per l’asola. Allungare la fusoliera o ridurre lo spessore della lastra.'); return B ? (B[0] + B[1]) / 2 : zDes; }
+    if (B[1] - B[0] < hs + 2 * m) { avv('attenzione', nome + ': attorno all’asola resta poco materiale (' + arr((B[1] - B[0] - hs) / 2, 10) + ' mm per parte).'); return (B[0] + B[1]) / 2; }
+    return limita(zDes, B[0] + m + hs / 2, B[1] - m - hs / 2);
+  };
+  zw = r2(sede(xw, xw + cr, zw, 'Ala'));
+  const fori = [rett(xw - g, zw - hs / 2, xw + cr + g, zw + hs / 2, 'foro')];
+  // ---- biplano: l'ala superiore passa in un castello che sale dal dorso
+  let zu = null;
+  if (bi) {
+    const B = banda(xw, xw + cr), top = B ? B[1] : Z(0.95), fm = fascia(xw + cr / 2), sopra = fm ? fm[1] : top; zu = r2(Math.max(top, sopra) + Math.max(0.5 * cr, 12));
+    fus.push(pieno(raccorda([[xw - 7, top - 2, 0], [xw + cr + 7, top - 2, 0], [xw + cr + 3.5, zu + hs / 2 + 3.2, 1.6], [xw - 3.5, zu + hs / 2 + 3.2, 1.6]])));
+    fori.push(rett(xw - g, zu - hs / 2, xw + cr + g, zu + hs / 2, 'foro'));
+    const f0 = Math.max(top, sopra) + 2.5, f1 = zu - hs / 2 - 3; if (f1 - f0 >= 4 && cr >= 14) fori.push(rett(xw + 4, f0, xw + cr - 4, f1, 'foro', { r: r2(Math.min(2.5, (f1 - f0) / 2 - 0.2)) })); // finestra: restano due montanti
+    reg = regione(fus);
+  }
+  // ---- piano di coda (non per il delta)
+  let Tc = null, xtl = 0, zt = 0;
+  if (!delta) {
+    Tc = piantaAla(jet ? 'freccia' : 'trap', limita(0.38 * b, 36, 0.56 * L), L, true); xtl = (jet ? 0.775 : 0.8) * L;
+    if (xtl + Tc.cr > 0.975 * L) xtl = 0.975 * L - Tc.cr;
+    const B = banda(xtl - 1, xtl + Tc.cr + 1); zt = r2(sede(xtl, xtl + Tc.cr, B ? (B[0] + B[1]) / 2 : Z(0.5), 'Piano di coda'));
+    fori.push(rett(xtl - g, zt - hs / 2, xtl + Tc.cr + g, zt + hs / 2, 'foro'));
+  }
+  // ---- controventatura
+  const ala = [pieno(W.pts.map(q => [q[0], r2(-q[1])]))], pezzi = [], fianco = [], pianta = [];
+  let astaV = null, montanti = null;
+  if (o.asta && bi) { // montanti interalari: due lastrine con le asole per le due ali
+    const ys = 0.3 * b, cs = W.corda(ys), dz = zu - zw, lx = cs + 7, lz = dz + hs + 7;
+    const f = [pieno(raccorda([[-lx / 2, -lz / 2, 2], [lx / 2, -lz / 2, 2], [lx / 2, lz / 2, 2], [-lx / 2, lz / 2, 2]])), rett(-cs / 2 - g, -dz / 2 - hs / 2, cs / 2 + g, -dz / 2 + hs / 2, 'foro'), rett(-cs / 2 - g, dz / 2 - hs / 2, cs / 2 + g, dz / 2 + hs / 2, 'foro')];
+    if (dz - hs - 6 >= 4 && cs >= 12) f.push(rett(-cs / 2 + 3.5, -dz / 2 + hs / 2 + 3, cs / 2 - 3.5, dz / 2 - hs / 2 - 3, 'foro', { r: r2(Math.min(2.5, (dz - hs - 6) / 2 - 0.2)) }));
+    montanti = { ys, cs, x0: xw + W.xle(ys) - 3.5, x1: xw + W.xle(ys) + cs + 3.5, z0: zw - hs / 2 - 3.5, z1: zu + hs / 2 + 3.5 };
+    pezzi.push({ nome: 'Montante interalare', h: t, n: 2, st: true, or: 'piedi', forme: f });
+  } else if (o.asta) { // asta a V: passa a incastro sotto (o sopra) la fusoliera e sale alle due semiali con un dente per parte
+    const ys = 0.27 * b, cs = W.corda(ys), xl = W.xle(ys) + 0.5 * cs, Xs = xw + xl, F = fascia(Xs), s = alta ? 1 : -1, sup = F ? (alta ? F[0] : F[1]) : 0, Dv = alta ? zw - t / 2 - sup : sup - (zw + t / 2), wt = 5;
+    if (!F || Dv < 7 || ys < t / 2 + 14 || cs < t + 2 * g + 5) avv('attenzione', 'Asta di controventatura: fra ala e fusoliera non c’è spazio a sufficienza (' + arr(Math.max(0, Dv), 10) + ' mm): non viene aggiunta.');
+    else {
+      const m = [[t / 2 + 5, -2.5, 1.5], [ys + wt / 2 + 1.5, Dv - 3.4, 1], [ys + wt / 2 + 1.5, Dv, 0], [ys + wt / 2, Dv, 0], [ys + wt / 2, Dv + t, 0], [ys - wt / 2, Dv + t, 0], [ys - wt / 2, Dv, 0], [ys - wt / 2 - 1.5, Dv, 0], [t / 2 + 4.5, 5.5, 1.5]];
+      const pts = raccorda(m.concat(m.slice().reverse().map(q => [-q[0], q[1], q[2]])));
+      pezzi.push({ nome: 'Asta di controventatura', h: t, n: 1, st: true, or: 'piedi', forme: [pieno(pts), rett(-hs / 2, 3, hs / 2, 7, 'foro')] });
+      fori.push(alta ? rett(Xs - hs / 2, sup - 1.5, Xs + hs / 2, sup + 3, 'foro') : rett(Xs - hs / 2, sup - 3, Xs + hs / 2, sup + 1.5, 'foro')); // mezzo incastro nella fusoliera
+      [-1, 1].forEach(q => ala.push(rett(q * ys - (wt + 2 * g) / 2, -xl - hs / 2, q * ys + (wt + 2 * g) / 2, -xl + hs / 2, 'foro'))); // sedi dei denti nelle semiali
+      astaV = { ys, Xs, z0: sup - s * 2.5, z1: zw - s * t / 2, wt };
+    }
+  }
+  // ---- scritta incisa sul fianco, nella fascia libera fra asola e bordo
+  if (o.testo) {
+    const x0 = 0.13 * L, x1 = Math.min(0.66 * L, delta ? 0.6 * L : xtl - 4), B = banda(x0, x1), nV = astaV ? 4.8 : 2;
+    const z0 = alta && !bi ? (B ? B[0] : 0) + nV : zw + hs / 2 + 2, z1 = alta && !bi ? zw - hs / 2 - 2 : (B ? B[1] : Hb) - nV;
+    if (B && z1 - z0 >= 3.2) fori.push(scritta(o.testo, (x0 + x1) / 2, (z0 + z1) / 2, x1 - x0, Math.min(0.8 * (z1 - z0), 0.34 * Hb), 'incavo', 0.4));
+    else avv('info', 'Sul fianco non c’è una fascia libera abbastanza alta per la scritta: non viene incisa.');
+  }
+  const fusFin = fus.concat(fori).map(f => sposta(f, -L / 2, -Hb / 2));
+  // segni di centraggio sull'ala: due tacche ai lati della fusoliera
+  const tacca = Math.min(0.5 * cr, 16); [-1, 1].forEach(q => ala.push(rett(q * (t / 2 + g + 0.5) - 0.4, -cr / 2 - tacca / 2, q * (t / 2 + g + 0.5) + 0.4, -cr / 2 + tacca / 2, 'incavo', { hr: 0.4 })));
+  const schizzi = [{ nome: 'Fusoliera', h: t, n: 1, st: true, or: 'piedi', forme: fusFin }, { nome: bi ? 'Ala (due uguali)' : 'Ala', h: t, n: bi ? 2 : 1, st: true, or: 'piedi', forme: ala.map(f => sposta(f, 0, W.xmax / 2)) }];
+  if (Tc) schizzi.push({ nome: 'Piano di coda', h: t, n: 1, st: true, or: 'piedi', forme: [sposta(pieno(Tc.pts.map(q => [q[0], r2(-q[1])])), 0, Tc.xmax / 2)] });
+  pezzi.forEach(p => schizzi.push(p));
+  let D = 0;
+  if (elica) { // elica bipala con il foro quadrato per il perno del muso
+    D = limita(0.3 * b, 30, 70); const w1 = 0.07 * D, w2 = 0.04 * D, q = [[2.4, 0, 3], [w1, 0.3 * D, 0.2 * D], [w2, 0.5 * D, 0.035 * D], [-w2, 0.5 * D, 0.035 * D], [-w1, 0.3 * D, 0.2 * D], [-2.4, 0, 3]];
+    schizzi.push({ nome: 'Elica', h: tp, n: 1, st: true, or: 'piedi', forme: [pieno(raccorda(q.concat(q.map(p => [-p[0], -p[1], p[2]]).slice(1, 5)).map(p => [p[1], p[0], p[2]]))), { t: 'c', m: 'pieno', x: 0, y: 0, d: r2(Math.max(9, 2 * t + 5)) }, rett(-hs / 2, -hs / 2, hs / 2, hs / 2, 'foro')] });
+  }
+  // ---- viste per l'anteprima: di fianco (x, z) e in pianta (x, y)
+  const rp = (x0, y0, x1, y1) => [[x0, y0], [x1, y0], [x1, y1], [x0, y1]];
+  const solFus = A.solidoSchizzo({ forme: fus.concat(fori).map(f => sposta(JSON.parse(JSON.stringify(f)), L / 2, Hb / 2)), h: t });
+  const corpoReg = solFus.base; fianco.push({ cl: 'fus', reg: corpoReg }); solFus.incavi.forEach(q => fianco.push({ cl: 'inc', reg: q.regione }));
+  if (montanti) fianco.push({ cl: 'asta', pts: rp(montanti.x0, montanti.z0, montanti.x1, montanti.z1) });
+  if (astaV) fianco.push({ cl: 'asta', pts: rp(astaV.Xs - t / 2, astaV.z0, astaV.Xs + t / 2, astaV.z1) });
+  fianco.push({ cl: 'ala', pts: rp(xw, zw - t / 2, xw + W.xmax, zw + t / 2) });
+  if (bi) fianco.push({ cl: 'ala', pts: rp(xw, zu - t / 2, xw + W.xmax, zu + t / 2) });
+  if (Tc) fianco.push({ cl: 'ala', pts: rp(xtl, zt - t / 2, xtl + Tc.xmax, zt + t / 2) });
+  if (elica) fianco.push({ cl: 'elica', pts: rp(-tp - 0.6, zMuso - D / 2, -0.6, zMuso + D / 2) });
+  pianta.push({ cl: 'ala', pts: W.pts.map(q => [xw + q[1], q[0]]) });
+  if (Tc) pianta.push({ cl: 'ala', pts: Tc.pts.map(q => [xtl + q[1], q[0]]) });
+  pianta.push({ cl: 'fus', pts: rp(0, -t / 2, L, t / 2) });
+  if (montanti) [-1, 1].forEach(q => pianta.push({ cl: 'asta', pts: rp(montanti.x0, q * montanti.ys - t / 2, montanti.x1, q * montanti.ys + t / 2) }));
+  if (astaV) pianta.push({ cl: 'asta', pts: rp(astaV.Xs - t / 2, -astaV.ys - astaV.wt / 2, astaV.Xs + t / 2, astaV.ys + astaV.wt / 2) });
+  if (elica) pianta.push({ cl: 'elica', pts: rp(-tp - 0.6, -D / 2, -0.6, D / 2) });
+  const nome = 'Modellino ' + (bi ? 'biplano' : o.motore === 'aliante' ? 'di aliante' : 'di aereo ' + MOTORI[o.motore]) + (bi ? ' ' + MOTORI[o.motore] : '') + ', ala ' + ALI[o.ala];
+  avv('info', 'Montaggio: le ali e il piano di coda si infilano di lato nelle asole della fusoliera fino alle tacche di centraggio' + (elica ? '; l’elica si calza sul perno quadrato del muso' : '') + (astaV ? '; l’asta a V entra a mezzo incastro ' + (alta ? 'sotto' : 'sopra') + ' la fusoliera e con i due denti nelle semiali' : '') + (montanti ? '; i due montanti si infilano sulle ali dalle estremità' : '') + '. Gioco degli incastri ' + String(g).replace('.', ',') + ' mm per parte: se le parti ballano, una goccia di colla.');
+  return { opz: o, nome, schizzi, avvisi, viste: { fianco, pianta }, dati: { L, b, t, cr: r2(cr), xw: r2(xw), zw, zu, Hb: r2(Hb), elica: D } };
+}
+
+// ---------------------------------------------------------------- portachiavi a forma di aereo, visto dall'alto
+/* Sagoma del portachiavi della scuola (quadrimotore di linea, 50,9 x 49,9 mm, muso in basso): dal kit «Aeroplani ITIS E. Majorana». */
+const LINEA = [[8.59,20.82],[8.29,20.25],[7.87,19.81],[7.5,19.59],[7.11,19.43],[6.51,19.36],[5.93,19.45],[5.46,19.65],[4.91,20.13],[4.62,20.55],[4.41,21.22],[4.47,24.26],[3.16,25.25],[1.96,26.23],[1.19,26.93],[0.58,27.58],[0.21,28.08],[0.04,28.45],[0,29.23],[0.07,31.02],[0.14,31.43],[0.33,31.72],[0.7,31.97],[1.23,32.01],[20.51,26.97],[21.49,36.58],[22.01,40.19],[22.41,42.34],[22.32,42.52],[20.94,43.46],[19.92,44.25],[19.16,44.98],[18.67,45.6],[18.44,46.07],[18.41,46.17],[18.49,48.36],[18.81,48.83],[19.17,49.02],[19.66,49.03],[23.7,47.87],[23.95,47.84],[24.25,48.5],[24.52,48.99],[24.85,49.43],[25.41,49.78],[25.94,49.91],[26.34,49.9],[26.77,49.78],[27.25,49.51],[27.61,49.13],[27.98,48.36],[28.24,47.68],[32.68,48.59],[33.16,48.5],[33.48,48.27],[33.68,47.91],[33.71,47.8],[33.64,45.7],[33.52,45.38],[33.14,44.85],[32.71,44.42],[31.91,43.77],[30.88,43.08],[29.54,42.3],[29.39,42.15],[29.67,39.47],[29.9,36.13],[30.2,26.64],[49.73,30.32],[50.14,30.3],[50.41,30.19],[50.77,29.81],[50.83,29.69],[50.87,29.32],[50.82,27.46],[50.79,26.95],[50.7,26.6],[50.35,26.09],[49.64,25.4],[48.94,24.82],[48,24.13],[46.25,22.99],[46.01,22.78],[45.85,19.68],[45.63,19.17],[45.29,18.72],[44.89,18.39],[44.37,18.16],[43.86,18.06],[43.32,18.12],[42.83,18.28],[42.33,18.59],[41.95,19.03],[41.64,19.79],[41.55,20.26],[38.73,18.76],[38.61,16.08],[38.46,15.53],[38.22,15.11],[37.8,14.7],[37.52,14.5],[37.05,14.31],[36.6,14.24],[35.95,14.29],[35.36,14.54],[34.88,14.93],[34.54,15.44],[34.37,15.89],[34.27,16.53],[30.06,14.54],[30.02,14.5],[29.88,11.94],[29.62,8.87],[29.34,6.94],[29.12,5.88],[28.86,4.81],[28.48,3.56],[28.16,2.77],[27.87,2.2],[27.54,1.69],[27.16,1.22],[26.76,0.84],[26.25,0.48],[25.69,0.21],[25.06,0.05],[24.42,0],[23.86,0.07],[23.36,0.2],[22.84,0.46],[22.34,0.82],[21.89,1.27],[21.52,1.77],[21.21,2.31],[20.94,2.9],[20.71,3.54],[20.42,4.67],[20.14,6.21],[19.9,8.48],[19.84,9.51],[19.81,10.86],[19.84,14.87],[15.76,17.18],[15.65,16.72],[15.44,16.16],[15.04,15.63],[14.53,15.27],[14,15.08],[13.42,15.04],[12.97,15.1],[12.39,15.36],[12.03,15.65],[11.65,16.15],[11.42,16.76],[11.44,19.74],[8.74,21.41]];
+const STILI_CHIAVI = { linea: 'quadrimotore di linea (sagoma del kit della scuola)', caccia: 'caccia a getto', turismo: 'monomotore a elica' };
+function opzChiavi(o) {
+  o = o || {}; const n = (v, d, a, b) => { v = parseFloat(v); return isFinite(v) ? limita(v, a, b) : d; };
+  return { stile: STILI_CHIAVI[o.stile] ? o.stile : 'linea', L: n(o.L, 90, 40, 220), t: n(o.t, 3, 1.2, 8), testo: testoPulito(o.testo, 30, ISTITUTO), modo: o.modo === 'incavo' ? 'incavo' : 'rilievo', hr: n(o.hr, 0.6, 0.2, 2), foro: n(o.foro, 4.5, 0, 10), larga: n(o.larga, 100, 80, 180), copie: Math.round(n(o.copie, 1, 1, 20)) };
+}
+/* Sagoma dell'aereo visto dall'alto, muso a destra, lunga L: le forme piene, dove va il foro e la fascia utile per la scritta. */
+function sagomaAereo(stile, L, k, dForo) {
+  const o = { stile, foro: dForo || 0 }, forme = []; let box, foro;
+  if (o.stile === 'linea') {
+    const s = L / 49.91, a = Math.atan2(26.0 - 24.42, 49.91), co = Math.cos(a), si = Math.sin(a), cx = 25.2, cy = 24.95; // l'asse della sagoma e' inclinato di poco: lo si raddrizza
+    const T = p => { const dx = p[0] - cx, dy = p[1] - cy, x = dx * co - dy * si, y = dx * si + dy * co; return [r2(-y * s), r2(x * s)]; }; // muso a destra
+    forme.push(pieno(LINEA.map(T)));
+    const wf = 10.2 * s; if (k > 1.01) forme.push(pieno(raccorda([[-17 * s, -wf * k / 2, wf * k * 0.35], [15 * s, -wf * k / 2, wf * k * 0.4], [15 * s, wf * k / 2, wf * k * 0.4], [-17 * s, wf * k / 2, wf * k * 0.35]])));
+    foro = T([24.57, 5.42]); box = { x0: -17.5 * s, x1: foro[0] - Math.max(o.foro, 3) / 2 - 2, h: wf * k };
+  } else {
+    const caccia = o.stile === 'caccia', wf = (caccia ? 0.17 : 0.16) * L * k, h = L / 2;
+    if (caccia) {
+      forme.push(pieno(raccorda([[h + 0.022 * L, 0, 0.01 * L], [0.24 * L, wf / 2, 0.5 * wf], [-0.47 * L, wf / 2 * 0.86, 0.1 * wf], [-h, wf / 2 * 0.7, 0.05 * wf], [-h, -wf / 2 * 0.7, 0.05 * wf], [-0.47 * L, -wf / 2 * 0.86, 0.1 * wf], [0.24 * L, -wf / 2, 0.5 * wf]])));
+      const ala = [[0.13 * L, 0, 0], [-0.15 * L, 0.4 * L, 0.02 * L], [-0.25 * L, 0.4 * L, 0.02 * L], [-0.22 * L, 0, 0]], coda = [[-0.3 * L, 0, 0], [-0.43 * L, 0.2 * L, 0.015 * L], [-0.5 * L, 0.2 * L, 0.015 * L], [-0.47 * L, 0, 0]];
+      [ala, coda].forEach(q => forme.push(pieno(raccorda(q.concat(q.slice(1, 3).reverse().map(p => [p[0], -p[1], p[2]]))))));
+    } else {
+      forme.push(pieno(raccorda([[h, wf * 0.22, 0.2 * wf], [0.36 * L, wf / 2, 0.4 * wf], [-0.1 * L, wf / 2, 0.5 * wf], [-h, wf * 0.3, 0.12 * wf], [-h, -wf * 0.3, 0.12 * wf], [-0.1 * L, -wf / 2, 0.5 * wf], [0.36 * L, -wf / 2, 0.4 * wf], [h, -wf * 0.22, 0.2 * wf]])));
+      const ala = [[0.2 * L, 0, 0], [0.17 * L, 0.46 * L, 0.05 * L], [0.03 * L, 0.46 * L, 0.05 * L], [0, 0, 0]], coda = [[-0.34 * L, 0, 0], [-0.36 * L, 0.19 * L, 0.03 * L], [-0.46 * L, 0.19 * L, 0.03 * L], [-0.47 * L, 0, 0]];
+      [ala, coda].forEach(q => forme.push(pieno(raccorda(q.concat(q.slice(1, 3).reverse().map(p => [p[0], -p[1], p[2]]))))));
+    }
+    foro = [-h + Math.max(4, o.foro / 2 + 2.2), 0]; box = { x0: foro[0] + o.foro / 2 + 2, x1: (caccia ? 0.24 : 0.36) * L, h: wf * (caccia ? 0.86 : 0.9) };
+  }
+  return { forme, foro, box };
+}
+function portachiaviAereo(o0) {
+  const o = opzChiavi(o0), L = o.L, avvisi = [], S = sagomaAereo(o.stile, L, o.larga / 100, o.foro), forme = S.forme, foro = S.foro; let box = S.box;
+  if (o.foro > 0) { forme.push({ t: 'c', m: 'foro', x: r2(foro[0]), y: r2(foro[1]), d: o.foro }); } else box = Object.assign(box, o.stile === 'linea' ? { x1: box.x1 + 4 } : { x0: box.x0 - 4 });
+  if (o.testo) {
+    const f = scritta(o.testo, (box.x0 + box.x1) / 2, 0, box.x1 - box.x0, 0.66 * box.h, o.modo, o.hr); forme.push(f);
+    if (f.a < 3.5) avvisi.push({ liv: 'attenzione', testo: 'Scritta alta ' + String(f.a).replace('.', ',') + ' mm: poco leggibile. Allungare il portachiavi, allargare la fusoliera o accorciare il testo.' });
+    if (o.modo === 'incavo' && o.hr >= o.t) avvisi.push({ liv: 'attenzione', testo: 'L’incisione è profonda quanto il pezzo: ridurla.' });
+  }
+  return { opz: o, nome: 'Portachiavi aereo' + (o.testo ? ' ' + o.testo : ''), schizzi: [{ nome: 'Portachiavi aereo', h: o.t, n: o.copie, st: true, or: 'piedi', forme }], avvisi };
+}
+
+// ---------------------------------------------------------------- albero di Natale in piano
+function opzAlbero(o) {
+  o = o || {}; const n = (v, d, a, b) => { v = parseFloat(v); return isFinite(v) ? limita(v, a, b) : d; };
+  return { H: n(o.H, 100, 50, 240), t: n(o.t, 3, 1.2, 8), testo: testoPulito(o.testo, 30, ISTITUTO), modo: o.modo === 'incavo' ? 'incavo' : 'rilievo', hr: n(o.hr, 0.6, 0.2, 2), palline: o.palline !== false, foro: n(o.foro, 3.5, 0, 8), piani: Math.round(n(o.piani, 3, 2, 5)), copie: Math.round(n(o.copie, 1, 1, 20)) };
+}
+function alberoNatale(o0) {
+  const o = opzAlbero(o0), H = o.H, avvisi = [], forme = [], N = o.piani;
+  const hb = 0.17 * H, wb = 0.66 * H, Rs = 0.095 * H, y0 = hb + 0.07 * H, yT = H - 1.25 * Rs, dy = (yT - y0) / N, W0 = 0.34 * H, r = Math.max(0.8, 0.012 * H);
+  // chioma: piani che si restringono verso la punta
+  const dx = [[0, yT, r]], palline = [];
+  for (let i = N - 1; i >= 0; i--) { const we = W0 * (0.42 + 0.58 * (N - i) / N), wi = W0 * (0.16 + 0.4 * (N - 1 - i) / N), yb = y0 + i * dy; dx.push([we, yb, r]); palline.push([we * 0.5, yb + 0.2 * dy], [-we * 0.16, yb + 0.55 * dy]); if (i > 0) dx.push([wi, yb, 0]); }
+  forme.push(pieno(raccorda(dx.concat(dx.slice(1).reverse().map(q => [-q[0], q[1], q[2]])))));
+  forme.push(rett(-0.06 * H, hb - 1, 0.06 * H, y0 + 1)); // tronco
+  forme.push(rett(-wb / 2, 0, wb / 2, hb, 'pieno', { r: r2(0.22 * hb) })); // targa di base, con la scritta
+  const stella = []; for (let i = 0; i < 10; i++) { const a = Math.PI / 2 + i * Math.PI / 5, q = i % 2 ? 0.45 * Rs : Rs; stella.push([r2(q * Math.cos(a)), r2(H - Rs + q * Math.sin(a))]); }
+  forme.push(pieno(stella));
+  if (o.foro > 0) { if (0.45 * Rs - o.foro / 2 < 1.2) avvisi.push({ liv: 'attenzione', testo: 'Il foro per appendere lascia poco materiale nella stella: ridurlo o fare l’albero più alto.' }); forme.push({ t: 'c', m: 'foro', x: 0, y: r2(H - Rs), d: o.foro }); }
+  if (o.palline) { const d = r2(limita(0.055 * H, 3, 9)); palline.forEach((q, i) => forme.push({ t: 'c', m: 'rilievo', hr: o.hr, x: r2(q[0] * (i % 4 < 2 ? 1 : -1)), y: r2(q[1]), d })); }
+  if (o.testo) {
+    const f = scritta(o.testo, 0, hb / 2, wb - 0.5 * hb, 0.56 * hb, o.modo, o.hr); forme.push(f);
+    if (f.a < 3.5) avvisi.push({ liv: 'attenzione', testo: 'Scritta alta ' + String(f.a).replace('.', ',') + ' mm: poco leggibile. Fare l’albero più alto o accorciare il testo.' });
+  }
+  return { opz: o, nome: 'Albero di Natale' + (o.testo ? ' ' + o.testo : ''), schizzi: [{ nome: 'Albero di Natale', h: o.t, n: o.copie, st: true, or: 'piedi', forme: forme.map(f => sposta(f, 0, -H / 2)) }], avvisi };
+}
+
+// ================================================================ gadget per gli open day
+const numero = (v, d, a, b) => { v = parseFloat(v); return isFinite(v) ? limita(v, a, b) : d; };
+const comuniOpz = (o, t, hr) => ({ t: numero(o.t, t, 0.6, 8), modo: o.modo === 'incavo' ? 'incavo' : 'rilievo', hr: numero(o.hr, hr || 0.6, 0.2, 2), copie: Math.round(numero(o.copie, 1, 1, 20)) });
+const virgola = v => String(v).replace('.', ',');
+/* Unisce piu' forme piene in una sola (o poche) forme a tracciato: nello schizzo restano un oggetto solo. */
+function fondi(forme, extra) {
+  const C = G.ClipperLib.Clipper, out = [];
+  regione(forme).forEach(p => {
+    let pts = p.map(q => [q.X / 1000, q.Y / 1000]);
+    if (pts.length > 380) pts = A.semplificaTratto(pts.concat([pts[0]]), 0.03).slice(0, -1);
+    out.push(Object.assign({ t: 'p', m: C.Orientation(p) ? 'pieno' : 'foro', pts: pts.slice(0, 400).map(q => [r2(q[0]), r2(q[1])]) }, extra || {}));
+  });
+  return out.sort((a, b) => (a.m === 'foro') - (b.m === 'foro'));
+}
+/* Scritta su una o due righe: sceglie la divisione che da' le lettere piu' alte. */
+function scrittaAdatta(testo, xc, yc, lmax, hmax, modo, hr, righe) {
+  const w = s => (A.larghezzaTesto({ testo: s, font: A.CAR_PREDEFINITO, a: 10, sp: 0 }) || 10) / 10, p = testo.split(/\s+/).filter(Boolean);
+  let m = { a: Math.min(hmax, lmax / w(testo)), r: null };
+  if (righe !== 1) for (let i = 1; i < p.length; i++) { const r1 = p.slice(0, i).join(' '), rr = p.slice(i).join(' '), a = Math.min(hmax / 2.25, lmax / Math.max(w(r1), w(rr))); if (a > m.a * 1.12) m = { a, r: [r1, rr] }; }
+  if (!m.r) return [scritta(testo, xc, yc, lmax, hmax, modo, hr)];
+  return [scritta(m.r[0], xc, yc + 0.625 * m.a, lmax, m.a, modo, hr), scritta(m.r[1], xc, yc - 0.625 * m.a, lmax, m.a, modo, hr)];
+}
+const pocoLeggibile = (forme, avvisi, rimedio) => { const a = Math.min(...forme.filter(f => f.t === 't').map(f => f.a)); if (a < 3.5) avvisi.push({ liv: 'attenzione', testo: 'Scritta alta ' + virgola(a) + ' mm: poco leggibile. ' + rimedio }); };
+const troppoProfonda = (o, avvisi) => { if (o.modo === 'incavo' && o.hr >= o.t - 0.2) avvisi.push({ liv: 'attenzione', testo: 'L’incisione è profonda quanto il pezzo: ridurla.' }); };
+/* Occhiello: un anello che sporge dal pezzo, con il foro per il nastro o l'anello. */
+const occhiello = (x, y, d) => [{ t: 'c', m: 'pieno', x: r2(x), y: r2(y), d: r2(d + 5) }, { t: 'c', m: 'foro', x: r2(x), y: r2(y), d }];
+const ruotaPunti = (pts, a, cx, cy) => { const c = Math.cos(a), s = Math.sin(a); return pts.map(q => [r2((cx || 0) + q[0] * c - q[1] * s), r2((cy || 0) + q[0] * s + q[1] * c)]); };
+const stella5 = (R, k, xc, yc, r) => raccorda(Array.from({ length: 10 }, (_, i) => { const a = Math.PI / 2 + i * Math.PI / 5, q = i % 2 ? k * R : R; return [xc + q * Math.cos(a), yc + q * Math.sin(a), i % 2 ? 0 : r || 0]; }));
+const pezzo = (nome, o, forme, n) => ({ nome, h: o.t, n: (n || 1) * o.copie, st: true, or: 'piedi', forme });
+
+// ---------------------------------------------------------------- portachiavi a forma di profilo alare
+function opzProfilo(o) {
+  o = o || {};
+  return Object.assign({ naca: String(o.naca === undefined ? '4418' : o.naca).replace(/[^0-9]/g, '').slice(0, 5), c: numero(o.c, 90, 50, 220), testo: testoPulito(o.testo, 30, ISTITUTO), foro: numero(o.foro, 4.5, 0, 8) }, comuniOpz(o, 3));
+}
+function portachiaviProfilo(o0) {
+  const o = opzProfilo(o0), def = A.nacaDef(o.naca), c = o.c, pr = A.nacaProfilo(def, 0.8 / c, 70), avvisi = [], forme = [];
+  const X = x => (x - 0.5) * c, sp = x => pr.spessore(x) * c;
+  forme.push(pieno(pr.pts.map(p => [r2(X(p[0])), r2(p[1] * c)])));
+  let xa = 0.07;
+  if (o.foro > 0) { // il foro va dove il profilo e' abbastanza spesso da lasciargli materiale intorno
+    let xf = 0.04; while (xf < 0.3 && sp(xf) < o.foro + 3.2) xf += 0.005;
+    if (sp(xf) < o.foro + 2.4) avvisi.push({ liv: 'attenzione', testo: 'Profilo sottile: intorno al foro restano ' + virgola(arr((sp(xf) - o.foro) / 2, 10)) + ' mm. Ridurre il foro, allungare la corda o scegliere un profilo più spesso (ultime due cifre).' });
+    forme.push({ t: 'c', m: 'foro', x: r2(X(xf)), y: r2(pr.medio(xf) * c), d: o.foro }); xa = xf + (o.foro / 2 + 2) / c;
+  }
+  if (o.testo) { // la scritta e' diritta, il profilo no: si cerca il tratto di corda che le lascia le lettere piu' alte
+    const w1 = (A.larghezzaTesto({ testo: o.testo, font: A.CAR_PREDEFINITO, a: 10, sp: 0 }) || 10) / 10; let m = null;
+    for (let xb = 0.5; xb <= 0.86; xb += 0.03) {
+      let lo = -Infinity, hi = Infinity; for (let i = 0; i <= 12; i++) { const x = xa + (xb - xa) * i / 12; lo = Math.max(lo, pr.yL(x)); hi = Math.min(hi, pr.yU(x)); }
+      const a = Math.min(0.72 * (hi - lo) * c, (xb - xa) * c / w1); if (!m || a > m.a) m = { a, xb, yc: (lo + hi) / 2 * c, h: (hi - lo) * c };
+    }
+    const f = scritta(o.testo, X((xa + m.xb) / 2), m.yc, (m.xb - xa) * c, 0.72 * m.h, o.modo, o.hr); forme.push(f);
+    pocoLeggibile(forme, avvisi, 'Allungare la corda, scegliere un profilo più spesso o accorciare il testo.'); troppoProfonda(o, avvisi);
+  }
+  avvisi.push({ liv: 'info', testo: def.nome + ': spessore massimo ' + virgola(arr(def.t * c, 10)) + ' mm su ' + virgola(c) + ' mm di corda' + (def.m ? ', freccia della linea media ' + virgola(arr(def.m * 100, 10)) + ' %' : ', simmetrico') + '. Il bordo d’uscita è ingrossato a 0,8 mm per poterlo stampare.' });
+  return { opz: o, nome: 'Portachiavi profilo ' + def.nome, schizzi: [pezzo('Portachiavi ' + def.nome, o, forme)], avvisi };
+}
+
+// ---------------------------------------------------------------- targhetta con nome
+const FORME_TARGA = { capsula: 'a capsula', rett: 'rettangolare' };
+function opzTarga(o) {
+  o = o || {};
+  return Object.assign({ forma: FORME_TARGA[o.forma] ? o.forma : 'capsula', L: numero(o.L, 80, 40, 200), H: numero(o.H, 22, 12, 80), testo: testoPulito(o.testo, 30, 'OPEN DAY'), testo2: testoPulito(o.testo2, 30, ISTITUTO), foro: numero(o.foro, 4.5, 0, 8), bordo: o.bordo !== false }, comuniOpz(o, 3));
+}
+function targhetta(o0) {
+  const o = opzTarga(o0), L = o.L, H = Math.min(o.H, L * 0.6), avvisi = [], forme = [], caps = o.forma === 'capsula', r = caps ? H / 2 : Math.min(0.14 * H, 4);
+  forme.push(rett(-L / 2, -H / 2, L / 2, H / 2, 'pieno', { r: r2(r) }));
+  const m = 1.6, xf = -L / 2 + Math.max(caps ? 0.5 * H : 0, o.foro / 2 + 3.2); let x0 = -L / 2 + (caps ? 0.3 * H : 3.5) + (o.bordo ? 1 : 0);
+  const x1 = L / 2 - (caps ? 0.3 * H : 3.5) - (o.bordo ? 1 : 0);
+  if (o.foro > 0) { forme.push({ t: 'c', m: 'foro', x: r2(xf), y: 0, d: o.foro }); x0 = xf + o.foro / 2 + 2.5; }
+  if (o.bordo) forme.push(rett(-L / 2 + m, -H / 2 + m, L / 2 - m, H / 2 - m, o.modo, { r: r2(Math.max(0.5, r - m)), pc: 1, hr: o.hr }));
+  const hu = H - 2 * (o.bordo ? m + 1.8 : 2), xc = (x0 + x1) / 2, lw = x1 - x0;
+  if (o.testo && o.testo2) { forme.push(scritta(o.testo, xc, 0.17 * hu, lw, 0.5 * hu, o.modo, o.hr), scritta(o.testo2, xc, -0.31 * hu, lw, 0.26 * hu, o.modo, o.hr)); }
+  else if (o.testo || o.testo2) forme.push(scritta(o.testo || o.testo2, xc, 0, lw, 0.66 * hu, o.modo, o.hr));
+  if (o.testo || o.testo2) { pocoLeggibile(forme, avvisi, 'Allungare o alzare la targhetta, oppure accorciare il testo.'); troppoProfonda(o, avvisi); }
+  return { opz: o, nome: 'Targhetta ' + (o.testo || o.testo2 || '').trim(), schizzi: [pezzo('Targhetta', o, forme)], avvisi };
+}
+
+// ---------------------------------------------------------------- segnalibro con l'aereo che sporge dal libro
+function opzSegnalibro(o) {
+  o = o || {};
+  return Object.assign({ stile: STILI_CHIAVI[o.stile] ? o.stile : 'caccia', L: numero(o.L, 140, 90, 200), H: numero(o.H, 26, 16, 45), testo: testoPulito(o.testo, 30, ISTITUTO), clip: o.clip !== false }, comuniOpz(Object.assign({ hr: 0.4 }, o), 1.2, 0.4));
+}
+function segnalibro(o0) {
+  const o = opzSegnalibro(o0), L = o.L, H = o.H, avvisi = [], La = Math.min(2.2 * H, 0.45 * L), xc = L / 2 - 0.2 * La;
+  const piene = [rett(-L / 2, -H / 2, L / 2, H / 2, 'pieno', { r: r2(0.16 * H) })].concat(sagomaAereo(o.stile, La, 1, 0).forme.map(f => sposta(f, xc, 0)));
+  const forme = fondi(piene); let x0 = -L / 2 + 3.5; // striscia e aereo fusi in un solo contorno
+  if (o.clip) { // linguetta che pizzica la pagina: un taglio a U largo 1,2 mm
+    const wt = 0.42 * H, lt = Math.min(34, 0.26 * L), s = 1.2, a = -L / 2 + 5, b = a + lt;
+    forme.push({ t: 'p', m: 'foro', pts: [[b, wt / 2 + s], [a - s, wt / 2 + s], [a - s, -wt / 2 - s], [b, -wt / 2 - s], [b, -wt / 2], [a, -wt / 2], [a, wt / 2], [b, wt / 2]].map(q => [r2(q[0]), r2(q[1])]) }); x0 = b + 3;
+  }
+  const x1 = xc - 0.32 * La;
+  if (o.testo) { forme.push(scritta(o.testo, (x0 + x1) / 2, 0, x1 - x0, 0.56 * H, o.modo, o.hr)); pocoLeggibile(forme, avvisi, 'Allungare il segnalibro o accorciare il testo.'); troppoProfonda(o, avvisi); }
+  if (o.t > 1.6) avvisi.push({ liv: 'info', testo: 'Oltre 1,6 mm di spessore il segnalibro gonfia il libro: 1–1,2 mm bastano.' });
+  return { opz: o, nome: 'Segnalibro ' + (o.testo || 'con aereo'), schizzi: [pezzo('Segnalibro', o, forme)], avvisi };
+}
+
+// ---------------------------------------------------------------- righello
+function opzRighello(o) {
+  o = o || {};
+  return Object.assign({ cm: Math.round(numero(o.cm, 15, 5, 20)), H: numero(o.H, 30, 20, 45), testo: testoPulito(o.testo, 30, ISTITUTO), foro: numero(o.foro, 4.5, 0, 8) }, comuniOpz(Object.assign({ modo: 'incavo', hr: 0.4 }, o), 2.4, 0.4));
+}
+function righello(o0) {
+  const o = opzRighello(o0), N = o.cm, H = o.H, avvisi = [], forme = [], Lu = 10 * N, mg = 5, xf = Lu + mg + (o.foro > 0 ? o.foro / 2 + 2 : 0), x1 = o.foro > 0 ? xf + o.foro / 2 + 3 : Lu + mg, lt = 0.8;
+  forme.push(rett(-mg, 0, x1, H, 'pieno', { r: 2 }));
+  if (o.foro > 0) forme.push({ t: 'c', m: 'foro', x: r2(xf), y: r2(H / 2), d: o.foro });
+  const ogni = N <= 17 ? 1 : 5; // un pezzo libero ha al massimo 60 forme: oltre i 17 cm si numerano solo i 5
+  for (let i = 0; i <= 2 * N; i++) { const x = 5 * i, lungo = i % 2 === 0, h = lungo ? (i % 10 === 0 ? 8 : 6.5) : 4; forme.push(rett(x - lt / 2, H - h, x + lt / 2, H, o.modo, { hr: o.hr })); }
+  for (let i = 0; i <= N; i += ogni) forme.push(scritta(String(i), 10 * i, H - 8 - 1.6 - 2.2, 9, 4.4, o.modo, o.hr));
+  if (o.testo) { forme.push(scritta(o.testo, Lu / 2, 0.2 * H + 1, Lu - 4, Math.min(0.26 * H, H - 21), o.modo, o.hr)); troppoProfonda(o, avvisi); }
+  avvisi.push({ liv: 'info', testo: 'Tacche ogni 5 mm, larghe 0,8 mm: più fitte non verrebbero pulite con un ugello da 0,4 mm.' + (ogni > 1 ? ' Oltre i 17 cm si numerano solo 0, 5, 10…' : '') });
+  avvisi.push({ liv: 'info', testo: 'Dopo la prima stampa confrontare con un righello vero: se la lunghezza scarta, si corregge dai passi/mm dell’asse.' });
+  return { opz: o, nome: 'Righello ' + N + ' cm', schizzi: [pezzo('Righello ' + N + ' cm', o, forme.map(f => sposta(f, -Lu / 2, -H / 2)))], avvisi };
+}
+
+// ---------------------------------------------------------------- medaglia dell'open day
+const SIMBOLI = { linea: 'aereo di linea', caccia: 'caccia a getto', turismo: 'monomotore', stella: 'stella', nessuno: 'nessuno' };
+function opzMedaglia(o) {
+  o = o || {};
+  return Object.assign({ D: numero(o.D, 60, 35, 120), simbolo: SIMBOLI[o.simbolo] ? o.simbolo : 'caccia', testo: testoPulito(o.testo, 24, 'OPEN DAY'), testo2: testoPulito(o.testo2, 30, ISTITUTO), bordo: o.bordo !== false, foro: numero(o.foro, 5, 0, 8) }, comuniOpz(o, 3));
+}
+function medaglia(o0) {
+  const o = opzMedaglia(o0), D = o.D, R = D / 2, avvisi = [], forme = [{ t: 'c', m: 'pieno', x: 0, y: 0, d: D }], Ri = R - (o.bordo ? 3.4 : 1.8);
+  if (o.foro > 0) forme.push(...occhiello(0, R + o.foro / 2 + 0.6, o.foro));
+  if (o.bordo) forme.push({ t: 'c', m: o.modo, hr: o.hr, pc: 1.2, x: 0, y: 0, d: r2(D - 2.4) });
+  const corda = (y, a) => 2 * Math.sqrt(Math.max(1, Ri * Ri - (Math.abs(y) + a / 2) * (Math.abs(y) + a / 2))), nudo = o.simbolo === 'nessuno';
+  if (!nudo) { // il simbolo al centro, alla stessa quota della scritta
+    let s;
+    if (o.simbolo === 'stella') s = [pieno(stella5(0.17 * D, 0.45, 0, 0, 0))];
+    else { // l'aereo si riduce finche' le ali non toccano le scritte
+      const q = sagomaAereo(o.simbolo, 100, 1, 0).forme, b = A.ingombro(regione(q)), La = 100 * Math.min(0.46 * D / (b.x1 - b.x0), 0.33 * D / (b.y1 - b.y0));
+      s = fondi(sagomaAereo(o.simbolo, La, 1, 0).forme); const c = A.ingombro(regione(s)); s.forEach(f => sposta(f, -(c.x0 + c.x1) / 2, -(c.y0 + c.y1) / 2));
+    }
+    s.forEach(f => { if (f.m === 'pieno') forme.push(Object.assign(f, { m: o.modo, hr: o.hr })); });
+  }
+  const a1 = nudo ? 0.2 * D : 0.13 * D, y1 = nudo ? 0.14 * D : 0.3 * D, h2 = nudo ? 0.3 * D : 0.2 * D, y2 = nudo ? -0.2 * D : -0.3 * D;
+  if (o.testo) forme.push(scritta(o.testo, 0, y1, corda(y1, a1), a1, o.modo, o.hr));
+  if (o.testo2) forme.push(...scrittaAdatta(o.testo2, 0, y2, corda(y2, 0.72 * h2), h2, o.modo, o.hr));
+  if (o.testo || o.testo2) { pocoLeggibile(forme, avvisi, 'Fare la medaglia più grande, togliere il simbolo o accorciare il testo.'); troppoProfonda(o, avvisi); }
+  return { opz: o, nome: 'Medaglia ' + (o.testo || o.testo2 || 'open day'), schizzi: [pezzo('Medaglia', o, forme)], avvisi };
+}
+
+// ---------------------------------------------------------------- supporto per il telefono, a incastro
+function opzTelefono(o) {
+  o = o || {};
+  return Object.assign({ W: numero(o.W, 70, 50, 110), Ha: numero(o.Ha, 100, 70, 160), ang: numero(o.ang, 68, 55, 80), sp: numero(o.sp, 12, 8, 20), g: numero(o.g, 0.15, 0, 0.5), testo: testoPulito(o.testo, 30, ISTITUTO) }, comuniOpz(o, 3), { t: numero(o.t, 3, 2, 5) });
+}
+function supportoTelefono(o0) {
+  const o = opzTelefono(o0), s = o.t + 2 * o.g, th = o.ang * Math.PI / 180, sn = Math.sin(th), cs = Math.cos(th), tn = Math.tan(th), avvisi = [];
+  // piede, visto di fianco: dente davanti, vassoio per il telefono, asola inclinata, sperone che regge lo schienale da dietro
+  const wl = 5, hv = 16, hl = hv + 10, zb = 9, Hs = hv + 22, xa = wl + o.sp + 1.5, pF = [xa - (hv - zb) / tn, zb], pR = [pF[0] + s * sn, zb - s * cs], xT = pR[0] + (Hs - pR[1]) / tn, Lb = Math.max(xT + 6 + 0.8 * Hs, xa + 50);
+  const piede = raccorda([[0, 0, 1.5], [Lb, 0, 2], [Lb, 6, 3], [xT + 6, Hs, 3], [xT, Hs, 1], [pR[0], pR[1], 0], [pF[0], pF[1], 0], [xa, hv, 0], [wl, hv, 1.5], [wl, hl, 1.5], [0, hl, 1.5]]);
+  const dA = (zb - s * cs) / sn + 0.6, d = 0.56 * o.W; // l'asola dello schienale scavalca i 9 mm di piede sotto l'asola e lo porta a toccare il tavolo
+  const sch = [pieno(raccorda([[-o.W / 2, 0, 1], [o.W / 2, 0, 1], [o.W / 2, o.Ha, 9], [-o.W / 2, o.Ha, 9]])), rett(-d / 2 - s / 2, -1, -d / 2 + s / 2, dA, 'foro'), rett(d / 2 - s / 2, -1, d / 2 + s / 2, dA, 'foro')];
+  if (o.testo) { sch.push(...scrittaAdatta(o.testo, 0, 0.6 * o.Ha, o.W - 12, 0.34 * o.Ha, o.modo, o.hr)); pocoLeggibile(sch, avvisi, 'Allargare lo schienale o accorciare il testo.'); troppoProfonda(o, avvisi); }
+  // vista di fianco del supporto montato, con un telefono da 150 mm
+  const u = [cs, sn], nr = [sn, -cs], q0 = [pF[0] - dA * u[0] + 0.6 * u[0], pF[1] - dA * u[1] + 0.6 * u[1]], lastra = [q0, [q0[0] + s * nr[0], q0[1] + s * nr[1]], [q0[0] + s * nr[0] + o.Ha * u[0], q0[1] + s * nr[1] + o.Ha * u[1]], [q0[0] + o.Ha * u[0], q0[1] + o.Ha * u[1]]];
+  const b0 = [xa, hv], tel = [b0, [b0[0] + 150 * u[0], b0[1] + 150 * u[1]], [b0[0] + 150 * u[0] - 9 * nr[0], b0[1] + 150 * u[1] - 9 * nr[1]], [b0[0] - 9 * nr[0], b0[1] - 9 * nr[1]]];
+  avvisi.push({ liv: 'info', testo: 'Lo schienale entra dall’alto nelle asole dei due piedi, inclinato di ' + virgola(o.ang) + '°. Asole larghe ' + virgola(arr(s, 100)) + ' mm (spessore + 2 × gioco). Il telefono poggia a ' + hv + ' mm dal tavolo: sotto resta il posto per il cavo.' });
+  avvisi.push({ liv: 'info', testo: 'Incastro non ancora provato in stampa: prima di farne molti, stampare un piede e lo schienale e, se serve, ritoccare il gioco.' });
+  return { opz: o, nome: 'Supporto per telefono' + (o.testo ? ' ' + o.testo : ''), schizzi: [pezzo('Schienale', o, sch.map(f => sposta(f, 0, -o.Ha / 2))), pezzo('Piede', o, [pieno(piede.map(q => [r2(q[0] - Lb / 2), r2(q[1] - Hs / 2)]))], 2)], avvisi,
+    viste: [['Montato, di fianco', [{ cl: 'fus', pts: piede }, { cl: 'ala', pts: lastra }, { cl: 'tel', pts: tel }]]] };
+}
+
+// ---------------------------------------------------------------- targa da banco, con due piedini
+function opzSegnaposto(o) {
+  o = o || {};
+  return Object.assign({ L: numero(o.L, 150, 80, 240), H: numero(o.H, 45, 25, 90), ang: numero(o.ang, 75, 60, 85), g: numero(o.g, 0.15, 0, 0.5), testo: testoPulito(o.testo, 30, 'COSTRUZIONI AERONAUTICHE'), testo2: testoPulito(o.testo2, 30, ISTITUTO), bordo: o.bordo !== false }, comuniOpz(o, 3), { t: numero(o.t, 3, 2, 5) });
+}
+function segnaposto(o0) {
+  const o = opzSegnaposto(o0), L = o.L, H = o.H, s = o.t + 2 * o.g, th = o.ang * Math.PI / 180, sn = Math.sin(th), cs = Math.cos(th), tn = Math.tan(th), avvisi = [];
+  const targa = [rett(-L / 2, 0, L / 2, H, 'pieno', { r: 3 })], m = 2, yb = 13; // i 13 mm in basso entrano nei piedini
+  if (o.bordo) targa.push(rett(-L / 2 + m, yb, L / 2 - m, H - m, o.modo, { r: 2, pc: 1, hr: o.hr }));
+  const hu = H - yb - m - (o.bordo ? 3.6 : 1.5), yc = yb + (o.bordo ? 1.8 : 0.5) + hu / 2, lw = L - 2 * m - (o.bordo ? 7 : 4);
+  if (o.testo && o.testo2) targa.push(scritta(o.testo, 0, yc + 0.17 * hu, lw, 0.5 * hu, o.modo, o.hr), scritta(o.testo2, 0, yc - 0.31 * hu, lw, 0.26 * hu, o.modo, o.hr));
+  else if (o.testo || o.testo2) targa.push(...scrittaAdatta(o.testo || o.testo2, 0, yc, lw, 0.8 * hu, o.modo, o.hr));
+  if (o.testo || o.testo2) { pocoLeggibile(targa, avvisi, 'Allungare o alzare la targa, oppure accorciare il testo.'); troppoProfonda(o, avvisi); }
+  // piedino: l'asola inclinata prende il bordo basso della targa
+  const hf = 16, zb = 5, Lf = Math.max(38, 0.8 * H), xs = 0.34 * Lf, pF = [xs - (hf - zb) / tn, zb], pR = [pF[0] + s * sn, zb - s * cs], xr = z => pR[0] + (z - pR[1]) / tn;
+  const corpo = raccorda([[0, 0, 1.5], [Lf, 0, 1.5], [Lf, 4, 2], [0.72 * Lf, hf, 3], [0.1 * Lf, hf, 3], [0, 4, 2]]), asola = [pF, pR, [xr(hf + 3), hf + 3], [xs + 3 / tn, hf + 3]];
+  const cx = Lf / 2, cy = hf / 2, pd = [pieno(corpo.map(q => [r2(q[0] - cx), r2(q[1] - cy)])), { t: 'p', m: 'foro', pts: asola.map(q => [r2(q[0] - cx), r2(q[1] - cy)]) }];
+  const u = [cs, sn], nr = [sn, -cs], lastra = [pF, pR, [pR[0] + H * u[0], pR[1] + H * u[1]], [pF[0] + H * u[0], pF[1] + H * u[1]]];
+  avvisi.push({ liv: 'info', testo: 'La targa si infila nei due piedini, inclinata di ' + virgola(o.ang) + '°: asole larghe ' + virgola(arr(s, 100)) + ' mm (spessore + 2 × gioco), profonde ' + virgola(arr((hf - zb) / sn, 10)) + ' mm. Se la targa balla, ridurre il gioco.' });
+  return { opz: o, nome: 'Targa da banco ' + (o.testo || o.testo2 || ''), schizzi: [pezzo('Targa da banco', o, targa.map(f => sposta(f, 0, -H / 2))), pezzo('Piedino', o, pd, 2)], avvisi,
+    viste: [['Montata, di fianco', [{ cl: 'fus', pts: corpo }, { cl: 'ala', pts: lastra }]]] };
+}
+
+// ---------------------------------------------------------------- addobbi di Natale
+const FORME_ADDOBBO = { stella: 'stella', pallina: 'pallina', fiocco: 'fiocco di neve' };
+function opzAddobbo(o) {
+  o = o || {};
+  return Object.assign({ forma: FORME_ADDOBBO[o.forma] ? o.forma : 'stella', D: numero(o.D, 75, 40, 140), testo: testoPulito(o.testo, 30, ISTITUTO), foro: numero(o.foro, 3.5, 0, 8) }, comuniOpz(o, 2.4));
+}
+function addobbo(o0) {
+  const o = opzAddobbo(o0), D = o.D, R = D / 2, avvisi = [], forme = []; let box, yF = R;
+  if (o.forma === 'stella') { forme.push(pieno(stella5(R, 0.52, 0, 0, 0.03 * D))); box = { y: 0.03 * R, l: 0.98 * R, h: 0.56 * R }; yF = R - 0.03 * D; }
+  else if (o.forma === 'pallina') {
+    forme.push({ t: 'c', m: 'pieno', x: 0, y: 0, d: D }, rett(-0.11 * D, R - 0.03 * D, 0.11 * D, R + 0.07 * D, 'pieno', { r: r2(0.015 * D) })); yF = R + 0.07 * D;
+    forme.push({ t: 'c', m: o.modo, hr: o.hr, pc: 1.2, x: 0, y: 0, d: r2(D - 2.4) });
+    const lf = Math.sqrt(Math.max(1, (R - 1.8) * (R - 1.8) - (0.2 * D + 0.6) * (0.2 * D + 0.6))); // le due fasce finiscono dentro la cornice
+    [0.2, -0.2].forEach(k => forme.push(rett(-lf, k * D - 0.6, lf, k * D + 0.6, o.modo, { hr: o.hr })));
+    [0.32, -0.32].forEach(k => [-0.14, 0, 0.14].forEach(j => forme.push({ t: 'c', m: o.modo, hr: o.hr, x: r2(j * D), y: r2(k * D), d: r2(0.06 * D) })));
+    box = { y: 0, l: 0.8 * D, h: 0.3 * D };
+  } else { // fiocco di neve: sei bracci con due coppie di rami, fusi in un solo contorno
+    const w = 0.075 * D, bracci = [];
+    for (let i = 0; i < 6; i++) {
+      const a = Math.PI / 2 + i * Math.PI / 3;
+      bracci.push(pieno(ruotaPunti([[0, -w / 2], [R - w / 2, -w / 2], [R, 0], [R - w / 2, w / 2], [0, w / 2]], a)));
+      [[0.5, 0.24], [0.74, 0.15]].forEach(q => [1, -1].forEach(v => { const b = [q[0] * R * Math.cos(a), q[0] * R * Math.sin(a)]; bracci.push(pieno(ruotaPunti([[0, -0.4 * w], [q[1] * D, -0.4 * w], [q[1] * D + 0.4 * w, 0], [q[1] * D, 0.4 * w], [0, 0.4 * w]], a + v * Math.PI / 3, b[0], b[1]))); }));
+    }
+    bracci.push({ t: 'g', m: 'pieno', x: 0, y: 0, d: r2(0.56 * D), n: 6, ang: 0 });
+    forme.push(...fondi(bracci)); box = { y: 0, l: 0.42 * D, h: 0.3 * D }; yF = R - 0.5;
+  }
+  if (o.foro > 0) forme.push(...occhiello(0, yF + o.foro / 2 - 0.4, o.foro));
+  if (o.testo) { forme.push(...scrittaAdatta(o.testo, 0, box.y, box.l, box.h, o.modo, o.hr)); pocoLeggibile(forme, avvisi, 'Fare l’addobbo più grande o accorciare il testo.'); troppoProfonda(o, avvisi); }
+  return { opz: o, nome: FORME_ADDOBBO[o.forma].charAt(0).toUpperCase() + FORME_ADDOBBO[o.forma].slice(1) + ' di Natale' + (o.testo ? ' ' + o.testo : ''), schizzi: [pezzo(o.forma === 'fiocco' ? 'Fiocco di neve' : o.forma === 'pallina' ? 'Pallina di Natale' : 'Stella di Natale', o, forme)], avvisi };
+}
+
+// ---------------------------------------------------------------- catalogo: ogni tipo con le sue opzioni e i campi da mostrare
+/* Voci dei campi: ['h', titolo] · ['n', chiave, etichetta, passo, unita', nota] · ['sc', chiave, etichetta, {valore: etichetta}] ·
+   ['sg', chiave, etichetta, [[valore, etichetta]…]] · ['ck', chiave, etichetta, nota] · ['tx', chiave, etichetta, nota, lunghezza] · ['nota', testo] */
+const campiScritta = o => [['sg', 'modo', 'La scritta è', [['rilievo', 'in rilievo'], ['incavo', 'incisa']]], ['n', 'hr', o.modo === 'incavo' ? 'Profondità' : 'Altezza', 0.2, 'mm']];
+const campiCopie = [['h', 'Quanti'], ['n', 'copie', 'Copie da stampare', 1, '', 'Fino a 20: si dispongono da sole sul piano, su più piatti se non ci stanno.']];
+const TIPI_GADGET = {
+  aereo: { nome: 'Aereo da montare', fam: 'Aerei', opz: opzAereo, genera: modellinoAereo, campi: o => [
+    ['h', 'Ala'], ['sc', 'ala', 'Forma dell’ala', ALI], ['sg', 'pos', 'Posizione', [['alta', 'sopra'], ['bassa', 'sotto'], ['biplano', 'biplano']]],
+    ['nota', o.pos === 'alta' ? 'Ala alta: passa nel tetto della fusoliera.' : o.pos === 'bassa' ? 'Ala bassa: passa vicino al ventre della fusoliera.' : 'Due ali uguali: quella bassa nella fusoliera, quella alta in un castello sul dorso.'],
+    ['ck', 'asta', 'Asta di controventatura', o.pos === 'biplano' ? 'Due montanti fra le ali, da infilare dalle estremità.' : o.pos === 'alta' ? 'Asta a V sotto la fusoliera, con un dente in ogni semiala.' : 'Asta a V sopra la fusoliera, con un dente in ogni semiala.'],
+    ['h', 'Motore'], ['sg', 'motore', 'Propulsione', [['elica', 'a elica'], ['getto', 'a getto'], ['aliante', 'aliante']]],
+    ['h', 'Misure'], ['n', 'L', 'Lunghezza della fusoliera', 5, 'mm'], ['n', 'b', 'Apertura alare', 5, 'mm'], ['n', 't', 'Spessore delle lastre', 0.2, 'mm', 'Tutti i pezzi sono lastre piane dello stesso spessore: le asole si adattano.'], ['n', 'g', 'Gioco degli incastri', 0.05, 'mm'],
+    ['h', 'Scritta'], ['tx', 'testo', 'Sul fianco della fusoliera', 'Incisa. Lasciare vuoto per non scrivere nulla.']] },
+  chiavi: { nome: 'Portachiavi aereo', fam: 'Aerei', opz: opzChiavi, genera: portachiaviAereo, campi: o => [
+    ['h', 'Aereo'], ['sc', 'stile', 'Sagoma', STILI_CHIAVI], ['n', 'L', 'Lunghezza', 5, 'mm'], ['n', 'larga', 'Larghezza della fusoliera', 5, '%', 'Oltre 100 % la fusoliera si allarga («schiacciata») per far posto a una scritta più alta.'], ['n', 't', 'Spessore', 0.25, 'mm'], ['n', 'foro', 'Foro per l’anello', 0.5, 'mm', '0 per non farlo.'],
+    ['h', 'Scritta']].concat(campiScritta(o), [['tx', 'testo', 'Sulla fusoliera', 'Il nome dell’istituto, o quello che si vuole: l’altezza delle lettere si adatta alla fusoliera.']], campiCopie) },
+  profilo: { nome: 'Portachiavi profilo alare', fam: 'Aerei', opz: opzProfilo, genera: portachiaviProfilo, campi: o => [
+    ['h', 'Profilo'], ['tx', 'naca', 'Profilo NACA', 'Quattro o cinque cifre: 4418, 0015, 2412, 23015… Le ultime due sono lo spessore in centesimi di corda: più è spesso, più c’è posto per la scritta.', 5], ['n', 'c', 'Corda', 5, 'mm'], ['n', 't', 'Spessore del pezzo', 0.25, 'mm'], ['n', 'foro', 'Foro per l’anello', 0.5, 'mm', 'Vicino al bordo d’attacco; 0 per non farlo.'],
+    ['h', 'Scritta']].concat(campiScritta(o), [['tx', 'testo', 'Lungo la corda', 'Il nome dell’istituto o la sigla del profilo.']], campiCopie) },
+  targa: { nome: 'Targhetta con nome', fam: 'Open day', opz: opzTarga, genera: targhetta, campi: o => [
+    ['h', 'Targhetta'], ['sg', 'forma', 'Forma', [['capsula', 'a capsula'], ['rett', 'rettangolare']]], ['n', 'L', 'Lunghezza', 5, 'mm'], ['n', 'H', 'Altezza', 1, 'mm'], ['n', 't', 'Spessore', 0.25, 'mm'], ['n', 'foro', 'Foro per l’anello', 0.5, 'mm', '0 per non farlo.'], ['ck', 'bordo', 'Cornice lungo il bordo'],
+    ['h', 'Scritta']].concat(campiScritta(o), [['tx', 'testo', 'Riga grande', 'Il nome del ragazzo, della classe, dell’evento…'], ['tx', 'testo2', 'Riga piccola', 'Lasciare vuota una riga per scriverne una sola, più alta.']], campiCopie) },
+  segnalibro: { nome: 'Segnalibro', fam: 'Open day', opz: opzSegnalibro, genera: segnalibro, campi: o => [
+    ['h', 'Segnalibro'], ['sc', 'stile', 'Aereo in cima', STILI_CHIAVI], ['n', 'L', 'Lunghezza della striscia', 5, 'mm'], ['n', 'H', 'Larghezza', 1, 'mm'], ['n', 't', 'Spessore', 0.2, 'mm', 'Sottile: 1–1,2 mm, cioè 5–6 strati da 0,2 mm.'], ['ck', 'clip', 'Linguetta che pizzica la pagina'],
+    ['h', 'Scritta']].concat(campiScritta(o), [['tx', 'testo', 'Lungo la striscia', 'L’aereo sporge dal libro, la scritta resta dentro.']], campiCopie) },
+  righello: { nome: 'Righello', fam: 'Open day', opz: opzRighello, genera: righello, campi: o => [
+    ['h', 'Righello'], ['n', 'cm', 'Lunghezza utile', 1, 'cm'], ['n', 'H', 'Larghezza', 1, 'mm'], ['n', 't', 'Spessore', 0.2, 'mm'], ['n', 'foro', 'Foro per appenderlo', 0.5, 'mm', '0 per non farlo.'],
+    ['h', 'Tacche, numeri e scritta']].concat(campiScritta(o), [['tx', 'testo', 'Lungo il bordo basso', 'Il nome dell’istituto, della classe o del ragazzo.']], campiCopie) },
+  medaglia: { nome: 'Medaglia', fam: 'Open day', opz: opzMedaglia, genera: medaglia, campi: o => [
+    ['h', 'Medaglia'], ['n', 'D', 'Diametro', 5, 'mm'], ['sc', 'simbolo', 'Simbolo al centro', SIMBOLI], ['n', 't', 'Spessore', 0.25, 'mm'], ['ck', 'bordo', 'Cornice lungo il bordo'], ['n', 'foro', 'Occhiello per il nastro', 0.5, 'mm', '0 per non farlo.'],
+    ['h', 'Scritta']].concat(campiScritta(o), [['tx', 'testo', 'In alto', 'Per esempio OPEN DAY, 1° POSTO, BENVENUTI.', 24], ['tx', 'testo2', 'In basso', 'Va a capo da sola se così le lettere vengono più alte.']], campiCopie) },
+  telefono: { nome: 'Supporto per telefono', fam: 'Open day', opz: opzTelefono, genera: supportoTelefono, campi: o => [
+    ['h', 'Supporto'], ['n', 'W', 'Larghezza dello schienale', 5, 'mm'], ['n', 'Ha', 'Altezza dello schienale', 5, 'mm'], ['n', 'ang', 'Inclinazione', 1, '°', 'Angolo dello schienale sul tavolo: 68° va bene per guardare lo schermo da seduti.'], ['n', 'sp', 'Spessore del telefono', 1, 'mm', 'Con la custodia: è la larghezza del vassoio in cui poggia.'],
+    ['h', 'Lastre e incastri'], ['n', 't', 'Spessore delle lastre', 0.2, 'mm'], ['n', 'g', 'Gioco degli incastri', 0.05, 'mm'],
+    ['h', 'Scritta']].concat(campiScritta(o), [['tx', 'testo', 'Sullo schienale', 'Si legge quando il telefono non c’è.']], campiCopie) },
+  segnaposto: { nome: 'Targa da banco', fam: 'Open day', opz: opzSegnaposto, genera: segnaposto, campi: o => [
+    ['h', 'Targa'], ['n', 'L', 'Lunghezza', 5, 'mm'], ['n', 'H', 'Altezza', 1, 'mm'], ['n', 'ang', 'Inclinazione', 1, '°'], ['ck', 'bordo', 'Cornice lungo il bordo'],
+    ['h', 'Lastre e incastri'], ['n', 't', 'Spessore delle lastre', 0.2, 'mm'], ['n', 'g', 'Gioco degli incastri', 0.05, 'mm'],
+    ['h', 'Scritta']].concat(campiScritta(o), [['tx', 'testo', 'Riga grande', 'Il nome del laboratorio, dell’indirizzo di studi, del docente…'], ['tx', 'testo2', 'Riga piccola', 'Lasciare vuota una riga per scriverne una sola, più alta.']], campiCopie) },
+  albero: { nome: 'Albero di Natale', fam: 'Natale', opz: opzAlbero, genera: alberoNatale, campi: o => [
+    ['h', 'Albero'], ['n', 'H', 'Altezza', 5, 'mm'], ['n', 'piani', 'Piani della chioma', 1, ''], ['n', 't', 'Spessore', 0.25, 'mm'], ['ck', 'palline', 'Palline in rilievo'], ['n', 'foro', 'Foro per appenderlo', 0.5, 'mm', 'Nella stella in punta; 0 per non farlo.'],
+    ['h', 'Scritta']].concat(campiScritta(o), [['tx', 'testo', 'Sulla targa di base', 'Il nome dell’istituto, o un augurio: l’altezza delle lettere si adatta alla targa.']], campiCopie) },
+  addobbo: { nome: 'Addobbi da appendere', fam: 'Natale', opz: opzAddobbo, genera: addobbo, campi: o => [
+    ['h', 'Addobbo'], ['sg', 'forma', 'Forma', [['stella', 'stella'], ['pallina', 'pallina'], ['fiocco', 'fiocco di neve']]], ['n', 'D', 'Grandezza', 5, 'mm'], ['n', 't', 'Spessore', 0.2, 'mm'], ['n', 'foro', 'Occhiello per il filo', 0.5, 'mm', '0 per non farlo.'],
+    ['h', 'Scritta']].concat(campiScritta(o), [['tx', 'testo', 'Al centro', 'Va a capo da sola se così le lettere vengono più alte.']], campiCopie) }
+};
+/* Modelli pronti per il menu: [tipo, etichetta, opzioni, gruppo del menu]. I primi quattro restano in quest'ordine. */
+const GADGET_PRONTI = [
+  ['chiavi', 'Portachiavi aereo di linea, con il nome dell’istituto', { stile: 'linea' }, 'Portachiavi'],
+  ['chiavi', 'Portachiavi caccia a getto, con il nome dell’istituto', { stile: 'caccia' }, 'Portachiavi'],
+  ['chiavi', 'Portachiavi monomotore a elica, con il nome dell’istituto', { stile: 'turismo' }, 'Portachiavi'],
+  ['albero', 'Albero di Natale con il nome dell’istituto', {}, 'Natale'],
+  ['profilo', 'Portachiavi a forma di profilo alare NACA 4418', { naca: '4418' }, 'Portachiavi'],
+  ['profilo', 'Portachiavi profilo simmetrico NACA 0018, con la sua sigla', { naca: '0018', testo: 'NACA 0018' }, 'Portachiavi'],
+  ['targa', 'Targhetta con nome e istituto', { testo: 'NOME COGNOME', testo2: ISTITUTO }, 'Portachiavi'],
+  ['targa', 'Targhetta «Remove before flight»', { forma: 'rett', L: 110, H: 24, testo: 'REMOVE BEFORE FLIGHT', testo2: ISTITUTO }, 'Portachiavi'],
+  ['medaglia', 'Medaglia dell’open day', {}, 'Gadget per gli open day'],
+  ['segnalibro', 'Segnalibro con l’aereo che sporge dal libro', {}, 'Gadget per gli open day'],
+  ['righello', 'Righello da 15 cm con il nome dell’istituto', {}, 'Gadget per gli open day'],
+  ['telefono', 'Supporto per telefono a incastro (3 pezzi)', {}, 'Gadget per gli open day'],
+  ['segnaposto', 'Targa da banco per laboratori e docenti (3 pezzi)', {}, 'Gadget per gli open day'],
+  ['addobbo', 'Stella di Natale da appendere', { forma: 'stella' }, 'Natale'],
+  ['addobbo', 'Pallina di Natale in piano', { forma: 'pallina' }, 'Natale'],
+  ['addobbo', 'Fiocco di neve', { forma: 'fiocco' }, 'Natale']
+];
+
+Object.assign(A, { raccorda, modellinoAereo, portachiaviAereo, alberoNatale, opzAereo, opzChiavi, opzAlbero, sagomaAereo, portachiaviProfilo, targhetta, segnalibro, righello, medaglia, supportoTelefono, segnaposto, addobbo, TIPI_GADGET, GADGET_PRONTI, AEREI, ALI_MODELLINO: ALI, POSIZIONI_ALA: POSIZIONI, MOTORI_MODELLINO: MOTORI, STILI_CHIAVI, ISTITUTO });
 })(typeof window !== 'undefined' ? window : globalThis);
 
 </script>
@@ -4222,6 +4846,103 @@ function eventiBanca() {
   dlg.addEventListener('dblclick', ev => { const b = ev.target.closest('[data-bi]'); if (b && BK.sel) usaProfiloBanca(); });
   dlg.addEventListener('cancel', ev => { const a = $('#banca .atlante'); if (a.classList.contains('con-scheda') && window.matchMedia('(max-width: 800px)').matches) { ev.preventDefault(); a.classList.remove('con-scheda'); } }); // Esc sul telefono: prima torna all'elenco
 }
+/* ---- modellini e gadget: aerei da montare, portachiavi, albero di Natale. Si scelgono dai modelli pronti,
+   si personalizzano in una finestra con l'anteprima e diventano pezzi liberi del progetto. */
+const MD = { tipo: 'aereo', R: null }; // per ogni tipo, MD[tipo] sono le sue opzioni
+const FAMIGLIE_MD = ['Aerei', 'Open day', 'Natale'];
+function apriModellini(tipo, opz) {
+  const T = A.TIPI_GADGET;
+  Object.keys(T).forEach(k => { if (!MD[k]) MD[k] = T[k].opz({}); });
+  if (tipo && T[tipo]) { MD.tipo = tipo; if (opz) MD[tipo] = T[tipo].opz(Object.assign({}, MD[tipo], tipo === 'aereo' ? { b: 180, L: 150 } : {}, opz)); }
+  disegnaModellini(); const d = $('#modellini'); if (!d.open) d.showModal();
+}
+const generaModellino = () => A.TIPI_GADGET[MD.tipo].genera(MD[MD.tipo]);
+function moduloModellini() {
+  const o = MD[MD.tipo], nota = t => (t ? '<p class="nota">' + t + '</p>' : '');
+  const voce = { // una voce dell'elenco dei campi del tipo scelto
+    h: q => '<h5>' + q[1] + '</h5>', nota: q => nota(q[1]),
+    n: q => '<label class="cp"><span>' + q[2] + '</span><span class="ingresso"><input type="number" data-mk="' + q[1] + '" value="' + o[q[1]] + '" step="' + q[3] + '">' + (q[4] ? '<i>' + q[4] + '</i>' : '') + '</span></label>' + nota(q[5]),
+    sc: q => '<label class="cp"><span>' + q[2] + '</span><span class="ingresso"><select data-mk="' + q[1] + '">' + Object.keys(q[3]).map(v => '<option value="' + v + '"' + (o[q[1]] === v ? ' selected' : '') + '>' + esc(q[3][v]) + '</option>').join('') + '</select></span></label>',
+    sg: q => '<div class="mdl-riga"><span>' + q[2] + '</span><span class="segm">' + q[3].map(v => '<button type="button" class="btn piccolo" data-mk="' + q[1] + '" data-v="' + v[0] + '" aria-pressed="' + (o[q[1]] === v[0]) + '">' + v[1] + '</button>').join('') + '</span></div>',
+    ck: q => '<label class="ck"><input type="checkbox" data-mk="' + q[1] + '"' + (o[q[1]] ? ' checked' : '') + '> ' + q[2] + '</label>' + nota(q[3]),
+    tx: q => '<label class="tx"><span>' + q[2] + '</span><input type="text" data-mk="' + q[1] + '" value="' + esc(o[q[1]]) + '" maxlength="' + (q[4] || 30) + '" spellcheck="false"></label>' + nota(q[3])
+  };
+  return (MD.tipo === 'aereo' ? '<h5>Partire da</h5><label class="cp unico"><span class="ingresso"><select data-mk="base" aria-label="Modello di partenza"><option value="">un modello già fatto…</option>' + A.AEREI.map((m, i) => '<option value="' + i + '">' + esc(m[0]) + '</option>').join('') + '</select></span></label>' : '') +
+    A.TIPI_GADGET[MD.tipo].campi(o).map(q => voce[q[0]](q)).join('');
+}
+function anteprimaModellini() {
+  let R; try { R = generaModellino(); } catch (err) { MD.R = null; return '<p class="nota avviso">' + esc(err.message) + '</p>'; }
+  MD.R = R;
+  const st = stato.P.stampante, poli = (q, m) => (q.reg ? '<path class="mv-' + q.cl + '" fill-rule="evenodd" d="' + percorsoD(q.reg) + '"/>' : '<polygon class="mv-' + q.cl + '" points="' + q.pts.map(p => p[0] + ',' + (-p[1])).join(' ') + '"/>');
+  const vista = (titolo, voci) => {
+    let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity; const dentro = (x, y) => { if (x < x0) x0 = x; if (x > x1) x1 = x; if (y < y0) y0 = y; if (y > y1) y1 = y; };
+    voci.forEach(q => { if (q.reg) { const b = A.ingombro(q.reg); dentro(b.x0, b.y0); dentro(b.x1, b.y1); } else q.pts.forEach(p => dentro(p[0], p[1])); });
+    const m = 0.04 * (x1 - x0) + 2;
+    return '<figure><figcaption>' + titolo + '</figcaption><svg viewBox="' + [x0 - m, -y1 - m, x1 - x0 + 2 * m, y1 - y0 + 2 * m].map(v => v.toFixed(2)).join(' ') + '" role="img" aria-label="' + titolo + '">' + voci.map(poli).join('') + '</svg></figure>';
+  };
+  let s = '';
+  const montato = Array.isArray(R.viste) ? R.viste : R.viste ? [['Di fianco', R.viste.fianco], ['In pianta', R.viste.pianta]] : [];
+  montato.forEach(q => { s += vista(q[0], q[1]); });
+  if (!R.viste || Array.isArray(R.viste)) R.schizzi.forEach(k => { const so = A.solidoSchizzo(k), v = [{ cl: 'fus', reg: so.base }]; so.rilievi.forEach(q => v.push({ cl: 'ril', reg: q.regione })); so.incavi.forEach(q => v.push({ cl: 'inc', reg: q.regione })); s += vista(esc(k.nome) + (k.n > 1 ? ' × ' + k.n : ''), v); });
+  s += '<table class="dati"><thead><tr><th>Pezzo</th><th class="n">n</th><th class="n">Ingombro mm</th></tr></thead><tbody>' + R.schizzi.map(k => {
+    const so = A.solidoSchizzo(k), b = so.base.length ? A.ingombro(so.base) : { x0: 0, x1: 0, y0: 0, y1: 0 }, lx = b.x1 - b.x0, ly = b.y1 - b.y0, fuori = Math.max(lx, ly) > st.lx - 8 || Math.min(lx, ly) > st.ly - 8;
+    if (fuori) R.avvisi.push({ liv: 'errore', testo: k.nome + ': ' + num(Math.max(lx, ly), 0) + ' mm, più del piano di stampa (' + st.lx + ' × ' + st.ly + ' mm). Ridurre le misure.' });
+    return '<tr' + (fuori ? ' class="ko"' : '') + '><td>' + esc(k.nome) + '</td><td class="n">' + k.n + '</td><td class="n">' + num(lx, 1) + ' × ' + num(ly, 1) + ' × ' + num(so.lz, 2) + '</td></tr>';
+  }).join('') + '</tbody></table>';
+  const av = R.avvisi.filter(a => a.liv !== 'info'), info = R.avvisi.filter(a => a.liv === 'info');
+  if (av.length) s += '<ul class="avvisi">' + av.map(a => '<li class="' + a.liv + '">' + esc(a.testo) + '</li>').join('') + '</ul>';
+  info.forEach(a => { s += '<p class="nota">' + esc(a.testo) + '</p>'; });
+  return s;
+}
+function disegnaModellini(soloAnteprima) {
+  const d = $('#modellini');
+  if (!soloAnteprima) {
+    const T = A.TIPI_GADGET;
+    d.querySelector('.mdl-tipi').innerHTML = FAMIGLIE_MD.map(f => '<div class="fam"><span>' + f + '</span>' + Object.keys(T).filter(k => T[k].fam === f).map(k => '<button type="button" role="tab" data-mt="' + k + '" aria-selected="' + (MD.tipo === k) + '">' + T[k].nome + '</button>').join('') + '</div>').join('');
+    d.querySelector('.mdl-opz').innerHTML = moduloModellini();
+  }
+  if (!soloAnteprima) { const scelto = d.querySelector('.mdl-tipi [aria-selected="true"]'), nav = d.querySelector('.mdl-tipi'); if (scelto && nav.scrollWidth > nav.clientWidth) nav.scrollLeft = scelto.offsetLeft - nav.offsetLeft - (nav.clientWidth - scelto.offsetWidth) / 2; } // sul telefono i tipi scorrono: quello scelto resta in vista
+  d.querySelector('.mdl-ant').innerHTML = anteprimaModellini();
+  const n = MD.R ? MD.R.schizzi.length : 0, pieno = stato.P.schizzi.length + n > 12, tot = MD.R ? MD.R.schizzi.reduce((t, k) => t + k.n, 0) : 0;
+  d.querySelector('[data-az="mdl-crea"]').disabled = !MD.R; d.querySelector('[data-az="mdl-aggiungi"]').disabled = !MD.R || pieno || !!stato.est;
+  d.querySelector('.mdl-piede .nota').textContent = MD.R ? (tot === 1 ? 'Un pezzo' : n === 1 ? tot + ' copie' : tot + ' pezzi, ' + n + ' diversi,') + ' da stampare in piano. «Crea il kit» apre un progetto nuovo con questi soli pezzi; «Aggiungi» li mette accanto a quelli del progetto aperto' + (pieno ? ' (non c’è posto: al massimo 12 pezzi liberi)' : '') + '. Poi si ritoccano nello schizzo.' : '';
+}
+function usaModellino(aggiungi) {
+  const R = MD.R; if (!R) return;
+  const pezzi = JSON.parse(JSON.stringify(R.schizzi));
+  if (aggiungi) { if (stato.P.schizzi.length + pezzi.length > 12) { toast('Il progetto può contenere al massimo 12 pezzi liberi.', 'errore'); return; } const primo = stato.P.schizzi.length; stato.P.schizzi.push(...pezzi); azzeraCad(); stato.sk.i = primo; }
+  else { // progetto nuovo con i soli pezzi del modellino: stampante e parametri di stampa restano quelli in uso
+    const P = A.progettoPredefinito(), v = stato.P; P.stampante = JSON.parse(JSON.stringify(v.stampante)); P.stampa = JSON.parse(JSON.stringify(v.stampa)); P.autore = v.autore;
+    stato.P = A.normalizzaProgetto(Object.assign(P, { nome: R.nome.slice(0, 60), soloLiberi: true, schizzi: pezzi }));
+    stato.est = null; stato.gcode = []; stato.generato = false; stato.centina = 0; tre.inq = {}; azzeraCad();
+  }
+  $('#modellini').close();
+  const tot = R.schizzi.reduce((t, k) => t + k.n, 0);
+  stato.vista = tot > 1 && !aggiungi ? 'piatto' : 'schizzo'; stato.piatto = 0; stato.opz.piano2d = true;
+  aggiorna('nessuna', true);
+  toast(aggiungi ? (pezzi.length === 1 ? 'Pezzo aggiunto' : pezzi.length + ' pezzi aggiunti') + ' al progetto: si ritoccano nello schizzo.' : tot > 1 ? 'Kit creato: ' + tot + ' pezzi sul piano di stampa. ' + (R.schizzi.length > 1 ? 'Ognuno' : 'Il disegno') + ' si ritocca nello «Schizzo libero».' : 'Pezzo creato: si ritocca qui nello schizzo, poi «Solido 3D» o «Scarica il kit di stampa».');
+}
+function eventiModellini() {
+  const d = $('#modellini'); let tq = 0;
+  const leggi = el => { const k = el.dataset.mk, o = MD[MD.tipo]; if (!k || k === 'base') return false; o[k] = el.type === 'checkbox' ? el.checked : el.dataset.v !== undefined ? el.dataset.v : el.value; return true; };
+  d.addEventListener('input', ev => { const el = ev.target; if (el.tagName !== 'INPUT' || el.type === 'checkbox' || !leggi(el)) return; clearTimeout(tq); tq = setTimeout(() => disegnaModellini(true), 160); }); // l'anteprima segue mentre si scrive
+  d.addEventListener('change', ev => {
+    const el = ev.target; clearTimeout(tq);
+    if (el.dataset.mk === 'base') { if (el.value !== '') apriModellini('aereo', Object.assign({ testo: MD.aereo.testo, t: MD.aereo.t, g: MD.aereo.g }, A.AEREI[+el.value][1])); return; }
+    if (!leggi(el)) return;
+    MD[MD.tipo] = A.TIPI_GADGET[MD.tipo].opz(MD[MD.tipo]); // i valori rientrano nei limiti
+    const k = el.dataset.mk; disegnaModellini(); const e2 = d.querySelector('[data-mk="' + k + '"]'); if (e2 && el.type !== 'checkbox' && document.activeElement === document.body) e2.focus();
+  });
+  d.addEventListener('click', ev => {
+    const t = ev.target.closest('[data-mt]'), b = ev.target.closest('button[data-mk]'), az = ev.target.closest('[data-az]');
+    if (ev.target === d) { d.close(); return; }
+    if (t) { MD.tipo = t.dataset.mt; disegnaModellini(); }
+    else if (b) { leggi(b); disegnaModellini(); }
+    else if (az && az.dataset.az === 'mdl-chiudi') d.close();
+    else if (az && az.dataset.az === 'mdl-crea') usaModellino(false);
+    else if (az && az.dataset.az === 'mdl-aggiungi') usaModellino(true);
+  });
+}
 const PREIMPOSTATI = [['0009', '0009 · simmetrico sottile'], ['0012', '0012 · simmetrico'], ['2412', '2412 · curvatura moderata'], ['4412', '4412 · portante (kit didattico)'], ['4415', '4415 · portante spesso'], ['23012', '23012 · linea media a 5 cifre'], ['23112', '23112 · reflex autostabile']];
 /* Forma della centina: famiglia, parametri della famiglia e profili tipici. */
 function selettoreProfilo() {
@@ -4424,7 +5145,7 @@ function aggiornaValori() {
     const nc = $('#n-centine'); if (nc) nc.innerHTML = notaDinamica('centine');
     M.longheroni.forEach(l => { const s = $('#sk-' + l.i); if (s) s.innerHTML = schizzo(l.sez); });
     const c = $('.gruppo[data-g="centine"] .conta'); if (c) c.textContent = M.n + ' pz';
-    const cd = $('.gruppo[data-g="didattica"] .conta'); if (cd && M.didattico) cd.textContent = M.corde.length * M.copie + ' pz';
+    const cd = $('.gruppo[data-g="didattica"] .conta'); if (cd && M.didattico) cd.textContent = M.centine.length * M.copie + ' pz';
   }
   $('#nome-progetto').value = stato.est ? stato.est.nome : P.nome;
   $('#nome-progetto').readOnly = !!stato.est;
@@ -4481,7 +5202,7 @@ function confrontaMisure(prima, dopo, chiave) {
   if (!righe.length) return null;
   return { causa: causa ? causa.nome : (ETICHETTE_CHIAVE[chiave] || ''), righe, quando: Date.now() };
 }
-const ETICHETTE_CHIAVE = { soloLiberi: 'Stampa solo i pezzi liberi', dCorde: 'Corde delle centine', dSp: 'Spessore della centina', dCopie: 'Copie', dModo: 'Segni incisi o in rilievo', dH: 'Profondità dei segni', dBase: 'Basetta', dTesto: 'Scritta', centine: 'Disposizione delle centine', rifFr: 'Linea di riferimento della freccia', doppia: 'Doppia freccia', livello: 'Cosa costruire', long: 'Longheroni', profilo: 'Profilo', naca: 'Profilo', tipo: 'Modello di ala', arLock: 'Vincolo dell’allungamento', schizzo: 'Schizzo libero', spCentina: 'Spessore della centina', auto: 'Proporzioni automatiche', adatta: 'Adattamento automatico' };
+const ETICHETTE_CHIAVE = { soloLiberi: 'Stampa solo i pezzi liberi', dNaca: 'Altri profili NACA', dCorde: 'Corde delle centine', dSp: 'Spessore della centina', dCopie: 'Copie', dModo: 'Segni incisi o in rilievo', dH: 'Profondità dei segni', dBase: 'Basetta', dTesto: 'Scritta', centine: 'Disposizione delle centine', rifFr: 'Linea di riferimento della freccia', doppia: 'Doppia freccia', livello: 'Cosa costruire', long: 'Longheroni', profilo: 'Profilo', naca: 'Profilo', tipo: 'Modello di ala', arLock: 'Vincolo dell’allungamento', schizzo: 'Schizzo libero', spCentina: 'Spessore della centina', auto: 'Proporzioni automatiche', adatta: 'Adattamento automatico' };
 function aggiorna(chiave, strutturale) {
   segnaStoria(); // annulla e ripeti dei pezzi liberi
   const P = stato.P, prima = stato.tab;
@@ -4836,6 +5557,7 @@ function pannelloDidattico() {
   return gruppo('didattica', 'Centine didattiche', [
     '<p class="nota">Centine piene del profilo scelto, con i segni che lo definiscono: per mostrare in classe com’è fatto un profilo alare.</p>',
     selettoreProfilo(),
+    campo({ k: 'dNaca', et: 'Altri profili NACA', tipo: 'testo', libero: true, nota: 'Per metterli a confronto basta il numero: codici a 4 o 5 cifre separati da virgole (es. 0012, 2412, 23012). Una centina in più per ogni profilo e per ogni corda.' }),
     campo({ k: 'dCorde', et: 'Corde', tipo: 'testo', libero: true, nota: 'In millimetri, separate da virgole (es. 200, 150, 100): una centina per ogni corda. Al massimo ' + num(Lmax, 0) + ' mm sul piano di questa stampante.' }),
     campo({ k: 'dCopie', et: 'Copie di ciascuna', um: 'pz', min: 1, max: 20, passo: 1 }),
     campo({ k: 'dSp', et: 'Spessore', um: 'mm', min: 1.2, max: 80, passo: 0.5, nota: '4–6 mm per una centina; oltre 20 mm diventa un tronco d’ala da tenere in mano.' }),
@@ -4852,7 +5574,7 @@ function pannelloDidattico() {
     campo({ k: 'dBase', et: 'Basetta per esporla in piedi', tipo: 'spunta', nota: 'Una cava con il fondo a forma di ventre: la centina sta in piedi sul banco.' }),
     P.dBase ? campo({ k: 'gioco', et: 'Gioco nella cava', um: 'mm', min: 0, max: 1, passo: 0.05, nota: 'Per lato.' }) : '',
     campo({ k: 'autore', et: 'Progettista', tipo: 'testo', libero: true, nota: 'Compare nella tavola, nel G-code, nel 3MF e nelle istruzioni.' })
-  ].join(''), M ? M.corde.length * M.copie + ' pz' : '');
+  ].join(''), M ? M.centine.length * M.copie + ' pz' : '');
 }
 /* Il significato della sigla, riga per riga, con i numeri della centina mostrata. */
 function righeSigla(def, C) {
@@ -4884,7 +5606,7 @@ function righeSigla(def, C) {
   return r;
 }
 function svgDidattico() {
-  const P = stato.P, M = stato.M, cs = M.centine, c = cs[stato.centina] || cs[0], D = c.didattica, def = M.def, pr = c.prof, C = c.c, B = c.base;
+  const P = stato.P, M = stato.M, cs = M.centine, c = cs[stato.centina] || cs[0], D = c.didattica, def = c.def || M.def, pr = c.prof, C = c.c, B = c.base;
   const u = C / 58, m = 4.5 * u, bb = A.ingombro(c.profC), yTop = -bb.y1, yGiu = Math.max(-bb.y0, B ? -B.zBot : -bb.y0), curvo = D.curvo;
   const leg = righeSigla(def, C), yC = yGiu + 2.6 * u, yR = yC + 3 * u, yL0 = yR + 4.2 * u, yPar = yL0 + leg.length * 1.55 * u + 0.6 * u, basso = yPar + 6.8 * u, alto = yTop - (curvo ? 9.4 * u : 7 * u);
   const pt = (x, y) => x.toFixed(3) + ' ' + (-y).toFixed(3);
@@ -4965,7 +5687,7 @@ function riepilogoDidattico() {
     '.</p><ul>' + ef.righe.filter(q => !q.diretta).slice(0, 4).map(q => '<li>' + q.nome + ': <b>' + esc(q.prima) + ' → ' + esc(q.dopo) + '</b> ' + q.um + '</li>').join('') + '</ul><button class="btn piccolo" data-az="vedi-misure">Vedi tutte nella scheda Misure</button></section>';
   h += '<section><h3>Profilo <small>' + esc(def.nome) + '</small></h3><div class="tessere">' +
     '<div><span>Corde</span><b>' + M.corde.map(x => num(x, 0)).join(' · ') + ' <small>mm</small></b></div>' +
-    '<div><span>Pezzi</span><b>' + M.corde.length * M.copie + (P.dBase ? ' + ' + M.corde.length * M.copie : '') + ' <small>' + (P.dBase ? 'centine + basette' : 'centine') + '</small></b></div>' +
+    '<div><span>Pezzi</span><b>' + M.centine.length * M.copie + (P.dBase ? ' + ' + M.centine.length * M.copie : '') + ' <small>' + (P.dBase ? 'centine + basette' : 'centine') + '</small></b></div>' +
     '<div><span>Spessore massimo</span><b>' + num(D.tm * C, 1) + ' <small>mm a ' + num(100 * D.xt, 0) + ' %</small></b></div>' +
     '<div><span>Freccia massima</span><b>' + (D.curvo ? num(D.fm * C, 1) + ' <small>mm a ' + num(100 * D.xf, 0) + ' %</small>' : '0 <small>simmetrico</small>') + '</b></div>' +
     '<div><span>Raggio del bordo d’attacco</span><b>' + (D.rLE ? num(D.rLE, 2) + ' <small>mm</small>' : '—') + '</b></div>' +
@@ -5459,7 +6181,7 @@ function quotaDef(q) {
     } };
   }
   const md = /^dc\.(\d+)$/.exec(q);
-  if (md && M && M.didattico) { const i = +md[1]; return { leggi: () => M.corde[i], scrivi: v => { const cs = M.corde.slice(); cs[i] = L(A.arr(v, 10), 20, 1000); P.dCorde = cs.join(', '); return 'dCorde'; } }; }
+  if (md && M && M.didattico) { const i = +md[1]; return { leggi: () => M.corde[i % M.corde.length], scrivi: v => { const cs = M.corde.slice(); cs[i % cs.length] = L(A.arr(v, 10), 20, 1000); P.dCorde = cs.join(', '); return 'dCorde'; } }; }
   let m = /^x\.(\d+)$/.exec(q);
   if (m && M) { const i = +m[1], c = M.centine[stato.centina] || M.centine[0]; return { leggi: () => A.arr(c.posLon[i].u, 10), scrivi: v => { spostaLongherone(i, c.j, A.arr(100 * c.prof.xi(v), 10)); return 'long'; } }; }
   m = /^L\.(\d+)\.(\w+)$/.exec(q);
@@ -5523,7 +6245,7 @@ function iniziaManiglia(ev, h) {
         if (!tonda) { sp.B = B; fissa('longheroni.' + i + '.B', true); }
         k = 'long';
       } else if (tipo === 'corda') { P.cr = L(Math.round(u), 30, 600); k = 'cr'; }
-      else if (tipo === 'dcorda') { const cs = M.corde.slice(); cs[c.j] = L(Math.round(u), 20, 1000); P.dCorde = cs.join(', '); k = 'dCorde'; }
+      else if (tipo === 'dcorda') { const cs = M.corde.slice(); cs[c.j % cs.length] = L(Math.round(u), 20, 1000); P.dCorde = cs.join(', '); k = 'dCorde'; }
       mosso = true;
       if (!raf) raf = requestAnimationFrame(() => { raf = 0; if (trascina === t) aggiornaRapido(k); });
     },
@@ -5726,10 +6448,10 @@ function azzeraCad() {
 }
 /* Selezione: sels elenca le forme scelte, sel e' l'ultima (quella di cui si vedono le proprieta').
    Una forma che appartiene a un gruppo porta con se' tutte le compagne. */
-function scegli(v, aggiungi) {
+function scegli(v, aggiungi, solo) { // solo: un elemento preso dentro il suo gruppo, senza i compagni
   const K = stato.sk, sk = skCorrente();
   let a = (Array.isArray(v) ? v : v >= 0 ? [v] : []).filter(i => sk && sk.forme[i]);
-  if (sk && a.length) {
+  if (sk && a.length && !solo) {
     const gr = new Set(a.map(i => sk.forme[i].grp).filter(Boolean)), ult = a[a.length - 1];
     if (gr.size) { sk.forme.forEach((f, i) => { if (gr.has(f.grp) && !a.includes(i)) a.push(i); }); a = a.filter(i => i !== ult).concat([ult]); }
   }
@@ -5928,7 +6650,7 @@ const STRUMENTI_SK = [['sel', 'Seleziona e trasforma', 'V'], ['nodi', 'Modifica 
   ['cen', 'Centina', ''], ['lon', 'Sezione di longherone', ''], ['cor', 'Sezione di corrente', ''], null, ['mano', 'Sposta la vista', 'H'], ['zoom', 'Ingrandisci o riduci', 'Z']];
 const COMPONENTI_SK = ['cen', 'lon', 'cor'];
 const AIUTO_SK = {
-  sel: 'Clic su una forma per sceglierla, Maiusc+clic per aggiungerne altre, trascina nel vuoto per racchiuderne più d’una. Le maniglie del riquadro scalano, quella tonda in alto ruota.',
+  sel: 'Clic su una forma per sceglierla, Maiusc+clic per aggiungerne altre, trascina nel vuoto per racchiuderne più d’una; «Raggruppa» ne fa un elemento solo. Le maniglie del riquadro scalano, quella tonda in alto ruota.',
   nodi: 'Trascina un punto del tracciato per spostarlo. Doppio clic su un punto: angolo ↔ curva. Doppio clic sul bordo: nuovo punto. Canc toglie il punto scelto.',
   r: 'Premi in un vertice e trascina fino a quello opposto. Con Maiusc viene un quadrato.',
   c: 'Premi nel centro e trascina fino al raggio voluto. Per farne un’ellisse, tira poi una maniglia laterale.',
@@ -5961,6 +6683,7 @@ const ICONE = {
   chiuso: '<rect x="4.5" y="9" width="11" height="8" rx="1.5"/><path d="M7 9V6.5a3 3 0 016 0V9"/>', aperto: '<rect x="4.5" y="9" width="11" height="8" rx="1.5"/><path d="M7 9V6.5a3 3 0 015.7-1.3"/>',
   davanti: '<rect class="pi" x="7" y="7" width="10" height="10" rx="1"/><path d="M13 5V4a1 1 0 00-1-1H4a1 1 0 00-1 1v8a1 1 0 001 1h1"/>', dietro: '<rect x="7" y="7" width="10" height="10" rx="1"/><rect class="pi" x="3" y="3" width="8" height="8" rx="1"/>',
   duplica: '<rect x="7" y="7" width="10" height="10" rx="1.2"/><path d="M13 7V4.2A1.2 1.2 0 0011.8 3H4.2A1.2 1.2 0 003 4.2v7.6A1.2 1.2 0 004.2 13H7"/>', elimina: '<path d="M4 6h12M8 6V4h4v2M5.5 6l.8 10.5h7.4L14.5 6M8.5 9v5M11.5 9v5"/>',
+  multi: '<rect x="2.5" y="2.5" width="8" height="8" rx="1" stroke-dasharray="2.2 2.2"/><path class="pi" d="M9 8v9.2l2.3-2.1 1.6 3.5 1.6-.7-1.6-3.4h3.3z"/><path d="M14.5 2.5v5M12 5h5"/>',
   piu: '<path d="M10 4v12M4 10h12"/>', cubo: '<path d="M10 2.5l6.5 3.7v7.6L10 17.5l-6.5-3.7V6.2z"/><path d="M3.5 6.2L10 10l6.5-3.8M10 10v7.5"/>', adatta: '<path d="M3 7V3h4M13 3h4v4M17 13v4h-4M7 17H3v-4"/>',
   tracciato: '<path d="M4 15C6 6 14 14 16 5"/><rect class="pi" x="2.5" y="13.5" width="3" height="3"/><rect class="pi" x="14.5" y="3.5" width="3" height="3"/>', pannello: '<rect x="2.5" y="3.5" width="15" height="13" rx="1.5"/><path d="M12.5 3.5v13"/>'
 };
@@ -5969,7 +6692,8 @@ const bIco = (az, d, icn, tit, extra) => '<button type="button" class="btn ico" 
 /* Tavolozza degli strumenti, a sinistra della tela. */
 function attrezziSchizzo() {
   const K = stato.sk;
-  return STRUMENTI_SK.map(q => (q ? '<button type="button" class="att" data-az="sk-str" data-s="' + q[0] + '" aria-pressed="' + (K.str === q[0]) + '" title="' + q[1] + (q[2] ? ' (' + q[2] + ')' : '') + '" aria-label="' + q[1] + '">' + ic(q[0]) + '</button>' : '<hr>')).join('');
+  return STRUMENTI_SK.map(q => (q ? '<button type="button" class="att" data-az="sk-str" data-s="' + q[0] + '" aria-pressed="' + (K.str === q[0]) + '" title="' + q[1] + (q[2] ? ' (' + q[2] + ')' : '') + '" aria-label="' + q[1] + '">' + ic(q[0]) + '</button>' +
+    (q[0] === 'nodi' ? '<button type="button" class="att multi" data-az="sk-multi" aria-pressed="' + !!K.multi + '" title="Selezione multipla: ogni clic aggiunge o toglie un oggetto, come tenendo premuto Maiusc. Utile su tavoletta e lavagna interattiva" aria-label="Selezione multipla">' + ic('multi') + '</button>' : '') : '<hr>')).join('');
 }
 const modiHtml = (m, az) => '<span class="segm modi">' + A.MODI.map(q => '<button type="button" class="btn piccolo" data-az="' + az + '" data-m="' + q + '" aria-pressed="' + (m === q) + '"><i class="m-' + q + '"></i>' + ETICHETTE_MODO[q] + '</button>').join('') + '</span>';
 /* Barra del pezzo, sopra la tela: quale pezzo, come si stampa, come nascono le forme nuove. */
@@ -5983,7 +6707,9 @@ function barraSchizzo() {
   if (!sk) return s;
   const cor = sk.or === 'coricato';
   s += '<span class="gr"><label title="' + (cor ? 'Lunghezza della barra' : 'Spessore del pezzo: di quanto il disegno viene estruso') + '">' + (cor ? 'Lunghezza' : 'Estrusione') + ' <input type="number" class="corto" data-b="sk-h" value="' + sk.h + '" min="0.4" max="1000" step="0.5"> mm</label><label>Copie <input type="number" class="corto" data-b="sk-n" value="' + sk.n + '" min="1" max="20" step="1"></label></span>';
-  s += '<span class="gr"><span class="segm">' + bIco('sk-annulla', '', 'annulla', 'Annulla (Ctrl+Z)', pronto && H.pass.length ? '' : ' disabled') + bIco('sk-ripeti', '', 'ripeti', 'Ripeti (Ctrl+Y)', pronto && H.fut.length ? '' : ' disabled') + '</span></span>';
+  const nI = pronto ? H.pass.length : 0, nA = pronto ? H.fut.length : 0;
+  s += '<span class="gr"><span class="segm"><button type="button" class="btn piccolo" data-az="sk-annulla" title="Passo indietro: annulla l’ultima modifica (Ctrl+Z)' + (nI ? ' · ' + nI + (nI === 1 ? ' passo' : ' passi') + ' in memoria' : '') + '"' + (nI ? '' : ' disabled') + '>' + ic('annulla') + 'Passo indietro</button>' +
+    '<button type="button" class="btn piccolo" data-az="sk-ripeti" title="Passo avanti: rifà la modifica annullata (Ctrl+Y)"' + (nA ? '' : ' disabled') + '>Passo avanti' + ic('ripeti') + '</button></span></span>';
   s += '<span class="gr" title="Come nascono le forme nuove: piene, fori passanti, in rilievo sopra il pezzo o incise"><span class="et">Forme nuove</span>' + modiHtml(K.modo, 'sk-modo') +
     (K.modo === 'rilievo' || K.modo === 'incavo' ? '<label>' + (K.modo === 'rilievo' ? 'alte' : 'profonde') + ' <input type="number" class="corto" data-b="sk-hr" value="' + K.hr + '" min="0.2" max="50" step="0.1"> mm</label>' : '') +
     (K.modo !== 'foro' ? '<label title="Le forme nuove saranno il contorno bucato di un pieno, con la parete indicata"><input type="checkbox" data-b="sk-cav"' + (K.pc > 0 ? ' checked' : '') + '> Solo contorno</label>' + (K.pc > 0 ? '<label>parete <input type="number" class="corto" data-b="sk-pc" value="' + K.pc + '" min="0.3" max="50" step="0.1"> mm</label>' : '') : '') +
@@ -6067,12 +6793,16 @@ function ispettoreForma(f) {
   return s + disponiHtml([f]);
 }
 function ispettoreGruppo(S) {
-  const b = ingombroForme({ forme: S }), n = (k, et, v) => '<label class="cp"><span>' + et + '</span><span class="ingresso"><input type="number" data-b="s-' + k + '" value="' + A.arr(v, 100) + '" step="0.5"><i>mm</i></span></label>';
-  const modi = new Set(S.map(q => q.m)), gruppo = S.every(q => q.grp && q.grp === S[0].grp);
-  return '<header class="isp-titolo">' + ic('gruppo') + '<b>' + S.length + ' oggetti' + (gruppo ? ' in gruppo' : ' scelti') + '</b></header>' +
+  const K = stato.sk, b = ingombroForme({ forme: S }), n = (k, et, v) => '<label class="cp"><span>' + et + '</span><span class="ingresso"><input type="number" data-b="s-' + k + '" value="' + A.arr(v, 100) + '" step="0.5"><i>mm</i></span></label>';
+  const modi = new Set(S.map(q => q.m)), gruppo = gruppoIntero(S), lib = S.filter(q => !q.bl).every(scalaLibera);
+  return '<header class="isp-titolo">' + ic('gruppo') + '<b>' + (gruppo ? 'Gruppo ' + S[0].grp + ' · ' + S.length + (S.length === 1 ? ' oggetto' : ' oggetti') : S.length + ' oggetti scelti') + '</b></header>' +
+    '<div class="isp-az">' + (gruppo ? '<button type="button" class="btn piccolo" data-az="sk-separa" title="Gli oggetti tornano indipendenti (Ctrl+Maiusc+G)">' + ic('separa') + 'Separa il gruppo</button>' : '<button type="button" class="btn piccolo" data-az="sk-raggruppa" title="Diventano un elemento solo: si scelgono, si spostano, si ruotano e si ridimensionano insieme (Ctrl+G)">' + ic('gruppo') + 'Raggruppa</button>') + '</div>' +
+    (gruppo ? '<p class="nota">Il gruppo si comporta come un elemento solo. Per ritoccare un suo oggetto: doppio clic nel disegno, oppure aprire il gruppo nell’elenco qui sotto.</p>' : '') +
     '<h5>Nel pezzo</h5>' + modiHtml(modi.size === 1 ? S[0].m : '', 'sk-fmodo') +
-    '<h5>Ingombro della selezione</h5><div class="due">' + n('x', 'X', b[0]) + n('y', 'Y', b[1]) + '</div><div class="due">' + n('w', 'L', b[2] - b[0]) + n('h', 'H', b[3] - b[1]) + '</div>' +
-    '<p class="nota">X e Y sono del vertice in basso a sinistra. Cambiando L o H gli oggetti si scalano insieme.</p>' + disponiHtml(S);
+    '<h5>' + (gruppo ? 'Posizione e misure del gruppo' : 'Ingombro della selezione') + '</h5><div class="due">' + n('x', 'X', b[0]) + n('y', 'Y', b[1]) + '</div><div class="due">' + n('w', 'L', b[2] - b[0]) + n('h', 'H', b[3] - b[1]) + '</div>' +
+    '<label class="cp"><span>Ruota di</span><span class="ingresso"><input type="number" data-b="s-rot" value="0" step="5"><i>°</i></span></label>' +
+    '<label class="ck" title="Con la spunta, cambiando L cambia anche H e le maniglie d’angolo non deformano"><input type="checkbox" data-b="s-prop"' + (K.prop !== false || !lib ? ' checked' : '') + (lib ? '' : ' disabled') + '> Mantieni le proporzioni</label>' +
+    '<p class="nota">X e Y sono del vertice in basso a sinistra. Cambiando L o H tutto si ridimensiona insieme' + (lib ? '' : ', sempre in proporzione: ci sono forme che non si deformano') + '.</p>' + disponiHtml(S);
 }
 function pannelloPezzo(sk) {
   const P = stato.P, so = A.solidoSchizzo(sk), a = so.base.length ? A.area(so.base) : 0, V = sk.or === 'coricato' ? a * sk.h : so.gradini.reduce((t, q) => t + A.area(q.regione) * (q.z1 - q.z0), 0), bb = so.base.length ? A.ingombro(so.base) : null, G = sk.guide, ng = G ? G.x.length + G.y.length : 0;
@@ -6094,12 +6824,32 @@ function ispettoreSchizzo() {
   const S = scelte(), sc = new Set(K.sels);
   let s = '<section class="isp-forma">' + (S.length === 1 ? ispettoreForma(S[0]) : S.length ? ispettoreGruppo(S) : pannelloPezzo(sk)) + '</section>';
   s += '<section class="isp-lista"><h4>Oggetti <small>' + sk.forme.length + '</small></h4>';
+  const riga = (i, figlio) => { const q = sk.forme[i];
+    return '<div class="riga' + (sc.has(i) ? ' sel' : '') + (figlio ? ' figlio' : '') + '"><button type="button" data-skf="' + i + '"' + (figlio ? ' data-solo="1" title="Sceglie solo questo oggetto del gruppo"' : '') + '><i class="m-' + q.m + (q.pc > 0 ? ' cav' : '') + '"></i><span>' + esc(nomeForma(q)) + '</span><small>' + ETICHETTE_MODO[q.m].toLowerCase() + (q.pc > 0 ? ', contorno ' + num(q.pc, 1) + ' mm' : '') + '</small></button>' +
+      '<button type="button" class="lucchetto" data-az="sk-blocca" data-k="' + i + '" aria-pressed="' + !!q.bl + '" title="' + (q.bl ? 'Sblocca' : 'Blocca') + '" aria-label="' + (q.bl ? 'Sblocca' : 'Blocca') + '">' + ic(q.bl ? 'chiuso' : 'aperto') + '</button></div>'; };
+  const visti = new Set(), aperti = K.grAperti || (K.grAperti = {});
   if (sk.forme.length) for (let i = sk.forme.length - 1; i >= 0; i--) { // in cima l'ultimo disegnato
     const q = sk.forme[i];
-    s += '<div class="riga' + (sc.has(i) ? ' sel' : '') + (q.grp ? ' gr' : '') + '"><button type="button" data-skf="' + i + '"><i class="m-' + q.m + (q.pc > 0 ? ' cav' : '') + '"></i><span>' + esc(nomeForma(q)) + '</span><small>' + ETICHETTE_MODO[q.m].toLowerCase() + (q.pc > 0 ? ', contorno ' + num(q.pc, 1) + ' mm' : '') + (q.grp ? ' · gruppo ' + q.grp : '') + '</small></button>' +
-      '<button type="button" class="lucchetto" data-az="sk-blocca" data-k="' + i + '" aria-pressed="' + !!q.bl + '" title="' + (q.bl ? 'Sblocca' : 'Blocca') + '" aria-label="' + (q.bl ? 'Sblocca' : 'Blocca') + '">' + ic(q.bl ? 'chiuso' : 'aperto') + '</button></div>';
+    if (!q.grp) { s += riga(i); continue; }
+    if (visti.has(q.grp)) continue;
+    visti.add(q.grp); // un gruppo e' una riga sola, che si puo' aprire
+    const mm = []; for (let j = sk.forme.length - 1; j >= 0; j--) if (sk.forme[j].grp === q.grp) mm.push(j);
+    const tutti = mm.every(j => sc.has(j)), ap = !!aperti[K.i + '.' + q.grp];
+    s += '<div class="riga gruppo' + (tutti ? ' sel' : '') + '"><button type="button" class="apri" data-az="sk-gr-apri" data-g="' + q.grp + '" aria-expanded="' + ap + '" title="' + (ap ? 'Chiudi' : 'Apri') + ' il gruppo" aria-label="' + (ap ? 'Chiudi' : 'Apri') + ' il gruppo"></button><button type="button" data-skg="' + q.grp + '">' + ic('gruppo') + '<span>Gruppo ' + q.grp + '</span><small>' + mm.length + (mm.length === 1 ? ' oggetto' : ' oggetti') + ', un elemento solo</small></button></div>';
+    if (ap) mm.forEach(j => { s += riga(j, true); });
   } else s += '<p class="nota">Ancora nessuna forma.</p>';
   return s + '</section>';
+}
+/* Vero se le forme scelte sono un gruppo intero, con tutti i suoi oggetti. */
+function gruppoIntero(S) { const sk = skCorrente(); return S.length > 0 && !!S[0].grp && S.every(q => q.grp === S[0].grp) && sk.forme.filter(q => q.grp === S[0].grp).length === S.length; }
+/* Barra della selezione, sopra il disegno: le azioni che servono subito, con il nome scritto. */
+function barraSelezione() {
+  const S = scelte(), K = stato.sk; if (!S.length || K.poli) return '';
+  const gruppo = gruppoIntero(S), haGr = S.some(q => q.grp), dentro = !gruppo && S.length === 1 && S[0].grp; // dentro: un oggetto preso da solo nel suo gruppo
+  return '<span class="sb-et">' + (gruppo ? 'Gruppo ' + S[0].grp + ' · ' + S.length + (S.length === 1 ? ' oggetto' : ' oggetti') : S.length === 1 ? esc(nomeForma(S[0])) + (dentro ? ' · nel gruppo ' + S[0].grp : '') : S.length + ' oggetti scelti') + '</span>' +
+    (gruppo || dentro ? '' : '<button type="button" class="btn piccolo" data-az="sk-raggruppa" title="Diventano un elemento solo: si spostano, si ruotano e si ridimensionano insieme (Ctrl+G)">' + ic('gruppo') + 'Raggruppa</button>') +
+    (haGr ? '<button type="button" class="btn piccolo" data-az="sk-separa" title="' + (dentro ? 'Questo oggetto esce dal gruppo, gli altri restano insieme' : 'Gli oggetti del gruppo tornano indipendenti (Ctrl+Maiusc+G)') + '">' + ic('separa') + (dentro ? 'Togli dal gruppo' : 'Separa') + '</button>' : '') +
+    '<button type="button" class="btn piccolo" data-az="sk-dup" title="Ctrl+D">' + ic('duplica') + 'Duplica</button><button type="button" class="btn piccolo pericolo" data-az="sk-del" title="Canc">' + ic('elimina') + 'Elimina</button>';
 }
 function ridisegnaSchizzo() { $('#tavola').innerHTML = svgSchizzo(); const z = $('#sk-zoom'); if (z) z.textContent = zoomTesto(); }
 const scriviXY = t => { const e = $('#sk-xy'); if (e) e.textContent = t; };
@@ -6408,7 +7158,7 @@ function pdSchizzo(ev) {
       muovi(e) {
         const q = mmSchizzo(e, fuori);
         let sx = hx && w0 > 1e-6 ? Math.max(0.02, (q[0] - o[0]) * hx / w0) : 1, sy = hy && h0 > 1e-6 ? Math.max(0.02, (q[1] - o[1]) * hy / h0) : 1;
-        if (!lib || (e.shiftKey && hx && hy)) { const s = hx && hy ? Math.max(sx, sy) : hx ? sx : sy; sx = sy = s; }
+        if (!lib || ((e.shiftKey || (ids.length > 1 && K.prop !== false)) && hx && hy)) { const s = hx && hy ? Math.max(sx, sy) : hx ? sx : sy; sx = sy = s; } // piu' oggetti: dagli angoli in proporzione, se non si toglie la spunta
         ids.forEach((id, j) => scalaForma(sk.forme[id], F0[j], o, sx, sy));
         const b = riquadroScelte(); scriviXY('L ' + num(b[2] - b[0], 2) + ' × H ' + num(b[3] - b[1], 2) + ' mm'); ridisegnaSchizzo();
       },
@@ -6418,7 +7168,7 @@ function pdSchizzo(ev) {
   }
   if (fo) {
     const i = +fo.dataset.f;
-    if (ev.shiftKey) { scegli(i, true); disegnaVista(); return; }
+    if (ev.shiftKey || K.multi) { scegli(i, true); disegnaVista(); return; }
     if (!K.sels.includes(i)) scegli(i); else { K.sels = K.sels.filter(j => j !== i).concat([i]); K.sel = i; }
     let set = mobili(), F0 = set.map(j => copia(sk.forme[j])), mosso = false;
     const p0 = svgPunto(ev), cx = ev.clientX, cy = ev.clientY, princ = sk.forme[i].bl ? sk.forme[set[0]] : sk.forme[i], rif = princ ? rifForma(copia(princ)) : [0, 0], B = set.length ? ingombroForme({ forme: F0 }) : null, fuori = new Set(K.sels), altri = riferimentiAllineamento(sk, fuori);
@@ -6446,9 +7196,9 @@ function pdSchizzo(ev) {
     return;
   }
   // nel vuoto: si deseleziona; trascinando si racchiudono le forme in un riquadro
-  const base = ev.shiftKey ? K.sels.slice() : [], p0 = svgPunto(ev), cx = ev.clientX, cy = ev.clientY; let mosso = false;
+  const piu = ev.shiftKey || K.multi, base = piu ? K.sels.slice() : [], p0 = svgPunto(ev), cx = ev.clientX, cy = ev.clientY; let mosso = false;
   const sulBordo = K.str === 'nodi' && f1 && f1.t === 'p' && latoVicino(f1, p0); // accanto al bordo del tracciato aperto: resta scelto, per il doppio clic che aggiunge un punto
-  if (!ev.shiftKey && !sulBordo) scegli(-1);
+  if (!piu && !sulBordo) scegli(-1);
   ascoltaTrascina({
     muovi(e) { if (!mosso && Math.hypot(e.clientX - cx, e.clientY - cy) < 4) return; mosso = true; const p = svgPunto(e); K.lazo = [Math.min(p0[0], p[0]), Math.min(p0[1], p[1]), Math.max(p0[0], p[0]), Math.max(p0[1], p[1])]; ridisegnaSchizzo(); },
     fine() {
@@ -6481,6 +7231,7 @@ function dblSchizzo(ev) {
     if (v && n < 400) { f.pts.splice(v.i + 1, 0, [A.arr(v.q[0], 100), A.arr(v.q[1], 100)]); if (f.ls) f.ls.splice(v.i + 1, 0, f.ls[v.i] && f.ls[(v.i + 1) % n] ? 1 : 0); K.nodo = v.i + 1; aggiorna('schizzo', false); return true; }
     return false;
   }
+  if (K.str === 'sel' && fo && K.sels.length > 1 && sk.forme[+fo.dataset.f] && sk.forme[+fo.dataset.f].grp && K.sels.includes(+fo.dataset.f)) { scegli(+fo.dataset.f, false, true); disegnaVista(); return true; } // dentro il gruppo: un solo oggetto
   if (K.str === 'sel' && fo && f && +fo.dataset.f === K.sel) {
     if (f.t === 'p') { K.str = 'nodi'; disegnaVista(); return true; }
     if (f.t === 't') { const t = $('[data-b="f-txt"]'); if (t) { t.focus(); t.select(); return true; } }
@@ -6546,6 +7297,8 @@ function azioneSchizzo(az, b) {
   else if (az === 'sk-inquadra') { K.vb = null; disegnaVista(); }
   else if (az === 'sk-zoom') { if (b.dataset.z === '1') zoomSchizzo(25.4 / 96 / mmPx()); else zoomSchizzo(b.dataset.z === '+' ? 1 / 1.4 : 1.4); }
   else if (az === 'sk-isp') { K.isp = !K.isp; disegnaVista(); }
+  else if (az === 'sk-multi') { K.multi = !K.multi; if (!['sel', 'nodi'].includes(K.str)) K.str = 'sel'; disegnaVista(); if (K.multi) toast('Selezione multipla: ogni clic aggiunge o toglie un oggetto.'); }
+  else if (az === 'sk-gr-apri') { const a = K.grAperti || (K.grAperti = {}), k = K.i + '.' + b.dataset.g; a[k] = !a[k]; disegnaVista(); }
   else if (az === 'sk-tutto') { scegli(sk.forme.map((q, i) => i).filter(i => !sk.forme[i].bl)); K.str = 'sel'; disegnaVista(); }
   else if (az === 'sk-guide-via') { delete sk.guide; aggiorna('schizzo', false); }
   else if (az === 'sk-blocca') { // dall'elenco: quella riga; altrimenti la selezione
@@ -6580,7 +7333,7 @@ function azioneSchizzo(az, b) {
   else if (az === 'sk-allinea') { if (allineaScelte(d)) aggiorna('schizzo', false); }
   else if (az === 'sk-distribuisci') { if (distribuisciScelte(d)) aggiorna('schizzo', false); }
   else if (az === 'sk-centra') { if (!n) return; const c = centro(); ids.forEach(i => spostaForma(sk.forme[i], copia(sk.forme[i]), -r3(c[0]), -r3(c[1]))); K.vb = null; aggiorna('schizzo', false); }
-  else if (az === 'sk-raggruppa') { if (n < 2) { toast('Per raggruppare servono almeno due oggetti.'); return; } const id = 1 + Math.max(0, ...sk.forme.map(q => q.grp || 0)); ids.forEach(i => { sk.forme[i].grp = id; }); aggiorna('schizzo', false); }
+  else if (az === 'sk-raggruppa') { if (!n) { toast('Le forme scelte sono bloccate: sbloccale dall’elenco degli oggetti.', 'errore'); return; } const id = 1 + Math.max(0, ...sk.forme.map(q => q.grp || 0)); ids.forEach(i => { sk.forme[i].grp = id; }); scegli(ids); toast(n === 1 ? 'Gruppo ' + id + ' creato con un oggetto: se ne possono aggiungere altri scegliendoli insieme e raggruppando di nuovo.' : 'Gruppo ' + id + ': ' + n + ' oggetti, ora un elemento solo.'); aggiorna('schizzo', false); }
   else if (az === 'sk-separa') { K.sels.forEach(i => { delete sk.forme[i].grp; }); aggiorna('schizzo', false); }
   else if (az === 'sk-davanti' || az === 'sk-dietro') { // l'ordine vale per l'elenco e per chi si prende con un clic: il pezzo e' sempre l'unione
     const sc = new Set(K.sels), su = sk.forme.filter((q, i) => sc.has(i)), giu = sk.forme.filter((q, i) => !sc.has(i));
@@ -6600,6 +7353,7 @@ function campoSchizzo(k, el) {
   if (k === 'sk-sel') { Object.assign(K, { i: +el.value, str: 'sel', poli: null, vb: null }); scegli(-1); disegnaVista(); return; }
   if (k === 'sk-esempio') { if (el.value) azioneSchizzo('sk-esempio', el.value); return; }
   if (k === 'sk-hr') { if (isFinite(v)) K.hr = A.limita(v, 0.2, 50); return; }
+  if (k === 's-prop') { K.prop = el.checked; disegnaVista(); return; }
   if (k === 'sk-cav') { K.pc = el.checked ? K.pc || 1.2 : 0; disegnaVista(); return; }
   if (k === 'sk-pc') { if (isFinite(v)) K.pc = A.limita(v, 0.3, 50); return; }
   if (k === 'sk-lati') { if (isFinite(v)) K.lati = A.limita(Math.round(v), 3, 24); return; }
@@ -6614,11 +7368,12 @@ function campoSchizzo(k, el) {
   else if (k === 'sk-n' && isFinite(v)) sk.n = A.limita(Math.round(v), 1, 20);
   else if (k === 'sk-st') sk.st = el.checked;
   else if (k === 'sk-or') { sk.or = el.value === 'coricato' ? 'coricato' : 'piedi'; if (sk.or === 'coricato' && sk.h < 20) sk.h = 100; }
+  else if (k === 's-rot') { const ids = mobili(); if (!ids.length || !isFinite(v) || !v) return; const B = ingombroForme({ forme: ids.map(i => sk.forme[i]) }), cc = [(B[0] + B[2]) / 2, (B[1] + B[3]) / 2]; ids.forEach(i => ruotaFormaDi(sk.forme[i], copia(sk.forme[i]), cc, v)); }
   else if (/^s-[xywh]$/.test(k)) { // ingombro della selezione: sposta o scala tutte le forme scelte
     const ids = mobili(), B = ids.length ? ingombroForme({ forme: ids.map(i => sk.forme[i]) }) : null; if (!B || !isFinite(v)) return;
     if (c === 'x' || c === 'y') ids.forEach(i => spostaForma(sk.forme[i], copia(sk.forme[i]), c === 'x' ? v - B[0] : 0, c === 'y' ? v - B[1] : 0));
     else {
-      const lib = ids.every(i => scalaLibera(sk.forme[i])), lato = c === 'w' ? B[2] - B[0] : B[3] - B[1]; if (lato < 1e-6 || v < 0.5) return;
+      const lib = K.prop === false && ids.every(i => scalaLibera(sk.forme[i])), lato = c === 'w' ? B[2] - B[0] : B[3] - B[1]; if (lato < 1e-6 || v < 0.5) return;
       const s = v / lato, sx = c === 'w' || !lib ? s : 1, sy = c === 'h' || !lib ? s : 1; ids.forEach(i => scalaForma(sk.forme[i], copia(sk.forme[i]), [B[0], B[1]], sx, sy));
     }
   }
@@ -6780,7 +7535,7 @@ function disegnaVista() {
     } else msg = 'Il progetto non è valido: correggere i dati evidenziati a destra.';
   } else if (v === 'tavola') {
     if (M) {
-      s = '<label>Centina <select id="sel-centina">' + M.centine.map(c => '<option value="' + c.j + '"' + (c.j === stato.centina ? ' selected' : '') + '>' + (c.j + 1) + ' · corda ' + num(c.c, 1) + ' mm</option>').join('') + '</select></label>' +
+      s = '<label>Centina <select id="sel-centina">' + M.centine.map(c => '<option value="' + c.j + '"' + (c.j === stato.centina ? ' selected' : '') + '>' + (c.j + 1) + ' · ' + (M.didattico && M.profili.length > 1 ? esc(c.def.nome) + ' · ' : '') + 'corda ' + num(c.c, 1) + ' mm</option>').join('') + '</select></label>' +
         '<label>Estrusione <input type="number" class="corto" data-b="t-centina" value="' + M.t + '" min="' + (M.didattico ? 1.2 : 1.5) + '" max="' + (M.didattico ? 80 : 20) + '" step="0.5"> mm</label><button class="btn piccolo" data-az="vedi3d">Vedi il solido 3D</button>' +
         '<span class="spazio"></span><span class="suggerimento">Trascina le maniglie o fai clic su una quota colorata per cambiarla: il resto dell’ala si adegua.</span>';
       disegnaTavola();
@@ -6789,7 +7544,7 @@ function disegnaVista() {
     s = barraSchizzo();
     if (skOn) {
       const K = stato.sk, isp = $('.ispettore'), el = k => isp.querySelector(k), firma = K.i + '|' + K.sels.join(), sc = el('.isp-lista') ? el('.isp-lista').scrollTop : 0, sf = el('.isp-forma') && firma === K.ispFirma ? el('.isp-forma').scrollTop : 0;
-      str.innerHTML = s; $('.sk-attrezzi').innerHTML = attrezziSchizzo(); $('.sk-stato').innerHTML = statoSchizzo();
+      str.innerHTML = s; $('.sk-attrezzi').innerHTML = attrezziSchizzo(); $('.sk-stato').innerHTML = statoSchizzo(); $('.sk-selbar').innerHTML = barraSelezione();
       isp.innerHTML = ispettoreSchizzo(); el('.isp-lista').scrollTop = sc; el('.isp-forma').scrollTop = sf;
       if (firma !== K.ispFirma) { const r = el('.isp-lista .riga.sel'), L = el('.isp-lista'); if (r && (r.offsetTop < L.scrollTop + 30 || r.offsetTop + r.offsetHeight > L.scrollTop + L.clientHeight)) L.scrollTop = Math.max(0, r.offsetTop - 34); } // la riga scelta resta in vista
       K.ispFirma = firma;
@@ -6805,8 +7560,8 @@ function disegnaVista() {
   } else if (!tre.ok) msg = 'La grafica 3D non è disponibile in questo browser. Restano utilizzabili la tavola quotata e il salvataggio dei file.';
   else if (v === 'assieme' && M && M.didattico) {
     tre.gruppo = gruppoDidattico(); tre.scena.add(tre.gruppo);
-    inquadra(tre.gruppo, -1.38, 0.2, 'did_' + M.corde.join('_') + '_' + M.t + (stato.P.dBase ? 'b' : ''), 'didattico');
-    s = '<button class="btn piccolo" data-az="inquadra">Inquadra</button><span class="spazio"></span><span>' + esc(M.def.nome) + ' · corde ' + M.corde.map(x => num(x, 0)).join(', ') + ' mm · spessore ' + num(M.t, 1) + ' mm</span>';
+    inquadra(tre.gruppo, -1.38, 0.2, 'did_' + M.profili.length + '_' + M.corde.join('_') + '_' + M.t + (stato.P.dBase ? 'b' : ''), 'didattico');
+    s = '<button class="btn piccolo" data-az="inquadra">Inquadra</button><span class="spazio"></span><span>' + esc(M.profili.join(', ')) + ' · corde ' + M.corde.map(x => num(x, 0)).join(', ') + ' mm · spessore ' + num(M.t, 1) + ' mm</span>';
     l = '<span><i style="background:var(--accento)"></i>Centine</span>' + (stato.P.dBase ? '<span><i style="background:var(--tenue)"></i>Basette</span>' : '');
   } else if (v === 'assieme' && M) {
     tre.gruppo = gruppoAssieme(); tre.scena.add(tre.gruppo);
@@ -6848,9 +7603,14 @@ function avvia() {
   let P = null;
   try { const s = localStorage.getItem(CHIAVE_LOCALE); if (s) P = A.normalizzaProgetto(JSON.parse(s)); } catch (err) { P = null; }
   stato.P = P || daModello(0);
-  $('#modelli').innerHTML = '<option value="">Modelli pronti…</option>' + MODELLI.map((m, i) => '<option value="' + i + '">' + esc(m[0]) + '</option>').join('');
-  inizia3D(); eventiModulo(); eventiCad(); eventiMisure(); eventiBanca();
-  $('#modelli').addEventListener('change', ev => { if (ev.target.value === '') return; stato.P = daModello(+ev.target.value); stato.est = null; stato.gcode = []; stato.generato = false; stato.centina = 0; tre.inq = {}; azzeraCad(); ev.target.value = ''; aggiorna('nessuna', true); });
+  const vociM = (da, a) => MODELLI.slice(da, a).map((m, i) => '<option value="' + (da + i) + '">' + esc(m[0]) + '</option>').join(''), did = MODELLI.findIndex(m => m[1].livello === 'profilo');
+  $('#modelli').innerHTML = '<option value="">Modelli pronti…</option><optgroup label="Strutture alari">' + vociM(0, did) + vociM(did + 2) + '</optgroup><optgroup label="Centine didattiche">' + vociM(did, did + 2) + '</optgroup>' +
+    '<optgroup label="Modellini di aerei da montare">' + A.AEREI.map((m, i) => '<option value="a' + i + '">' + esc(m[0]) + '</option>').join('') + '<option value="a">Aereo da personalizzare: ala, posizione, asta, motore…</option></optgroup>' +
+    [...new Set(A.GADGET_PRONTI.map(m => m[3]))].map(g => '<optgroup label="' + g + '">' + A.GADGET_PRONTI.map((m, i) => (m[3] === g ? '<option value="g' + i + '">' + esc(m[1]) + '</option>' : '')).join('') + '</optgroup>').join('');
+  inizia3D(); eventiModulo(); eventiCad(); eventiMisure(); eventiBanca(); eventiModellini();
+  $('#modelli').addEventListener('change', ev => { const v = ev.target.value; if (v === '') return;
+    if (/^[ag]/.test(v)) { ev.target.value = ''; if (v[0] === 'a') apriModellini('aereo', v.length > 1 ? A.AEREI[+v.slice(1)][1] : null); else { const q = A.GADGET_PRONTI[+v.slice(1)]; apriModellini(q[0], q[2]); } return; } // modellini e gadget: prima si personalizzano
+    stato.P = daModello(+ev.target.value); stato.est = null; stato.gcode = []; stato.generato = false; stato.centina = 0; tre.inq = {}; azzeraCad(); ev.target.value = ''; aggiorna('nessuna', true); });
   $('#nome-progetto').addEventListener('input', ev => { if (stato.est) return; stato.P.nome = ev.target.value || 'Ala'; stato.valido = false; try { localStorage.setItem(CHIAVE_LOCALE, JSON.stringify(stato.P)); } catch (err) { /* facoltativo */ } });
   $('#nome-progetto').addEventListener('change', () => disegnaRiepilogo());
   $('#btn-apri').addEventListener('click', () => $('#file').click());
@@ -6876,7 +7636,12 @@ function avvia() {
   const isp = $('.ispettore'); // pannello delle forme dello schizzo
   isp.addEventListener('change', ev => { const kb = ev.target.dataset.b; if (kb) campoSchizzo(kb, ev.target); });
   isp.addEventListener('input', ev => { const el = ev.target; if (el.dataset.b === 'f-txt') { const f = skCorrente() && skCorrente().forme[stato.sk.sel]; if (f) { f.testo = el.value.replace(/[\u0000-\u001f\u007f]/g, ' ').slice(0, 80) || 'Testo'; ridisegnaSchizzo(); } } });
-  isp.addEventListener('click', ev => { const b = ev.target.closest('[data-skf]'); if (b) { const K = stato.sk; if (!['sel', 'nodi'].includes(K.str)) K.str = 'sel'; K.poli = null; K.poliLs = null; scegli(+b.dataset.skf, ev.shiftKey || ev.ctrlKey || ev.metaKey); disegnaVista(); } });
+  isp.addEventListener('click', ev => {
+    const b = ev.target.closest('[data-skf]'), gq = ev.target.closest('[data-skg]'); if (!b && !gq) return;
+    const K = stato.sk, sk = skCorrente(), piu = ev.shiftKey || ev.ctrlKey || ev.metaKey || K.multi; if (!['sel', 'nodi'].includes(K.str)) K.str = 'sel'; K.poli = null; K.poliLs = null;
+    if (gq) scegli(sk.forme.map((f, i) => i).filter(i => sk.forme[i].grp === +gq.dataset.skg), piu); else scegli(+b.dataset.skf, piu, !!b.dataset.solo);
+    disegnaVista();
+  });
   $('.sk-stato').addEventListener('change', ev => { const kb = ev.target.dataset.b; if (kb) campoSchizzo(kb, ev.target); });
   $('.vista').addEventListener('keydown', ev => { // dopo Tab o Invio il pannello si ridisegna: il fuoco torna sul campo giusto
     const el = ev.target; if (stato.vista !== 'schizzo' || !el.dataset || !el.dataset.b || (ev.key !== 'Tab' && ev.key !== 'Enter')) return;
